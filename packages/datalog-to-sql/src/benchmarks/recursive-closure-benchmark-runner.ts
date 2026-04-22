@@ -111,9 +111,7 @@ async function measureBenchmark(input: {
   readonly closureRowCount: number;
   readonly executionTimesMs: number[];
 }> {
-  await waitForPostgres(input.connectionString);
-  await initializeGraphSchema(input.sql);
-  await applyDatalogFacts({ sql: input.sql, mode: 'insert-facts', facts: input.seedFacts });
+  await prepareBenchmarkDatabase(input);
 
   const postgresMajorVersion = await readPostgresMajorVersion(input.sql);
   const closureRows = await executeTranslatedSql<{ closure_size: string }>(input.sql, input.benchmarkQuery);
@@ -123,6 +121,16 @@ async function measureBenchmark(input: {
     closureRowCount: Number.parseInt(closureRows[0]?.closure_size ?? '0', 10),
     executionTimesMs: await measureExecutionTimes(input.sql, input.benchmarkQuery, input.contract),
   };
+}
+
+async function prepareBenchmarkDatabase(input: {
+  readonly sql: ReturnType<typeof createPostgresSqlClient>;
+  readonly connectionString: string;
+  readonly seedFacts: ReturnType<typeof createRecursiveClosureBenchmarkFixture>['seedFacts'];
+}): Promise<void> {
+  await waitForPostgres(input.connectionString);
+  await initializeGraphSchema(input.sql);
+  await applyDatalogFacts({ sql: input.sql, mode: 'insert-facts', facts: input.seedFacts });
 }
 
 function createBenchmarkReport(input: {

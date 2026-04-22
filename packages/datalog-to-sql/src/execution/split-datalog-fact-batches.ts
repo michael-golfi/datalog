@@ -2,12 +2,13 @@ import type { DatalogFact } from '../contracts/postgres-graph-operation.js';
 
 const DEFAULT_MAX_PARAMETERS = 60_000;
 type FactBatch = readonly [DatalogFact, ...DatalogFact[]];
+type MutableFactBatch = [DatalogFact, ...DatalogFact[]];
 
 /** Split fact batches before they exceed PostgreSQL parameter-count limits. */
 export function splitDatalogFactBatches(
   facts: FactBatch,
 ): readonly [FactBatch, ...FactBatch[]] {
-  const batches: Array<[DatalogFact, ...DatalogFact[]]> = [];
+  const batches: MutableFactBatch[] = [];
   let currentBatch: DatalogFact[] = [];
   let currentParameterCount = 0;
 
@@ -21,9 +22,7 @@ export function splitDatalogFactBatches(
     currentParameterCount += countFactParameters(fact);
   }
 
-  if (currentBatch.length > 0) {
-    batches.push(currentBatch as [DatalogFact, ...DatalogFact[]]);
-  }
+  appendTrailingBatch(batches, currentBatch);
 
   const [firstBatch, ...remainingBatches] = batches;
 
@@ -50,11 +49,17 @@ function shouldFlushCurrentBatch(
 }
 
 function flushCurrentBatch(
-  batches: Array<[DatalogFact, ...DatalogFact[]]>,
+  batches: MutableFactBatch[],
   currentBatch: DatalogFact[],
 ): DatalogFact[] {
-  batches.push(currentBatch as [DatalogFact, ...DatalogFact[]]);
+  batches.push(currentBatch as MutableFactBatch);
   return [];
+}
+
+function appendTrailingBatch(batches: MutableFactBatch[], currentBatch: DatalogFact[]): void {
+  if (currentBatch.length > 0) {
+    batches.push(currentBatch as MutableFactBatch);
+  }
 }
 
 function countFactParameters(fact: DatalogFact): number {
