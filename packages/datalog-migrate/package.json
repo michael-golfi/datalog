@@ -1,7 +1,6 @@
 {
   "name": "@datalog/datalog-migrate",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -9,6 +8,10 @@
   "files": [
     "dist/**"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "lint": "eslint --max-warnings=0 .",
     "typecheck": "tsc -p ./tsconfig.lib.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
@@ -24,7 +27,8 @@
     "datalog-migrate-watch": "./dist/watch-current-datalog-migration.js"
   },
   "dependencies": {
-    "@datalog/datalog-to-sql": "workspace:*"
+    "@datalog/datalog-to-sql": "^0.0.0",
+    "@datalog/parser": "^0.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
