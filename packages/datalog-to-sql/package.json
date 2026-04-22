@@ -1,7 +1,10 @@
 {
   "name": "@datalog/datalog-to-sql",
   "version": "0.0.0",
-  "private": true,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -26,7 +29,6 @@
     "test": "yarn workspace @datalog/parser build && vitest run --config ./vitest.config.ts"
   },
   "dependencies": {
-    "@datalog/parser": "workspace:*",
     "postgres": "^3.4.7"
   },
   "devDependencies": {
