@@ -9,12 +9,13 @@
 
 ## Package shape
 
-- Keep `src/index.ts` export-only.
-- Keep runtime code minimal: small path-resolution and migration-discovery helpers only.
+- Do not keep a package-style `src/` tree or export surface here; this workspace is fixture/test-owned.
+- Keep helper code test-scoped and package-local under `test/fixtures/` with explicit fixture-oriented names.
 - Keep ontology meaning in Datalog files under `migrations/` rather than expanding TypeScript modeling layers.
 - Committed migrations are moving to flat dated `.dl` files, with `current.dl` reserved as the mutable working area for later CLI tasks.
-- Keep tests colocated as `*.test.ts` beside the module they prove.
+- Keep workspace test suites under `test/**/*.test.ts` and package-local support modules under `test/fixtures/**/*.ts`.
 - Avoid deep imports into other workspaces; use `@datalog/*` package surfaces when cross-workspace dependencies become necessary in later tasks.
+- When invoking migration tooling, use `@datalog/datalog-migrate` package exports or public binaries only; do not deep-link into sibling `dist/` output or private source files.
 
 ## Not here
 
@@ -25,13 +26,20 @@
 
 ## Current ownership seams
 
-- `src/resolve-medical-ontology-workspace-path.ts` owns package-root path resolution.
-- `src/load-ontology-project-files.ts` owns minimal committed-migration/current-work-area discovery for future CLI support.
-- Later tasks will add commit metadata/hashing and the actual commit CLI workflow on top of the flat/current layout.
+- `test/fixtures/medical-ontology-workspace-path-support.ts` owns package-local path resolution for tests and workspace helpers.
+- `test/fixtures/committed-ontology-facts-fixture.ts` owns domain-specific loading of committed ontology edge facts for SQL-backed verification.
+- `test/fixtures/ontology-migration-chain-fixture.ts` owns the package-local CLI workspace fixture and canonical migration-chain replay used by consumer-side tests.
+- Graphile-Migrate-style workflow tooling now lives in `@datalog/datalog-migrate` and this package consumes it through scripts/tests instead of owning the implementation directly.
+- Consumer-side tests should generate chains by writing current-state step bodies and committing them through the public CLI seam, then prove outcomes from the generated `migrations/` state rather than inspecting migration internals directly.
 
 ## Verification
 
+- Default suite, including the localhost ontology happy/failure-path tests, must stay available through `yarn workspace @datalog/medical-ontology-e2e test`.
+- Keep the worker-collision proof opt-in behind `MEDICAL_ONTOLOGY_E2E_RUN_WORKER_COLLISION_PROOF=1`; it is verification-only and must not run as part of the default suite.
+- Preserve `MEDICAL_ONTOLOGY_E2E_ADMIN_POSTGRES_URL` as the localhost admin override for verification against a local PostgreSQL instance.
 - `yarn workspace @datalog/medical-ontology-e2e lint`
 - `yarn workspace @datalog/medical-ontology-e2e typecheck`
 - `yarn workspace @datalog/medical-ontology-e2e build`
 - `yarn workspace @datalog/medical-ontology-e2e test`
+- `yarn workspace @datalog/medical-ontology-e2e test:worker-collision-proof`
+- Simultaneous package-run safety proof: start two `yarn workspace @datalog/medical-ontology-e2e test` invocations at the same time and confirm both pass without database-name collisions.

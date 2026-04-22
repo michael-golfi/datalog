@@ -1,0 +1,277 @@
+% migration.previous: 20260422.0001.ontology-foundation.dl
+% migration.sha256: 4beb3b963a38680f09ae29903100ac69e8cfbb989965f89dfee88759b3aa0030
+% === Canonical clinical concepts v2 ===
+% Concepts remain first-class graph nodes. Relationship facts are compounds.
+
+% --- Conditions, medication ingredients, and drug classes ---
+Edge("condition/type_2_diabetes", "onto/instance_of", "class/Condition").
+Edge("condition/type_2_diabetes", "onto/preferred_label", "Type 2 Diabetes Mellitus").
+Edge("condition/type_2_diabetes", "onto/semantic_group", "condition").
+Edge("condition/type_2_diabetes", "onto/status", "active").
+
+Edge("condition/hypertension", "onto/instance_of", "class/Condition").
+Edge("condition/hypertension", "onto/preferred_label", "Hypertension").
+Edge("condition/hypertension", "onto/semantic_group", "condition").
+Edge("condition/hypertension", "onto/status", "active").
+
+Edge("condition/asthma", "onto/instance_of", "class/Condition").
+Edge("condition/asthma", "onto/preferred_label", "Asthma").
+Edge("condition/asthma", "onto/semantic_group", "condition").
+Edge("condition/asthma", "onto/status", "active").
+
+Edge("condition/major_depressive_disorder", "onto/instance_of", "class/Condition").
+Edge("condition/major_depressive_disorder", "onto/preferred_label", "Major Depressive Disorder").
+Edge("condition/major_depressive_disorder", "onto/semantic_group", "condition").
+Edge("condition/major_depressive_disorder", "onto/status", "active").
+
+Edge("condition/generalized_anxiety_disorder", "onto/instance_of", "class/Condition").
+Edge("condition/generalized_anxiety_disorder", "onto/preferred_label", "Generalized Anxiety Disorder").
+Edge("condition/generalized_anxiety_disorder", "onto/semantic_group", "condition").
+Edge("condition/generalized_anxiety_disorder", "onto/status", "active").
+
+Edge("condition/chronic_kidney_disease", "onto/instance_of", "class/Condition").
+Edge("condition/chronic_kidney_disease", "onto/preferred_label", "Chronic Kidney Disease").
+Edge("condition/chronic_kidney_disease", "onto/semantic_group", "condition").
+Edge("condition/chronic_kidney_disease", "onto/status", "active").
+
+Edge("condition/heart_failure", "onto/instance_of", "class/Condition").
+Edge("condition/heart_failure", "onto/preferred_label", "Heart Failure").
+Edge("condition/heart_failure", "onto/semantic_group", "condition").
+Edge("condition/heart_failure", "onto/status", "active").
+
+Edge("condition/pregnancy", "onto/instance_of", "class/Condition").
+Edge("condition/pregnancy", "onto/preferred_label", "Pregnancy").
+Edge("condition/pregnancy", "onto/semantic_group", "condition").
+Edge("condition/pregnancy", "onto/status", "active").
+
+Edge("condition/atrial_fibrillation", "onto/instance_of", "class/Condition").
+Edge("condition/atrial_fibrillation", "onto/preferred_label", "Atrial Fibrillation").
+Edge("condition/atrial_fibrillation", "onto/semantic_group", "condition").
+Edge("condition/atrial_fibrillation", "onto/status", "active").
+
+Edge("condition/hyperlipidemia", "onto/instance_of", "class/Condition").
+Edge("condition/hyperlipidemia", "onto/preferred_label", "Hyperlipidemia").
+Edge("condition/hyperlipidemia", "onto/semantic_group", "condition").
+Edge("condition/hyperlipidemia", "onto/status", "active").
+
+Edge("condition/hypothyroidism", "onto/instance_of", "class/Condition").
+Edge("condition/hypothyroidism", "onto/preferred_label", "Hypothyroidism").
+Edge("condition/hypothyroidism", "onto/semantic_group", "condition").
+Edge("condition/hypothyroidism", "onto/status", "active").
+
+Edge("condition/peptic_ulcer_disease", "onto/instance_of", "class/Condition").
+Edge("condition/peptic_ulcer_disease", "onto/preferred_label", "Peptic Ulcer Disease").
+Edge("condition/peptic_ulcer_disease", "onto/semantic_group", "condition").
+Edge("condition/peptic_ulcer_disease", "onto/status", "active").
+
+Edge("medication/metformin", "onto/instance_of", "class/MedicationIngredient").
+Edge("medication/metformin", "onto/preferred_label", "Metformin").
+Edge("medication/metformin", "onto/semantic_group", "medication_ingredient").
+Edge("medication/metformin", "onto/status", "active").
+
+Edge("medication/lisinopril", "onto/instance_of", "class/MedicationIngredient").
+Edge("medication/lisinopril", "onto/preferred_label", "Lisinopril").
+Edge("medication/lisinopril", "onto/semantic_group", "medication_ingredient").
+Edge("medication/lisinopril", "onto/status", "active").
+
+Edge("medication/albuterol", "onto/instance_of", "class/MedicationIngredient").
+Edge("medication/albuterol", "onto/preferred_label", "Albuterol").
+Edge("medication/albuterol", "onto/semantic_group", "medication_ingredient").
+Edge("medication/albuterol", "onto/status", "active").
+
+Edge("medication/sertraline", "onto/instance_of", "class/MedicationIngredient").
+Edge("medication/sertraline", "onto/preferred_label", "Sertraline").
+Edge("medication/sertraline", "onto/semantic_group", "medication_ingredient").
+Edge("medication/sertraline", "onto/status", "active").
+
+Edge("medication/atorvastatin", "onto/instance_of", "class/MedicationIngredient").
+Edge("medication/atorvastatin", "onto/preferred_label", "Atorvastatin").
+Edge("medication/atorvastatin", "onto/semantic_group", "medication_ingredient").
+Edge("medication/atorvastatin", "onto/status", "active").
+
+Edge("medication/warfarin", "onto/instance_of", "class/MedicationIngredient").
+Edge("medication/warfarin", "onto/preferred_label", "Warfarin").
+Edge("medication/warfarin", "onto/semantic_group", "medication_ingredient").
+Edge("medication/warfarin", "onto/status", "active").
+
+Edge("medication/ibuprofen", "onto/instance_of", "class/MedicationIngredient").
+Edge("medication/ibuprofen", "onto/preferred_label", "Ibuprofen").
+Edge("medication/ibuprofen", "onto/semantic_group", "medication_ingredient").
+Edge("medication/ibuprofen", "onto/status", "active").
+
+Edge("medication/omeprazole", "onto/instance_of", "class/MedicationIngredient").
+Edge("medication/omeprazole", "onto/preferred_label", "Omeprazole").
+Edge("medication/omeprazole", "onto/semantic_group", "medication_ingredient").
+Edge("medication/omeprazole", "onto/status", "active").
+
+Edge("medication/insulin_glargine", "onto/instance_of", "class/MedicationIngredient").
+Edge("medication/insulin_glargine", "onto/preferred_label", "Insulin Glargine").
+Edge("medication/insulin_glargine", "onto/semantic_group", "medication_ingredient").
+Edge("medication/insulin_glargine", "onto/status", "active").
+
+Edge("medication/levothyroxine", "onto/instance_of", "class/MedicationIngredient").
+Edge("medication/levothyroxine", "onto/preferred_label", "Levothyroxine").
+Edge("medication/levothyroxine", "onto/semantic_group", "medication_ingredient").
+Edge("medication/levothyroxine", "onto/status", "active").
+
+Edge("medication/apixaban", "onto/instance_of", "class/MedicationIngredient").
+Edge("medication/apixaban", "onto/preferred_label", "Apixaban").
+Edge("medication/apixaban", "onto/semantic_group", "medication_ingredient").
+Edge("medication/apixaban", "onto/status", "active").
+
+Edge("medication/fluoxetine", "onto/instance_of", "class/MedicationIngredient").
+Edge("medication/fluoxetine", "onto/preferred_label", "Fluoxetine").
+Edge("medication/fluoxetine", "onto/semantic_group", "medication_ingredient").
+Edge("medication/fluoxetine", "onto/status", "active").
+
+Edge("drug_class/biguanide", "onto/instance_of", "class/DrugClass").
+Edge("drug_class/biguanide", "onto/preferred_label", "Biguanide").
+Edge("drug_class/biguanide", "onto/semantic_group", "drug_class").
+Edge("drug_class/biguanide", "onto/status", "active").
+
+Edge("drug_class/ace_inhibitor", "onto/instance_of", "class/DrugClass").
+Edge("drug_class/ace_inhibitor", "onto/preferred_label", "ACE Inhibitor").
+Edge("drug_class/ace_inhibitor", "onto/semantic_group", "drug_class").
+Edge("drug_class/ace_inhibitor", "onto/status", "active").
+
+Edge("drug_class/short_acting_beta2_agonist", "onto/instance_of", "class/DrugClass").
+Edge("drug_class/short_acting_beta2_agonist", "onto/preferred_label", "Short-Acting Beta2 Agonist").
+Edge("drug_class/short_acting_beta2_agonist", "onto/semantic_group", "drug_class").
+Edge("drug_class/short_acting_beta2_agonist", "onto/status", "active").
+
+Edge("drug_class/ssri", "onto/instance_of", "class/DrugClass").
+Edge("drug_class/ssri", "onto/preferred_label", "SSRI").
+Edge("drug_class/ssri", "onto/semantic_group", "drug_class").
+Edge("drug_class/ssri", "onto/status", "active").
+
+Edge("drug_class/statin", "onto/instance_of", "class/DrugClass").
+Edge("drug_class/statin", "onto/preferred_label", "Statin").
+Edge("drug_class/statin", "onto/semantic_group", "drug_class").
+Edge("drug_class/statin", "onto/status", "active").
+
+Edge("drug_class/vitamin_k_antagonist", "onto/instance_of", "class/DrugClass").
+Edge("drug_class/vitamin_k_antagonist", "onto/preferred_label", "Vitamin K Antagonist").
+Edge("drug_class/vitamin_k_antagonist", "onto/semantic_group", "drug_class").
+Edge("drug_class/vitamin_k_antagonist", "onto/status", "active").
+
+Edge("drug_class/nsaid", "onto/instance_of", "class/DrugClass").
+Edge("drug_class/nsaid", "onto/preferred_label", "NSAID").
+Edge("drug_class/nsaid", "onto/semantic_group", "drug_class").
+Edge("drug_class/nsaid", "onto/status", "active").
+
+Edge("drug_class/proton_pump_inhibitor", "onto/instance_of", "class/DrugClass").
+Edge("drug_class/proton_pump_inhibitor", "onto/preferred_label", "Proton Pump Inhibitor").
+Edge("drug_class/proton_pump_inhibitor", "onto/semantic_group", "drug_class").
+Edge("drug_class/proton_pump_inhibitor", "onto/status", "active").
+
+Edge("drug_class/long_acting_insulin", "onto/instance_of", "class/DrugClass").
+Edge("drug_class/long_acting_insulin", "onto/preferred_label", "Long-Acting Insulin").
+Edge("drug_class/long_acting_insulin", "onto/semantic_group", "drug_class").
+Edge("drug_class/long_acting_insulin", "onto/status", "active").
+
+Edge("drug_class/thyroid_hormone", "onto/instance_of", "class/DrugClass").
+Edge("drug_class/thyroid_hormone", "onto/preferred_label", "Thyroid Hormone").
+Edge("drug_class/thyroid_hormone", "onto/semantic_group", "drug_class").
+Edge("drug_class/thyroid_hormone", "onto/status", "active").
+
+Edge("drug_class/factor_xa_inhibitor", "onto/instance_of", "class/DrugClass").
+Edge("drug_class/factor_xa_inhibitor", "onto/preferred_label", "Factor Xa Inhibitor").
+Edge("drug_class/factor_xa_inhibitor", "onto/semantic_group", "drug_class").
+Edge("drug_class/factor_xa_inhibitor", "onto/status", "active").
+
+% --- Medication ingredient to drug class membership compounds ---
+MedicationClassMembership@(cid="membership/metformin/biguanide", clinical/medication="medication/metformin", clinical/drug_class="drug_class/biguanide").
+Edge("membership/metformin/biguanide", "onto/instance_of", "class/MedicationClassMembership").
+Edge("membership/metformin/biguanide", "onto/preferred_label", "Metformin member of Biguanide").
+Edge("membership/metformin/biguanide", "clinical/relationship_kind", "ingredient_member_of_drug_class").
+Edge("membership/metformin/biguanide", "clinical/evidence_source", "source/starter_canon").
+Edge("membership/metformin/biguanide", "clinical/evidence_level", "seed").
+Edge("membership/metformin/biguanide", "clinical/as_of_date", "2026-04-22").
+
+MedicationClassMembership@(cid="membership/lisinopril/ace_inhibitor", clinical/medication="medication/lisinopril", clinical/drug_class="drug_class/ace_inhibitor").
+Edge("membership/lisinopril/ace_inhibitor", "onto/instance_of", "class/MedicationClassMembership").
+Edge("membership/lisinopril/ace_inhibitor", "onto/preferred_label", "Lisinopril member of ACE Inhibitor").
+Edge("membership/lisinopril/ace_inhibitor", "clinical/relationship_kind", "ingredient_member_of_drug_class").
+Edge("membership/lisinopril/ace_inhibitor", "clinical/evidence_source", "source/starter_canon").
+Edge("membership/lisinopril/ace_inhibitor", "clinical/evidence_level", "seed").
+Edge("membership/lisinopril/ace_inhibitor", "clinical/as_of_date", "2026-04-22").
+
+MedicationClassMembership@(cid="membership/albuterol/short_acting_beta2_agonist", clinical/medication="medication/albuterol", clinical/drug_class="drug_class/short_acting_beta2_agonist").
+Edge("membership/albuterol/short_acting_beta2_agonist", "onto/instance_of", "class/MedicationClassMembership").
+Edge("membership/albuterol/short_acting_beta2_agonist", "onto/preferred_label", "Albuterol member of Short-Acting Beta2 Agonist").
+Edge("membership/albuterol/short_acting_beta2_agonist", "clinical/relationship_kind", "ingredient_member_of_drug_class").
+Edge("membership/albuterol/short_acting_beta2_agonist", "clinical/evidence_source", "source/starter_canon").
+Edge("membership/albuterol/short_acting_beta2_agonist", "clinical/evidence_level", "seed").
+Edge("membership/albuterol/short_acting_beta2_agonist", "clinical/as_of_date", "2026-04-22").
+
+MedicationClassMembership@(cid="membership/sertraline/ssri", clinical/medication="medication/sertraline", clinical/drug_class="drug_class/ssri").
+Edge("membership/sertraline/ssri", "onto/instance_of", "class/MedicationClassMembership").
+Edge("membership/sertraline/ssri", "onto/preferred_label", "Sertraline member of SSRI").
+Edge("membership/sertraline/ssri", "clinical/relationship_kind", "ingredient_member_of_drug_class").
+Edge("membership/sertraline/ssri", "clinical/evidence_source", "source/starter_canon").
+Edge("membership/sertraline/ssri", "clinical/evidence_level", "seed").
+Edge("membership/sertraline/ssri", "clinical/as_of_date", "2026-04-22").
+
+MedicationClassMembership@(cid="membership/fluoxetine/ssri", clinical/medication="medication/fluoxetine", clinical/drug_class="drug_class/ssri").
+Edge("membership/fluoxetine/ssri", "onto/instance_of", "class/MedicationClassMembership").
+Edge("membership/fluoxetine/ssri", "onto/preferred_label", "Fluoxetine member of SSRI").
+Edge("membership/fluoxetine/ssri", "clinical/relationship_kind", "ingredient_member_of_drug_class").
+Edge("membership/fluoxetine/ssri", "clinical/evidence_source", "source/starter_canon").
+Edge("membership/fluoxetine/ssri", "clinical/evidence_level", "seed").
+Edge("membership/fluoxetine/ssri", "clinical/as_of_date", "2026-04-22").
+
+MedicationClassMembership@(cid="membership/atorvastatin/statin", clinical/medication="medication/atorvastatin", clinical/drug_class="drug_class/statin").
+Edge("membership/atorvastatin/statin", "onto/instance_of", "class/MedicationClassMembership").
+Edge("membership/atorvastatin/statin", "onto/preferred_label", "Atorvastatin member of Statin").
+Edge("membership/atorvastatin/statin", "clinical/relationship_kind", "ingredient_member_of_drug_class").
+Edge("membership/atorvastatin/statin", "clinical/evidence_source", "source/starter_canon").
+Edge("membership/atorvastatin/statin", "clinical/evidence_level", "seed").
+Edge("membership/atorvastatin/statin", "clinical/as_of_date", "2026-04-22").
+
+MedicationClassMembership@(cid="membership/warfarin/vitamin_k_antagonist", clinical/medication="medication/warfarin", clinical/drug_class="drug_class/vitamin_k_antagonist").
+Edge("membership/warfarin/vitamin_k_antagonist", "onto/instance_of", "class/MedicationClassMembership").
+Edge("membership/warfarin/vitamin_k_antagonist", "onto/preferred_label", "Warfarin member of Vitamin K Antagonist").
+Edge("membership/warfarin/vitamin_k_antagonist", "clinical/relationship_kind", "ingredient_member_of_drug_class").
+Edge("membership/warfarin/vitamin_k_antagonist", "clinical/evidence_source", "source/starter_canon").
+Edge("membership/warfarin/vitamin_k_antagonist", "clinical/evidence_level", "seed").
+Edge("membership/warfarin/vitamin_k_antagonist", "clinical/as_of_date", "2026-04-22").
+
+MedicationClassMembership@(cid="membership/ibuprofen/nsaid", clinical/medication="medication/ibuprofen", clinical/drug_class="drug_class/nsaid").
+Edge("membership/ibuprofen/nsaid", "onto/instance_of", "class/MedicationClassMembership").
+Edge("membership/ibuprofen/nsaid", "onto/preferred_label", "Ibuprofen member of NSAID").
+Edge("membership/ibuprofen/nsaid", "clinical/relationship_kind", "ingredient_member_of_drug_class").
+Edge("membership/ibuprofen/nsaid", "clinical/evidence_source", "source/starter_canon").
+Edge("membership/ibuprofen/nsaid", "clinical/evidence_level", "seed").
+Edge("membership/ibuprofen/nsaid", "clinical/as_of_date", "2026-04-22").
+
+MedicationClassMembership@(cid="membership/omeprazole/proton_pump_inhibitor", clinical/medication="medication/omeprazole", clinical/drug_class="drug_class/proton_pump_inhibitor").
+Edge("membership/omeprazole/proton_pump_inhibitor", "onto/instance_of", "class/MedicationClassMembership").
+Edge("membership/omeprazole/proton_pump_inhibitor", "onto/preferred_label", "Omeprazole member of Proton Pump Inhibitor").
+Edge("membership/omeprazole/proton_pump_inhibitor", "clinical/relationship_kind", "ingredient_member_of_drug_class").
+Edge("membership/omeprazole/proton_pump_inhibitor", "clinical/evidence_source", "source/starter_canon").
+Edge("membership/omeprazole/proton_pump_inhibitor", "clinical/evidence_level", "seed").
+Edge("membership/omeprazole/proton_pump_inhibitor", "clinical/as_of_date", "2026-04-22").
+
+MedicationClassMembership@(cid="membership/insulin_glargine/long_acting_insulin", clinical/medication="medication/insulin_glargine", clinical/drug_class="drug_class/long_acting_insulin").
+Edge("membership/insulin_glargine/long_acting_insulin", "onto/instance_of", "class/MedicationClassMembership").
+Edge("membership/insulin_glargine/long_acting_insulin", "onto/preferred_label", "Insulin Glargine member of Long-Acting Insulin").
+Edge("membership/insulin_glargine/long_acting_insulin", "clinical/relationship_kind", "ingredient_member_of_drug_class").
+Edge("membership/insulin_glargine/long_acting_insulin", "clinical/evidence_source", "source/starter_canon").
+Edge("membership/insulin_glargine/long_acting_insulin", "clinical/evidence_level", "seed").
+Edge("membership/insulin_glargine/long_acting_insulin", "clinical/as_of_date", "2026-04-22").
+
+MedicationClassMembership@(cid="membership/levothyroxine/thyroid_hormone", clinical/medication="medication/levothyroxine", clinical/drug_class="drug_class/thyroid_hormone").
+Edge("membership/levothyroxine/thyroid_hormone", "onto/instance_of", "class/MedicationClassMembership").
+Edge("membership/levothyroxine/thyroid_hormone", "onto/preferred_label", "Levothyroxine member of Thyroid Hormone").
+Edge("membership/levothyroxine/thyroid_hormone", "clinical/relationship_kind", "ingredient_member_of_drug_class").
+Edge("membership/levothyroxine/thyroid_hormone", "clinical/evidence_source", "source/starter_canon").
+Edge("membership/levothyroxine/thyroid_hormone", "clinical/evidence_level", "seed").
+Edge("membership/levothyroxine/thyroid_hormone", "clinical/as_of_date", "2026-04-22").
+
+MedicationClassMembership@(cid="membership/apixaban/factor_xa_inhibitor", clinical/medication="medication/apixaban", clinical/drug_class="drug_class/factor_xa_inhibitor").
+Edge("membership/apixaban/factor_xa_inhibitor", "onto/instance_of", "class/MedicationClassMembership").
+Edge("membership/apixaban/factor_xa_inhibitor", "onto/preferred_label", "Apixaban member of Factor Xa Inhibitor").
+Edge("membership/apixaban/factor_xa_inhibitor", "clinical/relationship_kind", "ingredient_member_of_drug_class").
+Edge("membership/apixaban/factor_xa_inhibitor", "clinical/evidence_source", "source/starter_canon").
+Edge("membership/apixaban/factor_xa_inhibitor", "clinical/evidence_level", "seed").
+Edge("membership/apixaban/factor_xa_inhibitor", "clinical/as_of_date", "2026-04-22").

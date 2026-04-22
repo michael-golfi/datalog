@@ -6,7 +6,7 @@ export default defineConfig({
     watch: false,
     globals: true,
     environment: 'node',
-    include: ['src/**/*.{test,spec}.ts'],
+    include: ['test/**/*.test.ts'],
     reporters: ['default'],
     coverage: {
       provider: 'v8',

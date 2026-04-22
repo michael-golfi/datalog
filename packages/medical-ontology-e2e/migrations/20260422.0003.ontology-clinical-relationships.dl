@@ -1,0 +1,234 @@
+% migration.previous: 20260422.0002.ontology-core-concepts.dl
+% migration.sha256: 7fda76a8f0f3dbf65bae112926bb58ccd80fbec9c3e35bee587bad6b3cc2f3ee
+% === Canonical clinical relationships v2 ===
+% Indications and contraindications are compound relationship nodes with attached metadata.
+
+% --- Medication indications ---
+Indication@(cid="indication/metformin/type_2_diabetes", clinical/medication="medication/metformin", clinical/condition="condition/type_2_diabetes").
+Edge("indication/metformin/type_2_diabetes", "onto/instance_of", "class/Indication").
+Edge("indication/metformin/type_2_diabetes", "onto/preferred_label", "Metformin indicated for Type 2 Diabetes").
+Edge("indication/metformin/type_2_diabetes", "clinical/relationship_kind", "on_label").
+Edge("indication/metformin/type_2_diabetes", "clinical/evidence_source", "source/starter_canon").
+Edge("indication/metformin/type_2_diabetes", "clinical/evidence_level", "seed").
+Edge("indication/metformin/type_2_diabetes", "clinical/action", "candidate_indication_match").
+Edge("indication/metformin/type_2_diabetes", "clinical/as_of_date", "2026-04-22").
+
+Indication@(cid="indication/insulin_glargine/type_2_diabetes", clinical/medication="medication/insulin_glargine", clinical/condition="condition/type_2_diabetes").
+Edge("indication/insulin_glargine/type_2_diabetes", "onto/instance_of", "class/Indication").
+Edge("indication/insulin_glargine/type_2_diabetes", "onto/preferred_label", "Insulin Glargine indicated for Type 2 Diabetes").
+Edge("indication/insulin_glargine/type_2_diabetes", "clinical/relationship_kind", "on_label").
+Edge("indication/insulin_glargine/type_2_diabetes", "clinical/evidence_source", "source/starter_canon").
+Edge("indication/insulin_glargine/type_2_diabetes", "clinical/evidence_level", "seed").
+Edge("indication/insulin_glargine/type_2_diabetes", "clinical/action", "candidate_indication_match").
+Edge("indication/insulin_glargine/type_2_diabetes", "clinical/as_of_date", "2026-04-22").
+
+Indication@(cid="indication/lisinopril/hypertension", clinical/medication="medication/lisinopril", clinical/condition="condition/hypertension").
+Edge("indication/lisinopril/hypertension", "onto/instance_of", "class/Indication").
+Edge("indication/lisinopril/hypertension", "onto/preferred_label", "Lisinopril indicated for Hypertension").
+Edge("indication/lisinopril/hypertension", "clinical/relationship_kind", "on_label").
+Edge("indication/lisinopril/hypertension", "clinical/evidence_source", "source/starter_canon").
+Edge("indication/lisinopril/hypertension", "clinical/evidence_level", "seed").
+Edge("indication/lisinopril/hypertension", "clinical/action", "candidate_indication_match").
+Edge("indication/lisinopril/hypertension", "clinical/as_of_date", "2026-04-22").
+
+Indication@(cid="indication/lisinopril/heart_failure", clinical/medication="medication/lisinopril", clinical/condition="condition/heart_failure").
+Edge("indication/lisinopril/heart_failure", "onto/instance_of", "class/Indication").
+Edge("indication/lisinopril/heart_failure", "onto/preferred_label", "Lisinopril indicated for Heart Failure").
+Edge("indication/lisinopril/heart_failure", "clinical/relationship_kind", "on_label").
+Edge("indication/lisinopril/heart_failure", "clinical/evidence_source", "source/starter_canon").
+Edge("indication/lisinopril/heart_failure", "clinical/evidence_level", "seed").
+Edge("indication/lisinopril/heart_failure", "clinical/action", "candidate_indication_match").
+Edge("indication/lisinopril/heart_failure", "clinical/as_of_date", "2026-04-22").
+
+Indication@(cid="indication/albuterol/asthma", clinical/medication="medication/albuterol", clinical/condition="condition/asthma").
+Edge("indication/albuterol/asthma", "onto/instance_of", "class/Indication").
+Edge("indication/albuterol/asthma", "onto/preferred_label", "Albuterol indicated for Asthma").
+Edge("indication/albuterol/asthma", "clinical/relationship_kind", "on_label").
+Edge("indication/albuterol/asthma", "clinical/evidence_source", "source/starter_canon").
+Edge("indication/albuterol/asthma", "clinical/evidence_level", "seed").
+Edge("indication/albuterol/asthma", "clinical/action", "candidate_indication_match").
+Edge("indication/albuterol/asthma", "clinical/as_of_date", "2026-04-22").
+
+Indication@(cid="indication/sertraline/major_depressive_disorder", clinical/medication="medication/sertraline", clinical/condition="condition/major_depressive_disorder").
+Edge("indication/sertraline/major_depressive_disorder", "onto/instance_of", "class/Indication").
+Edge("indication/sertraline/major_depressive_disorder", "onto/preferred_label", "Sertraline indicated for Major Depressive Disorder").
+Edge("indication/sertraline/major_depressive_disorder", "clinical/relationship_kind", "on_label").
+Edge("indication/sertraline/major_depressive_disorder", "clinical/evidence_source", "source/starter_canon").
+Edge("indication/sertraline/major_depressive_disorder", "clinical/evidence_level", "seed").
+Edge("indication/sertraline/major_depressive_disorder", "clinical/action", "candidate_indication_match").
+Edge("indication/sertraline/major_depressive_disorder", "clinical/as_of_date", "2026-04-22").
+
+Indication@(cid="indication/sertraline/generalized_anxiety_disorder", clinical/medication="medication/sertraline", clinical/condition="condition/generalized_anxiety_disorder").
+Edge("indication/sertraline/generalized_anxiety_disorder", "onto/instance_of", "class/Indication").
+Edge("indication/sertraline/generalized_anxiety_disorder", "onto/preferred_label", "Sertraline indicated for Generalized Anxiety Disorder").
+Edge("indication/sertraline/generalized_anxiety_disorder", "clinical/relationship_kind", "on_label").
+Edge("indication/sertraline/generalized_anxiety_disorder", "clinical/evidence_source", "source/starter_canon").
+Edge("indication/sertraline/generalized_anxiety_disorder", "clinical/evidence_level", "seed").
+Edge("indication/sertraline/generalized_anxiety_disorder", "clinical/action", "candidate_indication_match").
+Edge("indication/sertraline/generalized_anxiety_disorder", "clinical/as_of_date", "2026-04-22").
+
+Indication@(cid="indication/fluoxetine/major_depressive_disorder", clinical/medication="medication/fluoxetine", clinical/condition="condition/major_depressive_disorder").
+Edge("indication/fluoxetine/major_depressive_disorder", "onto/instance_of", "class/Indication").
+Edge("indication/fluoxetine/major_depressive_disorder", "onto/preferred_label", "Fluoxetine indicated for Major Depressive Disorder").
+Edge("indication/fluoxetine/major_depressive_disorder", "clinical/relationship_kind", "on_label").
+Edge("indication/fluoxetine/major_depressive_disorder", "clinical/evidence_source", "source/starter_canon").
+Edge("indication/fluoxetine/major_depressive_disorder", "clinical/evidence_level", "seed").
+Edge("indication/fluoxetine/major_depressive_disorder", "clinical/action", "candidate_indication_match").
+Edge("indication/fluoxetine/major_depressive_disorder", "clinical/as_of_date", "2026-04-22").
+
+Indication@(cid="indication/atorvastatin/hyperlipidemia", clinical/medication="medication/atorvastatin", clinical/condition="condition/hyperlipidemia").
+Edge("indication/atorvastatin/hyperlipidemia", "onto/instance_of", "class/Indication").
+Edge("indication/atorvastatin/hyperlipidemia", "onto/preferred_label", "Atorvastatin indicated for Hyperlipidemia").
+Edge("indication/atorvastatin/hyperlipidemia", "clinical/relationship_kind", "on_label").
+Edge("indication/atorvastatin/hyperlipidemia", "clinical/evidence_source", "source/starter_canon").
+Edge("indication/atorvastatin/hyperlipidemia", "clinical/evidence_level", "seed").
+Edge("indication/atorvastatin/hyperlipidemia", "clinical/action", "candidate_indication_match").
+Edge("indication/atorvastatin/hyperlipidemia", "clinical/as_of_date", "2026-04-22").
+
+Indication@(cid="indication/warfarin/atrial_fibrillation", clinical/medication="medication/warfarin", clinical/condition="condition/atrial_fibrillation").
+Edge("indication/warfarin/atrial_fibrillation", "onto/instance_of", "class/Indication").
+Edge("indication/warfarin/atrial_fibrillation", "onto/preferred_label", "Warfarin indicated for Atrial Fibrillation").
+Edge("indication/warfarin/atrial_fibrillation", "clinical/relationship_kind", "on_label").
+Edge("indication/warfarin/atrial_fibrillation", "clinical/evidence_source", "source/starter_canon").
+Edge("indication/warfarin/atrial_fibrillation", "clinical/evidence_level", "seed").
+Edge("indication/warfarin/atrial_fibrillation", "clinical/action", "candidate_indication_match").
+Edge("indication/warfarin/atrial_fibrillation", "clinical/as_of_date", "2026-04-22").
+
+Indication@(cid="indication/apixaban/atrial_fibrillation", clinical/medication="medication/apixaban", clinical/condition="condition/atrial_fibrillation").
+Edge("indication/apixaban/atrial_fibrillation", "onto/instance_of", "class/Indication").
+Edge("indication/apixaban/atrial_fibrillation", "onto/preferred_label", "Apixaban indicated for Atrial Fibrillation").
+Edge("indication/apixaban/atrial_fibrillation", "clinical/relationship_kind", "on_label").
+Edge("indication/apixaban/atrial_fibrillation", "clinical/evidence_source", "source/starter_canon").
+Edge("indication/apixaban/atrial_fibrillation", "clinical/evidence_level", "seed").
+Edge("indication/apixaban/atrial_fibrillation", "clinical/action", "candidate_indication_match").
+Edge("indication/apixaban/atrial_fibrillation", "clinical/as_of_date", "2026-04-22").
+
+Indication@(cid="indication/omeprazole/peptic_ulcer_disease", clinical/medication="medication/omeprazole", clinical/condition="condition/peptic_ulcer_disease").
+Edge("indication/omeprazole/peptic_ulcer_disease", "onto/instance_of", "class/Indication").
+Edge("indication/omeprazole/peptic_ulcer_disease", "onto/preferred_label", "Omeprazole indicated for Peptic Ulcer Disease").
+Edge("indication/omeprazole/peptic_ulcer_disease", "clinical/relationship_kind", "on_label").
+Edge("indication/omeprazole/peptic_ulcer_disease", "clinical/evidence_source", "source/starter_canon").
+Edge("indication/omeprazole/peptic_ulcer_disease", "clinical/evidence_level", "seed").
+Edge("indication/omeprazole/peptic_ulcer_disease", "clinical/action", "candidate_indication_match").
+Edge("indication/omeprazole/peptic_ulcer_disease", "clinical/as_of_date", "2026-04-22").
+
+Indication@(cid="indication/levothyroxine/hypothyroidism", clinical/medication="medication/levothyroxine", clinical/condition="condition/hypothyroidism").
+Edge("indication/levothyroxine/hypothyroidism", "onto/instance_of", "class/Indication").
+Edge("indication/levothyroxine/hypothyroidism", "onto/preferred_label", "Levothyroxine indicated for Hypothyroidism").
+Edge("indication/levothyroxine/hypothyroidism", "clinical/relationship_kind", "on_label").
+Edge("indication/levothyroxine/hypothyroidism", "clinical/evidence_source", "source/starter_canon").
+Edge("indication/levothyroxine/hypothyroidism", "clinical/evidence_level", "seed").
+Edge("indication/levothyroxine/hypothyroidism", "clinical/action", "candidate_indication_match").
+Edge("indication/levothyroxine/hypothyroidism", "clinical/as_of_date", "2026-04-22").
+
+% --- Medication contraindications and avoid/review relationships ---
+Contraindication@(cid="contraindication/lisinopril/pregnancy", clinical/medication="medication/lisinopril", clinical/condition="condition/pregnancy").
+Edge("contraindication/lisinopril/pregnancy", "onto/instance_of", "class/Contraindication").
+Edge("contraindication/lisinopril/pregnancy", "onto/preferred_label", "Lisinopril avoid/review in Pregnancy").
+Edge("contraindication/lisinopril/pregnancy", "clinical/relationship_kind", "avoid").
+Edge("contraindication/lisinopril/pregnancy", "clinical/severity", "requires_clinical_review").
+Edge("contraindication/lisinopril/pregnancy", "clinical/evidence_source", "source/starter_canon").
+Edge("contraindication/lisinopril/pregnancy", "clinical/evidence_level", "seed").
+Edge("contraindication/lisinopril/pregnancy", "clinical/action", "review_before_use").
+Edge("contraindication/lisinopril/pregnancy", "clinical/as_of_date", "2026-04-22").
+
+Contraindication@(cid="contraindication/warfarin/pregnancy", clinical/medication="medication/warfarin", clinical/condition="condition/pregnancy").
+Edge("contraindication/warfarin/pregnancy", "onto/instance_of", "class/Contraindication").
+Edge("contraindication/warfarin/pregnancy", "onto/preferred_label", "Warfarin avoid/review in Pregnancy").
+Edge("contraindication/warfarin/pregnancy", "clinical/relationship_kind", "avoid").
+Edge("contraindication/warfarin/pregnancy", "clinical/severity", "requires_clinical_review").
+Edge("contraindication/warfarin/pregnancy", "clinical/evidence_source", "source/starter_canon").
+Edge("contraindication/warfarin/pregnancy", "clinical/evidence_level", "seed").
+Edge("contraindication/warfarin/pregnancy", "clinical/action", "review_before_use").
+Edge("contraindication/warfarin/pregnancy", "clinical/as_of_date", "2026-04-22").
+
+Contraindication@(cid="contraindication/ibuprofen/chronic_kidney_disease", clinical/medication="medication/ibuprofen", clinical/condition="condition/chronic_kidney_disease").
+Edge("contraindication/ibuprofen/chronic_kidney_disease", "onto/instance_of", "class/Contraindication").
+Edge("contraindication/ibuprofen/chronic_kidney_disease", "onto/preferred_label", "Ibuprofen avoid/review in Chronic Kidney Disease").
+Edge("contraindication/ibuprofen/chronic_kidney_disease", "clinical/relationship_kind", "avoid").
+Edge("contraindication/ibuprofen/chronic_kidney_disease", "clinical/severity", "requires_clinical_review").
+Edge("contraindication/ibuprofen/chronic_kidney_disease", "clinical/evidence_source", "source/starter_canon").
+Edge("contraindication/ibuprofen/chronic_kidney_disease", "clinical/evidence_level", "seed").
+Edge("contraindication/ibuprofen/chronic_kidney_disease", "clinical/action", "review_before_use").
+Edge("contraindication/ibuprofen/chronic_kidney_disease", "clinical/as_of_date", "2026-04-22").
+
+Contraindication@(cid="contraindication/ibuprofen/peptic_ulcer_disease", clinical/medication="medication/ibuprofen", clinical/condition="condition/peptic_ulcer_disease").
+Edge("contraindication/ibuprofen/peptic_ulcer_disease", "onto/instance_of", "class/Contraindication").
+Edge("contraindication/ibuprofen/peptic_ulcer_disease", "onto/preferred_label", "Ibuprofen avoid/review in Peptic Ulcer Disease").
+Edge("contraindication/ibuprofen/peptic_ulcer_disease", "clinical/relationship_kind", "avoid").
+Edge("contraindication/ibuprofen/peptic_ulcer_disease", "clinical/severity", "requires_clinical_review").
+Edge("contraindication/ibuprofen/peptic_ulcer_disease", "clinical/evidence_source", "source/starter_canon").
+Edge("contraindication/ibuprofen/peptic_ulcer_disease", "clinical/evidence_level", "seed").
+Edge("contraindication/ibuprofen/peptic_ulcer_disease", "clinical/action", "review_before_use").
+Edge("contraindication/ibuprofen/peptic_ulcer_disease", "clinical/as_of_date", "2026-04-22").
+
+Contraindication@(cid="contraindication/ibuprofen/heart_failure", clinical/medication="medication/ibuprofen", clinical/condition="condition/heart_failure").
+Edge("contraindication/ibuprofen/heart_failure", "onto/instance_of", "class/Contraindication").
+Edge("contraindication/ibuprofen/heart_failure", "onto/preferred_label", "Ibuprofen avoid/review in Heart Failure").
+Edge("contraindication/ibuprofen/heart_failure", "clinical/relationship_kind", "avoid").
+Edge("contraindication/ibuprofen/heart_failure", "clinical/severity", "requires_clinical_review").
+Edge("contraindication/ibuprofen/heart_failure", "clinical/evidence_source", "source/starter_canon").
+Edge("contraindication/ibuprofen/heart_failure", "clinical/evidence_level", "seed").
+Edge("contraindication/ibuprofen/heart_failure", "clinical/action", "review_before_use").
+Edge("contraindication/ibuprofen/heart_failure", "clinical/as_of_date", "2026-04-22").
+
+% --- Symmetric comorbidity associations; each pair is materialized once ---
+ComorbidityAssociation@(cid="comorbidity/hypertension/type_2_diabetes", clinical/condition_a="condition/hypertension", clinical/condition_b="condition/type_2_diabetes").
+Edge("comorbidity/hypertension/type_2_diabetes", "onto/instance_of", "class/ComorbidityAssociation").
+Edge("comorbidity/hypertension/type_2_diabetes", "onto/preferred_label", "Hypertension comorbid with Type 2 Diabetes").
+Edge("comorbidity/hypertension/type_2_diabetes", "clinical/relationship_kind", "comorbid_with").
+Edge("comorbidity/hypertension/type_2_diabetes", "clinical/directionality", "symmetric").
+Edge("comorbidity/hypertension/type_2_diabetes", "clinical/normalized_pair_key", "condition/hypertension|condition/type_2_diabetes").
+Edge("comorbidity/hypertension/type_2_diabetes", "clinical/evidence_source", "source/starter_canon").
+Edge("comorbidity/hypertension/type_2_diabetes", "clinical/evidence_level", "seed").
+Edge("comorbidity/hypertension/type_2_diabetes", "clinical/as_of_date", "2026-04-22").
+
+ComorbidityAssociation@(cid="comorbidity/chronic_kidney_disease/type_2_diabetes", clinical/condition_a="condition/chronic_kidney_disease", clinical/condition_b="condition/type_2_diabetes").
+Edge("comorbidity/chronic_kidney_disease/type_2_diabetes", "onto/instance_of", "class/ComorbidityAssociation").
+Edge("comorbidity/chronic_kidney_disease/type_2_diabetes", "onto/preferred_label", "Chronic Kidney Disease comorbid with Type 2 Diabetes").
+Edge("comorbidity/chronic_kidney_disease/type_2_diabetes", "clinical/relationship_kind", "comorbid_with").
+Edge("comorbidity/chronic_kidney_disease/type_2_diabetes", "clinical/directionality", "symmetric").
+Edge("comorbidity/chronic_kidney_disease/type_2_diabetes", "clinical/normalized_pair_key", "condition/chronic_kidney_disease|condition/type_2_diabetes").
+Edge("comorbidity/chronic_kidney_disease/type_2_diabetes", "clinical/evidence_source", "source/starter_canon").
+Edge("comorbidity/chronic_kidney_disease/type_2_diabetes", "clinical/evidence_level", "seed").
+Edge("comorbidity/chronic_kidney_disease/type_2_diabetes", "clinical/as_of_date", "2026-04-22").
+
+ComorbidityAssociation@(cid="comorbidity/hyperlipidemia/type_2_diabetes", clinical/condition_a="condition/hyperlipidemia", clinical/condition_b="condition/type_2_diabetes").
+Edge("comorbidity/hyperlipidemia/type_2_diabetes", "onto/instance_of", "class/ComorbidityAssociation").
+Edge("comorbidity/hyperlipidemia/type_2_diabetes", "onto/preferred_label", "Hyperlipidemia comorbid with Type 2 Diabetes").
+Edge("comorbidity/hyperlipidemia/type_2_diabetes", "clinical/relationship_kind", "comorbid_with").
+Edge("comorbidity/hyperlipidemia/type_2_diabetes", "clinical/directionality", "symmetric").
+Edge("comorbidity/hyperlipidemia/type_2_diabetes", "clinical/normalized_pair_key", "condition/hyperlipidemia|condition/type_2_diabetes").
+Edge("comorbidity/hyperlipidemia/type_2_diabetes", "clinical/evidence_source", "source/starter_canon").
+Edge("comorbidity/hyperlipidemia/type_2_diabetes", "clinical/evidence_level", "seed").
+Edge("comorbidity/hyperlipidemia/type_2_diabetes", "clinical/as_of_date", "2026-04-22").
+
+ComorbidityAssociation@(cid="comorbidity/chronic_kidney_disease/heart_failure", clinical/condition_a="condition/chronic_kidney_disease", clinical/condition_b="condition/heart_failure").
+Edge("comorbidity/chronic_kidney_disease/heart_failure", "onto/instance_of", "class/ComorbidityAssociation").
+Edge("comorbidity/chronic_kidney_disease/heart_failure", "onto/preferred_label", "Chronic Kidney Disease comorbid with Heart Failure").
+Edge("comorbidity/chronic_kidney_disease/heart_failure", "clinical/relationship_kind", "comorbid_with").
+Edge("comorbidity/chronic_kidney_disease/heart_failure", "clinical/directionality", "symmetric").
+Edge("comorbidity/chronic_kidney_disease/heart_failure", "clinical/normalized_pair_key", "condition/chronic_kidney_disease|condition/heart_failure").
+Edge("comorbidity/chronic_kidney_disease/heart_failure", "clinical/evidence_source", "source/starter_canon").
+Edge("comorbidity/chronic_kidney_disease/heart_failure", "clinical/evidence_level", "seed").
+Edge("comorbidity/chronic_kidney_disease/heart_failure", "clinical/as_of_date", "2026-04-22").
+
+ComorbidityAssociation@(cid="comorbidity/atrial_fibrillation/heart_failure", clinical/condition_a="condition/atrial_fibrillation", clinical/condition_b="condition/heart_failure").
+Edge("comorbidity/atrial_fibrillation/heart_failure", "onto/instance_of", "class/ComorbidityAssociation").
+Edge("comorbidity/atrial_fibrillation/heart_failure", "onto/preferred_label", "Atrial Fibrillation comorbid with Heart Failure").
+Edge("comorbidity/atrial_fibrillation/heart_failure", "clinical/relationship_kind", "comorbid_with").
+Edge("comorbidity/atrial_fibrillation/heart_failure", "clinical/directionality", "symmetric").
+Edge("comorbidity/atrial_fibrillation/heart_failure", "clinical/normalized_pair_key", "condition/atrial_fibrillation|condition/heart_failure").
+Edge("comorbidity/atrial_fibrillation/heart_failure", "clinical/evidence_source", "source/starter_canon").
+Edge("comorbidity/atrial_fibrillation/heart_failure", "clinical/evidence_level", "seed").
+Edge("comorbidity/atrial_fibrillation/heart_failure", "clinical/as_of_date", "2026-04-22").
+
+ComorbidityAssociation@(cid="comorbidity/generalized_anxiety_disorder/major_depressive_disorder", clinical/condition_a="condition/generalized_anxiety_disorder", clinical/condition_b="condition/major_depressive_disorder").
+Edge("comorbidity/generalized_anxiety_disorder/major_depressive_disorder", "onto/instance_of", "class/ComorbidityAssociation").
+Edge("comorbidity/generalized_anxiety_disorder/major_depressive_disorder", "onto/preferred_label", "Generalized Anxiety Disorder comorbid with Major Depressive Disorder").
+Edge("comorbidity/generalized_anxiety_disorder/major_depressive_disorder", "clinical/relationship_kind", "comorbid_with").
+Edge("comorbidity/generalized_anxiety_disorder/major_depressive_disorder", "clinical/directionality", "symmetric").
+Edge("comorbidity/generalized_anxiety_disorder/major_depressive_disorder", "clinical/normalized_pair_key", "condition/generalized_anxiety_disorder|condition/major_depressive_disorder").
+Edge("comorbidity/generalized_anxiety_disorder/major_depressive_disorder", "clinical/evidence_source", "source/starter_canon").
+Edge("comorbidity/generalized_anxiety_disorder/major_depressive_disorder", "clinical/evidence_level", "seed").
+Edge("comorbidity/generalized_anxiety_disorder/major_depressive_disorder", "clinical/as_of_date", "2026-04-22").

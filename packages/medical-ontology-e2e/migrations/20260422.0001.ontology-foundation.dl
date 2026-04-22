@@ -1,0 +1,200 @@
+% migration.previous: none
+% migration.sha256: fa5f2215f56109863d0bc89d88493124af49f711d88e3cb4234b5c70c174b318
+% === Clinical Ontology Foundation v2 ===
+% Binary predicates remain for stable taxonomy and scalar metadata.
+% Compounds represent n-ary clinical relations; metadata is attached to the compound cid.
+
+% --- Core ontology predicates ---
+DefPred("onto/preferred_label", "1", "liquid/node", "0", "liquid/string").
+DefPred("onto/description", "1", "liquid/node", "0", "liquid/string").
+DefPred("onto/subclass_of", "0", "liquid/node", "0", "liquid/node").
+DefPred("onto/instance_of", "0", "liquid/node", "0", "liquid/node").
+DefPred("onto/semantic_group", "1", "liquid/node", "0", "liquid/string").
+DefPred("onto/status", "1", "liquid/node", "0", "liquid/string").
+
+% --- Clinical relationship metadata predicates ---
+DefPred("clinical/relationship_kind", "1", "liquid/node", "0", "liquid/string").
+DefPred("clinical/evidence_source", "0", "liquid/node", "0", "liquid/node").
+DefPred("clinical/evidence_level", "1", "liquid/node", "0", "liquid/string").
+DefPred("clinical/action", "1", "liquid/node", "0", "liquid/string").
+DefPred("clinical/severity", "1", "liquid/node", "0", "liquid/string").
+DefPred("clinical/directionality", "1", "liquid/node", "0", "liquid/string").
+DefPred("clinical/confidence", "1", "liquid/node", "0", "liquid/string").
+DefPred("clinical/as_of_date", "1", "liquid/node", "0", "liquid/string").
+DefPred("clinical/normalized_pair_key", "1", "liquid/node", "0", "liquid/string").
+DefPred("clinical/clinical_note", "1", "liquid/node", "0", "liquid/string").
+
+% --- External terminology mapping predicates ---
+DefPred("mapping/url", "1", "liquid/node", "0", "liquid/string").
+DefPred("mapping/source", "1", "liquid/node", "0", "liquid/string").
+DefPred("mapping/license_scope", "1", "liquid/node", "0", "liquid/string").
+DefPred("mapping/version", "1", "liquid/node", "0", "liquid/string").
+DefPred("mapping/scope", "1", "liquid/node", "0", "liquid/string").
+DefPred("mapping/as_of_date", "1", "liquid/node", "0", "liquid/string").
+
+% --- User clinical assertion predicates ---
+DefPred("user/status", "1", "liquid/node", "0", "liquid/string").
+DefPred("user/source", "1", "liquid/node", "0", "liquid/string").
+DefPred("user/observed_at", "1", "liquid/node", "0", "liquid/string").
+DefPred("user/onset_date", "1", "liquid/node", "0", "liquid/string").
+DefPred("user/start_date", "1", "liquid/node", "0", "liquid/string").
+DefPred("user/end_date", "1", "liquid/node", "0", "liquid/string").
+DefPred("user/dose_text", "1", "liquid/node", "0", "liquid/string").
+DefPred("user/route", "1", "liquid/node", "0", "liquid/string").
+DefPred("user/frequency", "1", "liquid/node", "0", "liquid/string").
+DefPred("user/certainty", "1", "liquid/node", "0", "liquid/string").
+DefPred("user/adherence_status", "1", "liquid/node", "0", "liquid/string").
+
+% --- Compound identity definitions ---
+% A mapping is identified by the local concept, external vocabulary, and external code.
+DefCompound("ExternalMapping", "mapping/concept", "0", "liquid/node").
+DefCompound("ExternalMapping", "mapping/vocabulary", "0", "liquid/node").
+DefCompound("ExternalMapping", "mapping/code", "0", "liquid/string").
+Edge("ExternalMapping", "liquid/mutable", "false").
+
+% A medication-class membership is an n-ary relationship node, not just a binary edge.
+DefCompound("MedicationClassMembership", "clinical/medication", "0", "liquid/node").
+DefCompound("MedicationClassMembership", "clinical/drug_class", "0", "liquid/node").
+Edge("MedicationClassMembership", "liquid/mutable", "false").
+
+% A medication indication joins a medication ingredient and a target condition.
+DefCompound("Indication", "clinical/medication", "0", "liquid/node").
+DefCompound("Indication", "clinical/condition", "0", "liquid/node").
+Edge("Indication", "liquid/mutable", "false").
+
+% A contraindication joins a medication ingredient and a patient condition/risk state.
+DefCompound("Contraindication", "clinical/medication", "0", "liquid/node").
+DefCompound("Contraindication", "clinical/condition", "0", "liquid/node").
+Edge("Contraindication", "liquid/mutable", "false").
+
+% Symmetric comorbidity is represented once using a normalized condition pair.
+DefCompound("ComorbidityAssociation", "clinical/condition_a", "0", "liquid/node").
+DefCompound("ComorbidityAssociation", "clinical/condition_b", "0", "liquid/node").
+Edge("ComorbidityAssociation", "liquid/mutable", "false").
+
+% User-level assertions are separated from canonical ontology facts.
+DefCompound("UserConditionAssertion", "user/profile", "0", "liquid/node").
+DefCompound("UserConditionAssertion", "user/episode", "0", "liquid/node").
+DefCompound("UserConditionAssertion", "clinical/condition", "0", "liquid/node").
+Edge("UserConditionAssertion", "liquid/mutable", "false").
+
+DefCompound("UserMedicationAssertion", "user/profile", "0", "liquid/node").
+DefCompound("UserMedicationAssertion", "user/episode", "0", "liquid/node").
+DefCompound("UserMedicationAssertion", "clinical/medication", "0", "liquid/node").
+Edge("UserMedicationAssertion", "liquid/mutable", "false").
+
+% Optional materialized joins for downstream applications or review workflows.
+DefCompound("UserIndicationMatch", "user/profile", "0", "liquid/node").
+DefCompound("UserIndicationMatch", "user/episode", "0", "liquid/node").
+DefCompound("UserIndicationMatch", "clinical/medication", "0", "liquid/node").
+DefCompound("UserIndicationMatch", "clinical/condition", "0", "liquid/node").
+DefCompound("UserIndicationMatch", "clinical/indication", "0", "liquid/node").
+Edge("UserIndicationMatch", "liquid/mutable", "false").
+
+DefCompound("UserContraindicationRisk", "user/profile", "0", "liquid/node").
+DefCompound("UserContraindicationRisk", "user/episode", "0", "liquid/node").
+DefCompound("UserContraindicationRisk", "clinical/medication", "0", "liquid/node").
+DefCompound("UserContraindicationRisk", "clinical/condition", "0", "liquid/node").
+DefCompound("UserContraindicationRisk", "clinical/contraindication", "0", "liquid/node").
+Edge("UserContraindicationRisk", "liquid/mutable", "false").
+
+% --- Class hierarchy ---
+Edge("class/Thing", "onto/preferred_label", "Thing").
+Edge("class/Thing", "onto/instance_of", "class/Thing").
+Edge("class/ClinicalConcept", "onto/preferred_label", "Clinical Concept").
+Edge("class/ClinicalConcept", "onto/instance_of", "class/Thing").
+Edge("class/ClinicalConcept", "onto/subclass_of", "class/Thing").
+Edge("class/Condition", "onto/preferred_label", "Condition").
+Edge("class/Condition", "onto/instance_of", "class/Thing").
+Edge("class/Condition", "onto/subclass_of", "class/ClinicalConcept").
+Edge("class/MedicationIngredient", "onto/preferred_label", "Medication Ingredient").
+Edge("class/MedicationIngredient", "onto/instance_of", "class/Thing").
+Edge("class/MedicationIngredient", "onto/subclass_of", "class/ClinicalConcept").
+Edge("class/DrugClass", "onto/preferred_label", "Drug Class").
+Edge("class/DrugClass", "onto/instance_of", "class/Thing").
+Edge("class/DrugClass", "onto/subclass_of", "class/ClinicalConcept").
+Edge("class/ClinicalRelationship", "onto/preferred_label", "Clinical Relationship").
+Edge("class/ClinicalRelationship", "onto/instance_of", "class/Thing").
+Edge("class/ClinicalRelationship", "onto/subclass_of", "class/Thing").
+Edge("class/MedicationClassMembership", "onto/preferred_label", "Medication Class Membership").
+Edge("class/MedicationClassMembership", "onto/instance_of", "class/Thing").
+Edge("class/MedicationClassMembership", "onto/subclass_of", "class/ClinicalRelationship").
+Edge("class/Indication", "onto/preferred_label", "Indication").
+Edge("class/Indication", "onto/instance_of", "class/Thing").
+Edge("class/Indication", "onto/subclass_of", "class/ClinicalRelationship").
+Edge("class/Contraindication", "onto/preferred_label", "Contraindication").
+Edge("class/Contraindication", "onto/instance_of", "class/Thing").
+Edge("class/Contraindication", "onto/subclass_of", "class/ClinicalRelationship").
+Edge("class/ComorbidityAssociation", "onto/preferred_label", "Comorbidity Association").
+Edge("class/ComorbidityAssociation", "onto/instance_of", "class/Thing").
+Edge("class/ComorbidityAssociation", "onto/subclass_of", "class/ClinicalRelationship").
+Edge("class/ExternalMapping", "onto/preferred_label", "External Mapping").
+Edge("class/ExternalMapping", "onto/instance_of", "class/Thing").
+Edge("class/ExternalMapping", "onto/subclass_of", "class/Thing").
+Edge("class/Vocabulary", "onto/preferred_label", "External Vocabulary").
+Edge("class/Vocabulary", "onto/instance_of", "class/Thing").
+Edge("class/Vocabulary", "onto/subclass_of", "class/Thing").
+Edge("class/EvidenceSource", "onto/preferred_label", "Evidence Source").
+Edge("class/EvidenceSource", "onto/instance_of", "class/Thing").
+Edge("class/EvidenceSource", "onto/subclass_of", "class/Thing").
+Edge("class/UserClinicalAssertion", "onto/preferred_label", "User Clinical Assertion").
+Edge("class/UserClinicalAssertion", "onto/instance_of", "class/Thing").
+Edge("class/UserClinicalAssertion", "onto/subclass_of", "class/Thing").
+Edge("class/UserConditionAssertion", "onto/preferred_label", "User Condition Assertion").
+Edge("class/UserConditionAssertion", "onto/instance_of", "class/Thing").
+Edge("class/UserConditionAssertion", "onto/subclass_of", "class/UserClinicalAssertion").
+Edge("class/UserMedicationAssertion", "onto/preferred_label", "User Medication Assertion").
+Edge("class/UserMedicationAssertion", "onto/instance_of", "class/Thing").
+Edge("class/UserMedicationAssertion", "onto/subclass_of", "class/UserClinicalAssertion").
+Edge("class/UserIndicationMatch", "onto/preferred_label", "User Indication Match").
+Edge("class/UserIndicationMatch", "onto/instance_of", "class/Thing").
+Edge("class/UserIndicationMatch", "onto/subclass_of", "class/UserClinicalAssertion").
+Edge("class/UserContraindicationRisk", "onto/preferred_label", "User Contraindication Risk").
+Edge("class/UserContraindicationRisk", "onto/instance_of", "class/Thing").
+Edge("class/UserContraindicationRisk", "onto/subclass_of", "class/UserClinicalAssertion").
+Edge("class/EpisodeOfCare", "onto/preferred_label", "Episode Of Care").
+Edge("class/EpisodeOfCare", "onto/instance_of", "class/Thing").
+Edge("class/EpisodeOfCare", "onto/subclass_of", "class/Thing").
+
+% --- External vocabulary nodes ---
+Edge("vocab/atc", "onto/instance_of", "class/Vocabulary").
+Edge("vocab/atc", "onto/preferred_label", "ATC").
+Edge("vocab/atc", "onto/status", "active").
+Edge("vocab/rxnorm", "onto/instance_of", "class/Vocabulary").
+Edge("vocab/rxnorm", "onto/preferred_label", "RxNorm").
+Edge("vocab/rxnorm", "onto/status", "active").
+Edge("vocab/drugbank", "onto/instance_of", "class/Vocabulary").
+Edge("vocab/drugbank", "onto/preferred_label", "DrugBank").
+Edge("vocab/drugbank", "onto/status", "active").
+Edge("vocab/umls", "onto/instance_of", "class/Vocabulary").
+Edge("vocab/umls", "onto/preferred_label", "UMLS").
+Edge("vocab/umls", "onto/status", "active").
+Edge("vocab/icd10", "onto/instance_of", "class/Vocabulary").
+Edge("vocab/icd10", "onto/preferred_label", "ICD-10").
+Edge("vocab/icd10", "onto/status", "active").
+Edge("vocab/snomedct", "onto/instance_of", "class/Vocabulary").
+Edge("vocab/snomedct", "onto/preferred_label", "SNOMED CT").
+Edge("vocab/snomedct", "onto/status", "active").
+
+% --- Evidence/source nodes ---
+Edge("source/starter_canon", "onto/instance_of", "class/EvidenceSource").
+Edge("source/starter_canon", "onto/preferred_label", "Starter Canon").
+Edge("source/starter_canon", "onto/status", "active").
+Edge("source/rxnav_api_current", "onto/instance_of", "class/EvidenceSource").
+Edge("source/rxnav_api_current", "onto/preferred_label", "RxNav API Current").
+Edge("source/rxnav_api_current", "onto/status", "active").
+Edge("source/uts_current_concept", "onto/instance_of", "class/EvidenceSource").
+Edge("source/uts_current_concept", "onto/preferred_label", "UMLS Terminology Services Current Concept").
+Edge("source/uts_current_concept", "onto/status", "active").
+Edge("source/snomedct_browser_current", "onto/instance_of", "class/EvidenceSource").
+Edge("source/snomedct_browser_current", "onto/preferred_label", "SNOMED CT Browser Current").
+Edge("source/snomedct_browser_current", "onto/status", "active").
+Edge("source/drugbank_public_drug_page", "onto/instance_of", "class/EvidenceSource").
+Edge("source/drugbank_public_drug_page", "onto/preferred_label", "DrugBank Public Drug Page").
+Edge("source/drugbank_public_drug_page", "onto/status", "active").
+Edge("source/whocc_fhi_atc_ddd_index", "onto/instance_of", "class/EvidenceSource").
+Edge("source/whocc_fhi_atc_ddd_index", "onto/preferred_label", "WHOCC ATC/DDD Index").
+Edge("source/whocc_fhi_atc_ddd_index", "onto/status", "active").
+Edge("source/who_icd10_browser", "onto/instance_of", "class/EvidenceSource").
+Edge("source/who_icd10_browser", "onto/preferred_label", "WHO ICD-10 Browser").
+Edge("source/who_icd10_browser", "onto/status", "active").

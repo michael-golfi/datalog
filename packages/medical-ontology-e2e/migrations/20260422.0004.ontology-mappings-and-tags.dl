@@ -1,0 +1,613 @@
+% migration.previous: 20260422.0003.ontology-clinical-relationships.dl
+% migration.sha256: cdb3d8781c01c71852e8250fff48f0d34d2fd11adb77d8b35866cf302c3594ab
+% === External terminology mappings v2 ===
+% UMLS, SNOMED CT, RxNorm, DrugBank, ATC, and ICD-10 links are represented as mapping compounds.
+% The mapping compound key is (local concept, vocabulary, code); provenance and license metadata are attached to the mapping cid.
+
+ExternalMapping@(cid="mapping/atc_a10ba02", mapping/concept="medication/metformin", mapping/vocabulary="vocab/atc", mapping/code="A10BA02").
+Edge("mapping/atc_a10ba02", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/atc_a10ba02", "onto/preferred_label", "ATC A10BA02").
+Edge("mapping/atc_a10ba02", "mapping/url", "https://atcddd.fhi.no/atc_ddd_index/?code=A10BA02").
+Edge("mapping/atc_a10ba02", "mapping/source", "whocc_fhi_atc_ddd_index").
+Edge("mapping/atc_a10ba02", "mapping/license_scope", "public_classifier_link").
+Edge("mapping/atc_a10ba02", "mapping/version", "atc_ddd_guidelines_2026").
+Edge("mapping/atc_a10ba02", "mapping/scope", "exact").
+Edge("mapping/atc_a10ba02", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/rxnorm_6809", mapping/concept="medication/metformin", mapping/vocabulary="vocab/rxnorm", mapping/code="6809").
+Edge("mapping/rxnorm_6809", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/rxnorm_6809", "onto/preferred_label", "RxNorm 6809").
+Edge("mapping/rxnorm_6809", "mapping/url", "https://rxnav.nlm.nih.gov/REST/rxcui/6809/properties.json").
+Edge("mapping/rxnorm_6809", "mapping/source", "rxnav_api_current").
+Edge("mapping/rxnorm_6809", "mapping/license_scope", "public_core_identifier").
+Edge("mapping/rxnorm_6809", "mapping/version", "rxnorm_06-Apr-2026_api-3.1.351").
+Edge("mapping/rxnorm_6809", "mapping/scope", "exact").
+Edge("mapping/rxnorm_6809", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/drugbank_db00331", mapping/concept="medication/metformin", mapping/vocabulary="vocab/drugbank", mapping/code="DB00331").
+Edge("mapping/drugbank_db00331", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/drugbank_db00331", "onto/preferred_label", "DrugBank DB00331").
+Edge("mapping/drugbank_db00331", "mapping/url", "https://go.drugbank.com/drugs/DB00331").
+Edge("mapping/drugbank_db00331", "mapping/source", "drugbank_public_drug_page").
+Edge("mapping/drugbank_db00331", "mapping/license_scope", "identifier_provenance_only").
+Edge("mapping/drugbank_db00331", "mapping/version", "drugbank_public_page_accessed_2026-04-22").
+Edge("mapping/drugbank_db00331", "mapping/scope", "exact").
+Edge("mapping/drugbank_db00331", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0025598", mapping/concept="medication/metformin", mapping/vocabulary="vocab/umls", mapping/code="C0025598").
+Edge("mapping/umls_c0025598", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0025598", "onto/preferred_label", "UMLS C0025598").
+Edge("mapping/umls_c0025598", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0025598").
+Edge("mapping/umls_c0025598", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0025598", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0025598", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0025598", "mapping/scope", "exact").
+Edge("mapping/umls_c0025598", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/icd10_e11", mapping/concept="condition/type_2_diabetes", mapping/vocabulary="vocab/icd10", mapping/code="E11").
+Edge("mapping/icd10_e11", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/icd10_e11", "onto/preferred_label", "ICD-10 E11").
+Edge("mapping/icd10_e11", "mapping/url", "https://icd.who.int/browse10/2019/en#/E11").
+Edge("mapping/icd10_e11", "mapping/source", "who_icd10_browser").
+Edge("mapping/icd10_e11", "mapping/license_scope", "public_classifier_link").
+Edge("mapping/icd10_e11", "mapping/version", "icd10_2019_browser_accessed_2026-04-22").
+Edge("mapping/icd10_e11", "mapping/scope", "exact").
+Edge("mapping/icd10_e11", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_44054006", mapping/concept="condition/type_2_diabetes", mapping/vocabulary="vocab/snomedct", mapping/code="44054006").
+Edge("mapping/snomedct_44054006", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_44054006", "onto/preferred_label", "SNOMED CT 44054006").
+Edge("mapping/snomedct_44054006", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=44054006").
+Edge("mapping/snomedct_44054006", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_44054006", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_44054006", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_44054006", "mapping/scope", "exact").
+Edge("mapping/snomedct_44054006", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0011860", mapping/concept="condition/type_2_diabetes", mapping/vocabulary="vocab/umls", mapping/code="C0011860").
+Edge("mapping/umls_c0011860", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0011860", "onto/preferred_label", "UMLS C0011860").
+Edge("mapping/umls_c0011860", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0011860").
+Edge("mapping/umls_c0011860", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0011860", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0011860", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0011860", "mapping/scope", "exact").
+Edge("mapping/umls_c0011860", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_38341003", mapping/concept="condition/hypertension", mapping/vocabulary="vocab/snomedct", mapping/code="38341003").
+Edge("mapping/snomedct_38341003", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_38341003", "onto/preferred_label", "SNOMED CT 38341003").
+Edge("mapping/snomedct_38341003", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=38341003").
+Edge("mapping/snomedct_38341003", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_38341003", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_38341003", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_38341003", "mapping/scope", "exact").
+Edge("mapping/snomedct_38341003", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0020538", mapping/concept="condition/hypertension", mapping/vocabulary="vocab/umls", mapping/code="C0020538").
+Edge("mapping/umls_c0020538", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0020538", "onto/preferred_label", "UMLS C0020538").
+Edge("mapping/umls_c0020538", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0020538").
+Edge("mapping/umls_c0020538", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0020538", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0020538", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0020538", "mapping/scope", "exact").
+Edge("mapping/umls_c0020538", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_195967001", mapping/concept="condition/asthma", mapping/vocabulary="vocab/snomedct", mapping/code="195967001").
+Edge("mapping/snomedct_195967001", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_195967001", "onto/preferred_label", "SNOMED CT 195967001").
+Edge("mapping/snomedct_195967001", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=195967001").
+Edge("mapping/snomedct_195967001", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_195967001", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_195967001", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_195967001", "mapping/scope", "exact").
+Edge("mapping/snomedct_195967001", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0004096", mapping/concept="condition/asthma", mapping/vocabulary="vocab/umls", mapping/code="C0004096").
+Edge("mapping/umls_c0004096", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0004096", "onto/preferred_label", "UMLS C0004096").
+Edge("mapping/umls_c0004096", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0004096").
+Edge("mapping/umls_c0004096", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0004096", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0004096", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0004096", "mapping/scope", "exact").
+Edge("mapping/umls_c0004096", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_370143000", mapping/concept="condition/major_depressive_disorder", mapping/vocabulary="vocab/snomedct", mapping/code="370143000").
+Edge("mapping/snomedct_370143000", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_370143000", "onto/preferred_label", "SNOMED CT 370143000").
+Edge("mapping/snomedct_370143000", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=370143000").
+Edge("mapping/snomedct_370143000", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_370143000", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_370143000", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_370143000", "mapping/scope", "exact").
+Edge("mapping/snomedct_370143000", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c1269683", mapping/concept="condition/major_depressive_disorder", mapping/vocabulary="vocab/umls", mapping/code="C1269683").
+Edge("mapping/umls_c1269683", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c1269683", "onto/preferred_label", "UMLS C1269683").
+Edge("mapping/umls_c1269683", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C1269683").
+Edge("mapping/umls_c1269683", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c1269683", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c1269683", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c1269683", "mapping/scope", "exact").
+Edge("mapping/umls_c1269683", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_21897009", mapping/concept="condition/generalized_anxiety_disorder", mapping/vocabulary="vocab/snomedct", mapping/code="21897009").
+Edge("mapping/snomedct_21897009", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_21897009", "onto/preferred_label", "SNOMED CT 21897009").
+Edge("mapping/snomedct_21897009", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=21897009").
+Edge("mapping/snomedct_21897009", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_21897009", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_21897009", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_21897009", "mapping/scope", "exact").
+Edge("mapping/snomedct_21897009", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0270549", mapping/concept="condition/generalized_anxiety_disorder", mapping/vocabulary="vocab/umls", mapping/code="C0270549").
+Edge("mapping/umls_c0270549", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0270549", "onto/preferred_label", "UMLS C0270549").
+Edge("mapping/umls_c0270549", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0270549").
+Edge("mapping/umls_c0270549", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0270549", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0270549", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0270549", "mapping/scope", "exact").
+Edge("mapping/umls_c0270549", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_709044004", mapping/concept="condition/chronic_kidney_disease", mapping/vocabulary="vocab/snomedct", mapping/code="709044004").
+Edge("mapping/snomedct_709044004", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_709044004", "onto/preferred_label", "SNOMED CT 709044004").
+Edge("mapping/snomedct_709044004", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=709044004").
+Edge("mapping/snomedct_709044004", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_709044004", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_709044004", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_709044004", "mapping/scope", "exact").
+Edge("mapping/snomedct_709044004", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c1561643", mapping/concept="condition/chronic_kidney_disease", mapping/vocabulary="vocab/umls", mapping/code="C1561643").
+Edge("mapping/umls_c1561643", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c1561643", "onto/preferred_label", "UMLS C1561643").
+Edge("mapping/umls_c1561643", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C1561643").
+Edge("mapping/umls_c1561643", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c1561643", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c1561643", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c1561643", "mapping/scope", "exact").
+Edge("mapping/umls_c1561643", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_84114007", mapping/concept="condition/heart_failure", mapping/vocabulary="vocab/snomedct", mapping/code="84114007").
+Edge("mapping/snomedct_84114007", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_84114007", "onto/preferred_label", "SNOMED CT 84114007").
+Edge("mapping/snomedct_84114007", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=84114007").
+Edge("mapping/snomedct_84114007", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_84114007", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_84114007", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_84114007", "mapping/scope", "exact").
+Edge("mapping/snomedct_84114007", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0018801", mapping/concept="condition/heart_failure", mapping/vocabulary="vocab/umls", mapping/code="C0018801").
+Edge("mapping/umls_c0018801", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0018801", "onto/preferred_label", "UMLS C0018801").
+Edge("mapping/umls_c0018801", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0018801").
+Edge("mapping/umls_c0018801", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0018801", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0018801", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0018801", "mapping/scope", "exact").
+Edge("mapping/umls_c0018801", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_77386006", mapping/concept="condition/pregnancy", mapping/vocabulary="vocab/snomedct", mapping/code="77386006").
+Edge("mapping/snomedct_77386006", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_77386006", "onto/preferred_label", "SNOMED CT 77386006").
+Edge("mapping/snomedct_77386006", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=77386006").
+Edge("mapping/snomedct_77386006", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_77386006", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_77386006", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_77386006", "mapping/scope", "exact").
+Edge("mapping/snomedct_77386006", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0032961", mapping/concept="condition/pregnancy", mapping/vocabulary="vocab/umls", mapping/code="C0032961").
+Edge("mapping/umls_c0032961", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0032961", "onto/preferred_label", "UMLS C0032961").
+Edge("mapping/umls_c0032961", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0032961").
+Edge("mapping/umls_c0032961", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0032961", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0032961", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0032961", "mapping/scope", "exact").
+Edge("mapping/umls_c0032961", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_49436004", mapping/concept="condition/atrial_fibrillation", mapping/vocabulary="vocab/snomedct", mapping/code="49436004").
+Edge("mapping/snomedct_49436004", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_49436004", "onto/preferred_label", "SNOMED CT 49436004").
+Edge("mapping/snomedct_49436004", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=49436004").
+Edge("mapping/snomedct_49436004", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_49436004", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_49436004", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_49436004", "mapping/scope", "exact").
+Edge("mapping/snomedct_49436004", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0004238", mapping/concept="condition/atrial_fibrillation", mapping/vocabulary="vocab/umls", mapping/code="C0004238").
+Edge("mapping/umls_c0004238", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0004238", "onto/preferred_label", "UMLS C0004238").
+Edge("mapping/umls_c0004238", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0004238").
+Edge("mapping/umls_c0004238", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0004238", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0004238", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0004238", "mapping/scope", "exact").
+Edge("mapping/umls_c0004238", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_55822004", mapping/concept="condition/hyperlipidemia", mapping/vocabulary="vocab/snomedct", mapping/code="55822004").
+Edge("mapping/snomedct_55822004", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_55822004", "onto/preferred_label", "SNOMED CT 55822004").
+Edge("mapping/snomedct_55822004", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=55822004").
+Edge("mapping/snomedct_55822004", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_55822004", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_55822004", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_55822004", "mapping/scope", "exact").
+Edge("mapping/snomedct_55822004", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0020473", mapping/concept="condition/hyperlipidemia", mapping/vocabulary="vocab/umls", mapping/code="C0020473").
+Edge("mapping/umls_c0020473", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0020473", "onto/preferred_label", "UMLS C0020473").
+Edge("mapping/umls_c0020473", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0020473").
+Edge("mapping/umls_c0020473", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0020473", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0020473", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0020473", "mapping/scope", "exact").
+Edge("mapping/umls_c0020473", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_40930008", mapping/concept="condition/hypothyroidism", mapping/vocabulary="vocab/snomedct", mapping/code="40930008").
+Edge("mapping/snomedct_40930008", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_40930008", "onto/preferred_label", "SNOMED CT 40930008").
+Edge("mapping/snomedct_40930008", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=40930008").
+Edge("mapping/snomedct_40930008", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_40930008", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_40930008", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_40930008", "mapping/scope", "exact").
+Edge("mapping/snomedct_40930008", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0020676", mapping/concept="condition/hypothyroidism", mapping/vocabulary="vocab/umls", mapping/code="C0020676").
+Edge("mapping/umls_c0020676", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0020676", "onto/preferred_label", "UMLS C0020676").
+Edge("mapping/umls_c0020676", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0020676").
+Edge("mapping/umls_c0020676", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0020676", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0020676", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0020676", "mapping/scope", "exact").
+Edge("mapping/umls_c0020676", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_13200003", mapping/concept="condition/peptic_ulcer_disease", mapping/vocabulary="vocab/snomedct", mapping/code="13200003").
+Edge("mapping/snomedct_13200003", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_13200003", "onto/preferred_label", "SNOMED CT 13200003").
+Edge("mapping/snomedct_13200003", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=13200003").
+Edge("mapping/snomedct_13200003", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_13200003", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_13200003", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_13200003", "mapping/scope", "exact").
+Edge("mapping/snomedct_13200003", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0030920", mapping/concept="condition/peptic_ulcer_disease", mapping/vocabulary="vocab/umls", mapping/code="C0030920").
+Edge("mapping/umls_c0030920", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0030920", "onto/preferred_label", "UMLS C0030920").
+Edge("mapping/umls_c0030920", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0030920").
+Edge("mapping/umls_c0030920", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0030920", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0030920", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0030920", "mapping/scope", "exact").
+Edge("mapping/umls_c0030920", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/rxnorm_29046", mapping/concept="medication/lisinopril", mapping/vocabulary="vocab/rxnorm", mapping/code="29046").
+Edge("mapping/rxnorm_29046", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/rxnorm_29046", "onto/preferred_label", "RxNorm 29046").
+Edge("mapping/rxnorm_29046", "mapping/url", "https://rxnav.nlm.nih.gov/REST/rxcui/29046/properties.json").
+Edge("mapping/rxnorm_29046", "mapping/source", "rxnav_api_current").
+Edge("mapping/rxnorm_29046", "mapping/license_scope", "public_core_identifier").
+Edge("mapping/rxnorm_29046", "mapping/version", "rxnorm_06-Apr-2026_api-3.1.351").
+Edge("mapping/rxnorm_29046", "mapping/scope", "exact").
+Edge("mapping/rxnorm_29046", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0065374", mapping/concept="medication/lisinopril", mapping/vocabulary="vocab/umls", mapping/code="C0065374").
+Edge("mapping/umls_c0065374", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0065374", "onto/preferred_label", "UMLS C0065374").
+Edge("mapping/umls_c0065374", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0065374").
+Edge("mapping/umls_c0065374", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0065374", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0065374", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0065374", "mapping/scope", "exact").
+Edge("mapping/umls_c0065374", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/rxnorm_435", mapping/concept="medication/albuterol", mapping/vocabulary="vocab/rxnorm", mapping/code="435").
+Edge("mapping/rxnorm_435", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/rxnorm_435", "onto/preferred_label", "RxNorm 435").
+Edge("mapping/rxnorm_435", "mapping/url", "https://rxnav.nlm.nih.gov/REST/rxcui/435/properties.json").
+Edge("mapping/rxnorm_435", "mapping/source", "rxnav_api_current").
+Edge("mapping/rxnorm_435", "mapping/license_scope", "public_core_identifier").
+Edge("mapping/rxnorm_435", "mapping/version", "rxnorm_06-Apr-2026_api-3.1.351").
+Edge("mapping/rxnorm_435", "mapping/scope", "exact").
+Edge("mapping/rxnorm_435", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0001927", mapping/concept="medication/albuterol", mapping/vocabulary="vocab/umls", mapping/code="C0001927").
+Edge("mapping/umls_c0001927", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0001927", "onto/preferred_label", "UMLS C0001927").
+Edge("mapping/umls_c0001927", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0001927").
+Edge("mapping/umls_c0001927", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0001927", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0001927", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0001927", "mapping/scope", "exact").
+Edge("mapping/umls_c0001927", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_372897005", mapping/concept="medication/albuterol", mapping/vocabulary="vocab/snomedct", mapping/code="372897005").
+Edge("mapping/snomedct_372897005", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_372897005", "onto/preferred_label", "SNOMED CT 372897005").
+Edge("mapping/snomedct_372897005", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=372897005").
+Edge("mapping/snomedct_372897005", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_372897005", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_372897005", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_372897005", "mapping/scope", "related").
+Edge("mapping/snomedct_372897005", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_91143003", mapping/concept="medication/albuterol", mapping/vocabulary="vocab/snomedct", mapping/code="91143003").
+Edge("mapping/snomedct_91143003", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_91143003", "onto/preferred_label", "SNOMED CT 91143003").
+Edge("mapping/snomedct_91143003", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=91143003").
+Edge("mapping/snomedct_91143003", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_91143003", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_91143003", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_91143003", "mapping/scope", "related").
+Edge("mapping/snomedct_91143003", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/drugbank_db01001", mapping/concept="medication/albuterol", mapping/vocabulary="vocab/drugbank", mapping/code="DB01001").
+Edge("mapping/drugbank_db01001", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/drugbank_db01001", "onto/preferred_label", "DrugBank DB01001").
+Edge("mapping/drugbank_db01001", "mapping/url", "https://go.drugbank.com/drugs/DB01001").
+Edge("mapping/drugbank_db01001", "mapping/source", "drugbank_public_drug_page").
+Edge("mapping/drugbank_db01001", "mapping/license_scope", "identifier_provenance_only").
+Edge("mapping/drugbank_db01001", "mapping/version", "drugbank_public_page_accessed_2026-04-22").
+Edge("mapping/drugbank_db01001", "mapping/scope", "exact").
+Edge("mapping/drugbank_db01001", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/rxnorm_36437", mapping/concept="medication/sertraline", mapping/vocabulary="vocab/rxnorm", mapping/code="36437").
+Edge("mapping/rxnorm_36437", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/rxnorm_36437", "onto/preferred_label", "RxNorm 36437").
+Edge("mapping/rxnorm_36437", "mapping/url", "https://rxnav.nlm.nih.gov/REST/rxcui/36437/properties.json").
+Edge("mapping/rxnorm_36437", "mapping/source", "rxnav_api_current").
+Edge("mapping/rxnorm_36437", "mapping/license_scope", "public_core_identifier").
+Edge("mapping/rxnorm_36437", "mapping/version", "rxnorm_06-Apr-2026_api-3.1.351").
+Edge("mapping/rxnorm_36437", "mapping/scope", "exact").
+Edge("mapping/rxnorm_36437", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0074393", mapping/concept="medication/sertraline", mapping/vocabulary="vocab/umls", mapping/code="C0074393").
+Edge("mapping/umls_c0074393", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0074393", "onto/preferred_label", "UMLS C0074393").
+Edge("mapping/umls_c0074393", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0074393").
+Edge("mapping/umls_c0074393", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0074393", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0074393", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0074393", "mapping/scope", "exact").
+Edge("mapping/umls_c0074393", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/rxnorm_83367", mapping/concept="medication/atorvastatin", mapping/vocabulary="vocab/rxnorm", mapping/code="83367").
+Edge("mapping/rxnorm_83367", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/rxnorm_83367", "onto/preferred_label", "RxNorm 83367").
+Edge("mapping/rxnorm_83367", "mapping/url", "https://rxnav.nlm.nih.gov/REST/rxcui/83367/properties.json").
+Edge("mapping/rxnorm_83367", "mapping/source", "rxnav_api_current").
+Edge("mapping/rxnorm_83367", "mapping/license_scope", "public_core_identifier").
+Edge("mapping/rxnorm_83367", "mapping/version", "rxnorm_06-Apr-2026_api-3.1.351").
+Edge("mapping/rxnorm_83367", "mapping/scope", "exact").
+Edge("mapping/rxnorm_83367", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0286651", mapping/concept="medication/atorvastatin", mapping/vocabulary="vocab/umls", mapping/code="C0286651").
+Edge("mapping/umls_c0286651", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0286651", "onto/preferred_label", "UMLS C0286651").
+Edge("mapping/umls_c0286651", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0286651").
+Edge("mapping/umls_c0286651", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0286651", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0286651", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0286651", "mapping/scope", "exact").
+Edge("mapping/umls_c0286651", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/rxnorm_11289", mapping/concept="medication/warfarin", mapping/vocabulary="vocab/rxnorm", mapping/code="11289").
+Edge("mapping/rxnorm_11289", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/rxnorm_11289", "onto/preferred_label", "RxNorm 11289").
+Edge("mapping/rxnorm_11289", "mapping/url", "https://rxnav.nlm.nih.gov/REST/rxcui/11289/properties.json").
+Edge("mapping/rxnorm_11289", "mapping/source", "rxnav_api_current").
+Edge("mapping/rxnorm_11289", "mapping/license_scope", "public_core_identifier").
+Edge("mapping/rxnorm_11289", "mapping/version", "rxnorm_06-Apr-2026_api-3.1.351").
+Edge("mapping/rxnorm_11289", "mapping/scope", "exact").
+Edge("mapping/rxnorm_11289", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0043031", mapping/concept="medication/warfarin", mapping/vocabulary="vocab/umls", mapping/code="C0043031").
+Edge("mapping/umls_c0043031", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0043031", "onto/preferred_label", "UMLS C0043031").
+Edge("mapping/umls_c0043031", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0043031").
+Edge("mapping/umls_c0043031", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0043031", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0043031", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0043031", "mapping/scope", "exact").
+Edge("mapping/umls_c0043031", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/rxnorm_5640", mapping/concept="medication/ibuprofen", mapping/vocabulary="vocab/rxnorm", mapping/code="5640").
+Edge("mapping/rxnorm_5640", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/rxnorm_5640", "onto/preferred_label", "RxNorm 5640").
+Edge("mapping/rxnorm_5640", "mapping/url", "https://rxnav.nlm.nih.gov/REST/rxcui/5640/properties.json").
+Edge("mapping/rxnorm_5640", "mapping/source", "rxnav_api_current").
+Edge("mapping/rxnorm_5640", "mapping/license_scope", "public_core_identifier").
+Edge("mapping/rxnorm_5640", "mapping/version", "rxnorm_06-Apr-2026_api-3.1.351").
+Edge("mapping/rxnorm_5640", "mapping/scope", "exact").
+Edge("mapping/rxnorm_5640", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0020740", mapping/concept="medication/ibuprofen", mapping/vocabulary="vocab/umls", mapping/code="C0020740").
+Edge("mapping/umls_c0020740", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0020740", "onto/preferred_label", "UMLS C0020740").
+Edge("mapping/umls_c0020740", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0020740").
+Edge("mapping/umls_c0020740", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0020740", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0020740", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0020740", "mapping/scope", "exact").
+Edge("mapping/umls_c0020740", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/rxnorm_7646", mapping/concept="medication/omeprazole", mapping/vocabulary="vocab/rxnorm", mapping/code="7646").
+Edge("mapping/rxnorm_7646", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/rxnorm_7646", "onto/preferred_label", "RxNorm 7646").
+Edge("mapping/rxnorm_7646", "mapping/url", "https://rxnav.nlm.nih.gov/REST/rxcui/7646/properties.json").
+Edge("mapping/rxnorm_7646", "mapping/source", "rxnav_api_current").
+Edge("mapping/rxnorm_7646", "mapping/license_scope", "public_core_identifier").
+Edge("mapping/rxnorm_7646", "mapping/version", "rxnorm_06-Apr-2026_api-3.1.351").
+Edge("mapping/rxnorm_7646", "mapping/scope", "exact").
+Edge("mapping/rxnorm_7646", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0028978", mapping/concept="medication/omeprazole", mapping/vocabulary="vocab/umls", mapping/code="C0028978").
+Edge("mapping/umls_c0028978", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0028978", "onto/preferred_label", "UMLS C0028978").
+Edge("mapping/umls_c0028978", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0028978").
+Edge("mapping/umls_c0028978", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0028978", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0028978", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0028978", "mapping/scope", "exact").
+Edge("mapping/umls_c0028978", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/rxnorm_274783", mapping/concept="medication/insulin_glargine", mapping/vocabulary="vocab/rxnorm", mapping/code="274783").
+Edge("mapping/rxnorm_274783", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/rxnorm_274783", "onto/preferred_label", "RxNorm 274783").
+Edge("mapping/rxnorm_274783", "mapping/url", "https://rxnav.nlm.nih.gov/REST/rxcui/274783/properties.json").
+Edge("mapping/rxnorm_274783", "mapping/source", "rxnav_api_current").
+Edge("mapping/rxnorm_274783", "mapping/license_scope", "public_core_identifier").
+Edge("mapping/rxnorm_274783", "mapping/version", "rxnorm_06-Apr-2026_api-3.1.351").
+Edge("mapping/rxnorm_274783", "mapping/scope", "exact").
+Edge("mapping/rxnorm_274783", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/atc_a10ae04", mapping/concept="medication/insulin_glargine", mapping/vocabulary="vocab/atc", mapping/code="A10AE04").
+Edge("mapping/atc_a10ae04", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/atc_a10ae04", "onto/preferred_label", "ATC A10AE04").
+Edge("mapping/atc_a10ae04", "mapping/url", "https://atcddd.fhi.no/atc_ddd_index/?code=A10AE04").
+Edge("mapping/atc_a10ae04", "mapping/source", "whocc_fhi_atc_ddd_index").
+Edge("mapping/atc_a10ae04", "mapping/license_scope", "public_classifier_link").
+Edge("mapping/atc_a10ae04", "mapping/version", "atc_ddd_guidelines_2026").
+Edge("mapping/atc_a10ae04", "mapping/scope", "exact").
+Edge("mapping/atc_a10ae04", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_126212009", mapping/concept="medication/insulin_glargine", mapping/vocabulary="vocab/snomedct", mapping/code="126212009").
+Edge("mapping/snomedct_126212009", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_126212009", "onto/preferred_label", "SNOMED CT 126212009").
+Edge("mapping/snomedct_126212009", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=126212009").
+Edge("mapping/snomedct_126212009", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_126212009", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_126212009", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_126212009", "mapping/scope", "related").
+Edge("mapping/snomedct_126212009", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_411529005", mapping/concept="medication/insulin_glargine", mapping/vocabulary="vocab/snomedct", mapping/code="411529005").
+Edge("mapping/snomedct_411529005", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_411529005", "onto/preferred_label", "SNOMED CT 411529005").
+Edge("mapping/snomedct_411529005", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=411529005").
+Edge("mapping/snomedct_411529005", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_411529005", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_411529005", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_411529005", "mapping/scope", "related").
+Edge("mapping/snomedct_411529005", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/drugbank_db00047", mapping/concept="medication/insulin_glargine", mapping/vocabulary="vocab/drugbank", mapping/code="DB00047").
+Edge("mapping/drugbank_db00047", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/drugbank_db00047", "onto/preferred_label", "DrugBank DB00047").
+Edge("mapping/drugbank_db00047", "mapping/url", "https://go.drugbank.com/drugs/DB00047").
+Edge("mapping/drugbank_db00047", "mapping/source", "drugbank_public_drug_page").
+Edge("mapping/drugbank_db00047", "mapping/license_scope", "identifier_provenance_only").
+Edge("mapping/drugbank_db00047", "mapping/version", "drugbank_public_page_accessed_2026-04-22").
+Edge("mapping/drugbank_db00047", "mapping/scope", "exact").
+Edge("mapping/drugbank_db00047", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/rxnorm_10582", mapping/concept="medication/levothyroxine", mapping/vocabulary="vocab/rxnorm", mapping/code="10582").
+Edge("mapping/rxnorm_10582", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/rxnorm_10582", "onto/preferred_label", "RxNorm 10582").
+Edge("mapping/rxnorm_10582", "mapping/url", "https://rxnav.nlm.nih.gov/REST/rxcui/10582/properties.json").
+Edge("mapping/rxnorm_10582", "mapping/source", "rxnav_api_current").
+Edge("mapping/rxnorm_10582", "mapping/license_scope", "public_core_identifier").
+Edge("mapping/rxnorm_10582", "mapping/version", "rxnorm_06-Apr-2026_api-3.1.351").
+Edge("mapping/rxnorm_10582", "mapping/scope", "exact").
+Edge("mapping/rxnorm_10582", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0040165", mapping/concept="medication/levothyroxine", mapping/vocabulary="vocab/umls", mapping/code="C0040165").
+Edge("mapping/umls_c0040165", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0040165", "onto/preferred_label", "UMLS C0040165").
+Edge("mapping/umls_c0040165", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0040165").
+Edge("mapping/umls_c0040165", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0040165", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0040165", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0040165", "mapping/scope", "exact").
+Edge("mapping/umls_c0040165", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/rxnorm_1364430", mapping/concept="medication/apixaban", mapping/vocabulary="vocab/rxnorm", mapping/code="1364430").
+Edge("mapping/rxnorm_1364430", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/rxnorm_1364430", "onto/preferred_label", "RxNorm 1364430").
+Edge("mapping/rxnorm_1364430", "mapping/url", "https://rxnav.nlm.nih.gov/REST/rxcui/1364430/properties.json").
+Edge("mapping/rxnorm_1364430", "mapping/source", "rxnav_api_current").
+Edge("mapping/rxnorm_1364430", "mapping/license_scope", "public_core_identifier").
+Edge("mapping/rxnorm_1364430", "mapping/version", "rxnorm_06-Apr-2026_api-3.1.351").
+Edge("mapping/rxnorm_1364430", "mapping/scope", "exact").
+Edge("mapping/rxnorm_1364430", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/atc_b01af02", mapping/concept="medication/apixaban", mapping/vocabulary="vocab/atc", mapping/code="B01AF02").
+Edge("mapping/atc_b01af02", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/atc_b01af02", "onto/preferred_label", "ATC B01AF02").
+Edge("mapping/atc_b01af02", "mapping/url", "https://atcddd.fhi.no/atc_ddd_index/?code=B01AF02").
+Edge("mapping/atc_b01af02", "mapping/source", "whocc_fhi_atc_ddd_index").
+Edge("mapping/atc_b01af02", "mapping/license_scope", "public_classifier_link").
+Edge("mapping/atc_b01af02", "mapping/version", "atc_ddd_guidelines_2026").
+Edge("mapping/atc_b01af02", "mapping/scope", "exact").
+Edge("mapping/atc_b01af02", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_698090000", mapping/concept="medication/apixaban", mapping/vocabulary="vocab/snomedct", mapping/code="698090000").
+Edge("mapping/snomedct_698090000", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_698090000", "onto/preferred_label", "SNOMED CT 698090000").
+Edge("mapping/snomedct_698090000", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=698090000").
+Edge("mapping/snomedct_698090000", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_698090000", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_698090000", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_698090000", "mapping/scope", "related").
+Edge("mapping/snomedct_698090000", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/snomedct_703906002", mapping/concept="medication/apixaban", mapping/vocabulary="vocab/snomedct", mapping/code="703906002").
+Edge("mapping/snomedct_703906002", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/snomedct_703906002", "onto/preferred_label", "SNOMED CT 703906002").
+Edge("mapping/snomedct_703906002", "mapping/url", "https://browser.ihtsdotools.org/?perspective=full&conceptId1=703906002").
+Edge("mapping/snomedct_703906002", "mapping/source", "snomedct_browser_current").
+Edge("mapping/snomedct_703906002", "mapping/license_scope", "license_aware_edition_sensitive_link").
+Edge("mapping/snomedct_703906002", "mapping/version", "snomedct_browser_accessed_2026-04-22").
+Edge("mapping/snomedct_703906002", "mapping/scope", "related").
+Edge("mapping/snomedct_703906002", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/drugbank_db06605", mapping/concept="medication/apixaban", mapping/vocabulary="vocab/drugbank", mapping/code="DB06605").
+Edge("mapping/drugbank_db06605", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/drugbank_db06605", "onto/preferred_label", "DrugBank DB06605").
+Edge("mapping/drugbank_db06605", "mapping/url", "https://go.drugbank.com/drugs/DB06605").
+Edge("mapping/drugbank_db06605", "mapping/source", "drugbank_public_drug_page").
+Edge("mapping/drugbank_db06605", "mapping/license_scope", "identifier_provenance_only").
+Edge("mapping/drugbank_db06605", "mapping/version", "drugbank_public_page_accessed_2026-04-22").
+Edge("mapping/drugbank_db06605", "mapping/scope", "exact").
+Edge("mapping/drugbank_db06605", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/rxnorm_4493", mapping/concept="medication/fluoxetine", mapping/vocabulary="vocab/rxnorm", mapping/code="4493").
+Edge("mapping/rxnorm_4493", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/rxnorm_4493", "onto/preferred_label", "RxNorm 4493").
+Edge("mapping/rxnorm_4493", "mapping/url", "https://rxnav.nlm.nih.gov/REST/rxcui/4493/properties.json").
+Edge("mapping/rxnorm_4493", "mapping/source", "rxnav_api_current").
+Edge("mapping/rxnorm_4493", "mapping/license_scope", "public_core_identifier").
+Edge("mapping/rxnorm_4493", "mapping/version", "rxnorm_06-Apr-2026_api-3.1.351").
+Edge("mapping/rxnorm_4493", "mapping/scope", "exact").
+Edge("mapping/rxnorm_4493", "mapping/as_of_date", "2026-04-22").
+
+ExternalMapping@(cid="mapping/umls_c0016365", mapping/concept="medication/fluoxetine", mapping/vocabulary="vocab/umls", mapping/code="C0016365").
+Edge("mapping/umls_c0016365", "onto/instance_of", "class/ExternalMapping").
+Edge("mapping/umls_c0016365", "onto/preferred_label", "UMLS C0016365").
+Edge("mapping/umls_c0016365", "mapping/url", "https://uts.nlm.nih.gov/uts/umls/concept/C0016365").
+Edge("mapping/umls_c0016365", "mapping/source", "uts_current_concept").
+Edge("mapping/umls_c0016365", "mapping/license_scope", "uts_restricted_identifier_link").
+Edge("mapping/umls_c0016365", "mapping/version", "uts_current_accessed_2026-04-22").
+Edge("mapping/umls_c0016365", "mapping/scope", "exact").
+Edge("mapping/umls_c0016365", "mapping/as_of_date", "2026-04-22").
+
+% === User assertion layer notes ===
+% The UserConditionAssertion, UserMedicationAssertion, UserIndicationMatch, and UserContraindicationRisk compounds are defined in 0001.
+% Keep user observations separate from canonical ontology facts so consent, provenance, episode boundaries, and review status can be modeled explicitly.
+% Example assertion shape, intentionally commented out:
+% UserConditionAssertion@(cid="user_condition/user_123/episode_2026/type_2_diabetes", user/profile="user/123", user/episode="episode/2026", clinical/condition="condition/type_2_diabetes").
+% Edge("user_condition/user_123/episode_2026/type_2_diabetes", "user/status", "active").
+% Edge("user_condition/user_123/episode_2026/type_2_diabetes", "user/source", "ehr_problem_list").
