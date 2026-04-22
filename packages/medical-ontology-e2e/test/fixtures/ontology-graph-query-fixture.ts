@@ -1,118 +1,55 @@
-import { applyDatalogFacts } from '@datalog/datalog-to-sql';
-import { describe, expect, it } from 'vitest';
+import type {
+  DatalogConstantTerm,
+  DatalogFact,
+  DatalogVariableTerm,
+  EdgeFactPattern,
+  SelectFactsOperation,
+  SelectVertexByIdOperation,
+} from '@datalog/datalog-to-sql';
 
-import {
-  createOntologyLivePostgresProofFixture,
-  executeOntologyGraphQuery,
-} from './fixtures/ontology-live-postgres-proof-fixture.js';
+type GraphConstant = DatalogConstantTerm;
+type GraphVariable = DatalogVariableTerm;
+type GraphTerm = GraphConstant | GraphVariable;
+type GraphEdgeMatch = EdgeFactPattern;
 
-describe('ontology live postgres e2e', () => {
-  it('proves committed ontology migrations connect clinical concepts across vocabularies and user-tagged graph facts through localhost postgres', async () => {
-    const fixture = await createOntologyLivePostgresProofFixture();
+function graphConstant(value: string): GraphConstant {
+  return { kind: 'constant', value } as const;
+}
 
-    try {
-      await applyDatalogFacts({
-        sql: fixture.sql,
-        mode: 'insert-facts',
-        facts: createSyntheticUserTagFacts(),
-      });
+function graphVariable(name: string): GraphVariable {
+  return { kind: 'variable', name } as const;
+}
 
-      const medicationCrosswalkResult = await executeOntologyGraphQuery<{
-        medication_label: string;
-        rxnorm_label: string;
-        umls_label: string;
-        drugbank_label: string;
-      }>(fixture.sql, createMedicationCrosswalkOperation());
-      const conditionCrosswalkResult = await executeOntologyGraphQuery<{
-        condition_label: string;
-        snomed_label: string;
-        umls_label: string;
-      }>(fixture.sql, createConditionCrosswalkOperation());
-      const drugClassResult = await executeOntologyGraphQuery<{
-        medication_label: string;
-        drug_class_label: string;
-      }>(fixture.sql, createDrugClassOperation());
-      const userTagConnectivityResult = await executeOntologyGraphQuery<{
-        episode: string;
-        medication: string;
-        condition: string;
-        medication_label: string;
-        condition_label: string;
-        drug_class_label: string;
-      }>(fixture.sql, createUserTagConnectivityOperation());
+function graphEdge(
+  subject: GraphTerm,
+  predicate: string,
+  object: GraphTerm,
+): GraphEdgeMatch {
+  return {
+    kind: 'edge',
+    subject,
+    predicate: graphConstant(predicate),
+    object,
+  } as const;
+}
 
-      expect(fixture.committedFileNames).toEqual([
-        '20260422.0001.ontology-foundation.dl',
-        '20260422.0002.ontology-core-concepts.dl',
-        '20260422.0003.ontology-clinical-relationships.dl',
-        '20260422.0004.ontology-mappings-and-tags.dl',
-      ]);
-      expect(medicationCrosswalkResult).toEqual([
-        {
-          medication_label: 'Metformin',
-          rxnorm_label: 'RxNorm 6809',
-          umls_label: 'UMLS C0025598',
-          drugbank_label: 'DrugBank DB00331',
-        },
-      ]);
-      expect(conditionCrosswalkResult).toEqual([
-        {
-          condition_label: 'Type 2 Diabetes Mellitus',
-          snomed_label: 'SNOMED CT 44054006',
-          umls_label: 'UMLS C0011860',
-        },
-      ]);
-      expect(drugClassResult).toEqual([
-        {
-          medication_label: 'Apixaban',
-          drug_class_label: 'Factor Xa Inhibitor',
-        },
-      ]);
-      expect(userTagConnectivityResult).toEqual([
-        {
-          episode: 'episode/synthetic-hypertension-visit',
-          medication: 'medication/lisinopril',
-          condition: 'condition/hypertension',
-          medication_label: 'Lisinopril',
-          condition_label: 'Hypertension',
-          drug_class_label: 'ACE Inhibitor',
-        },
-      ]);
-    } finally {
-      await fixture.cleanup();
-    }
-  });
+export function createVertexByIdOperation(vertexId: string): SelectVertexByIdOperation {
+  return {
+    kind: 'select-vertex-by-id',
+    vertexId,
+  } as const;
+}
 
-  it('proves broken cross-vocabulary state after load is observable through the same translated query flow', async () => {
-    const fixture = await createOntologyLivePostgresProofFixture();
+export function createPreferredLabelOperation(subjectId: string, variableName = 'label'): SelectFactsOperation {
+  return {
+    kind: 'select-facts',
+    match: [
+      graphEdge(graphConstant(subjectId), 'onto/preferred_label', graphVariable(variableName)),
+    ],
+  } as const;
+}
 
-    try {
-      await applyDatalogFacts({
-        sql: fixture.sql,
-        mode: 'delete-facts',
-        facts: [{
-          kind: 'edge',
-          subjectId: 'medication/metformin',
-          predicateId: 'med/has_mapping',
-          objectId: 'mapping/rxnorm_6809',
-        }],
-      });
-
-      const result = await executeOntologyGraphQuery<{
-        medication_label: string;
-        rxnorm_label: string;
-        umls_label: string;
-        drugbank_label: string;
-      }>(fixture.sql, createMedicationCrosswalkOperation());
-
-      expect(result).toHaveLength(0);
-    } finally {
-      await fixture.cleanup();
-    }
-  });
-});
-
-function createMedicationCrosswalkOperation() {
+export function createMedicationCrosswalkOperation(): SelectFactsOperation {
   return {
     kind: 'select-facts',
     match: [
@@ -127,7 +64,7 @@ function createMedicationCrosswalkOperation() {
   } as const;
 }
 
-function createConditionCrosswalkOperation() {
+export function createConditionCrosswalkOperation(): SelectFactsOperation {
   return {
     kind: 'select-facts',
     match: [
@@ -140,7 +77,7 @@ function createConditionCrosswalkOperation() {
   } as const;
 }
 
-function createDrugClassOperation() {
+export function createDrugClassOperation(): SelectFactsOperation {
   return {
     kind: 'select-facts',
     match: [
@@ -151,7 +88,7 @@ function createDrugClassOperation() {
   } as const;
 }
 
-function createUserTagConnectivityOperation() {
+export function createUserTagConnectivityOperation(): SelectFactsOperation {
   return {
     kind: 'select-facts',
     match: [
@@ -171,7 +108,7 @@ function createUserTagConnectivityOperation() {
   } as const;
 }
 
-function createSyntheticUserTagFacts() {
+export function createSyntheticUserTagFacts(): readonly [DatalogFact, ...DatalogFact[]] {
   return [
     { kind: 'vertex', id: 'user/synthetic-demo' },
     { kind: 'vertex', id: 'episode/synthetic-hypertension-visit' },
@@ -193,25 +130,4 @@ function createSyntheticUserTagFacts() {
     { kind: 'edge', subjectId: 'tag/user-condition-hypertension', predicateId: 'status', objectId: 'status/active' },
     { kind: 'edge', subjectId: 'tag/user-condition-hypertension', predicateId: 'source', objectId: 'source/manual-review' },
   ] as const;
-}
-
-function graphConstant(value: string) {
-  return { kind: 'constant', value } as const;
-}
-
-function graphVariable(name: string) {
-  return { kind: 'variable', name } as const;
-}
-
-function graphEdge(
-  subject: ReturnType<typeof graphConstant> | ReturnType<typeof graphVariable>,
-  predicate: string,
-  object: ReturnType<typeof graphConstant> | ReturnType<typeof graphVariable>,
-) {
-  return {
-    kind: 'edge',
-    subject,
-    predicate: graphConstant(predicate),
-    object,
-  } as const;
 }
