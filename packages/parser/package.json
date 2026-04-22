@@ -1,7 +1,10 @@
 {
   "name": "@datalog/parser",
   "version": "0.0.0",
-  "private": true,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
