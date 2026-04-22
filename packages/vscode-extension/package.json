@@ -1,0 +1,72 @@
+{
+  "name": "@datalog/vscode-extension",
+  "displayName": "Datalog Graph Language Support",
+  "description": "Syntax highlighting and language support for graph-oriented Datalog (.dl).",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./out/extension.js",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:datalog"
+  ],
+  "files": [
+    "out/**",
+    "syntaxes/**",
+    "language-configuration.json",
+    "package.json"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "datalog",
+        "aliases": [
+          "Datalog",
+          "datalog"
+        ],
+        "extensions": [
+          ".dl"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "datalog",
+        "scopeName": "source.datalog",
+        "path": "./syntaxes/datalog.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsc -b ./tsconfig.build.json",
+    "lint": "eslint --max-warnings=0 .",
+    "package": "yarn workspace @datalog/parser build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/create-package-stage.mjs",
+    "smoke": "yarn workspace @datalog/parser build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/run-smoke.mjs",
+    "smoke:broken": "yarn workspace @datalog/parser build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/run-smoke.mjs --broken",
+    "typecheck": "tsc -p ./tsconfig.build.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
+    "test": "vitest run --config ./vitest.config.ts"
+  },
+  "dependencies": {
+    "@datalog/lsp": "workspace:*",
+    "vscode-languageclient": "^9.0.0"
+  },
+  "peerDependencies": {
+    "vscode": "^1.85.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.36.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vite": "^6.0.0",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "folders": [
+    {
+      "name": "datalog (main)",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "git.detectWorktrees": true,
+    "scm.alwaysShowRepositories": true,
+    "scm.repositories.selectionMode": "multiple",
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports": "never"
+    },
+    "eslint.workingDirectories": [
+      { "mode": "auto" }
+    ],
+    "prettier.configPath": ".prettierrc",
+    "window.title": "${rootPath} — Datalog"
+  },
+  "extensions": {
+    "recommendations": [
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "ms-playwright.playwright",
+      "firsttris.vscode-jest-runner",
+      "jackiotyu.git-worktree-manager"
+    ]
+  }
+}

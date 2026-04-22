@@ -1,0 +1,41 @@
+{
+  "name": "@datalog/datalog-to-sql",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "benchmark:recursive-closure": "yarn workspace @datalog/parser build && tsc -b ./tsconfig.lib.json && node ./dist/benchmarks/run-recursive-closure-benchmark.js",
+    "benchmark:recursive-closure:validate": "yarn workspace @datalog/parser build && tsc -b ./tsconfig.lib.json && node ./dist/benchmarks/run-recursive-closure-benchmark.js --validate",
+    "build": "yarn workspace @datalog/parser build && tsc -b ./tsconfig.lib.json",
+    "lint": "eslint --max-warnings=0 .",
+    "typecheck": "yarn workspace @datalog/parser build && tsc -p ./tsconfig.lib.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
+    "test": "yarn workspace @datalog/parser build && vitest run --config ./vitest.config.ts"
+  },
+  "dependencies": {
+    "@datalog/parser": "workspace:*",
+    "postgres": "^3.4.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.36.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vite": "^6.0.0",
+    "vitest": "^3.2.4"
+  }
+}

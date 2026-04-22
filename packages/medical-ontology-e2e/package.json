@@ -1,0 +1,39 @@
+{
+  "name": "@datalog/medical-ontology-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "lint": "eslint --max-warnings=0 .",
+    "typecheck": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && tsc -p ./tsconfig.lib.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
+    "build": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && tsc -b ./tsconfig.lib.json",
+    "test": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && vitest run --config ./vitest.config.ts"
+  },
+  "dependencies": {
+    "@datalog/parser": "workspace:*"
+  },
+  "devDependencies": {
+    "@datalog/datalog-to-sql": "workspace:*",
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.36.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vite": "^6.0.0",
+    "vitest": "^3.2.4"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  }
+}

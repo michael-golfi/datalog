@@ -1,0 +1,26 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/parser"
+    },
+    {
+      "path": "./packages/datalog-to-sql"
+    },
+    {
+      "path": "./packages/lsp"
+    },
+    {
+      "path": "./packages/vscode-extension"
+    },
+    {
+      "path": "./packages/medical-ontology-e2e"
+    },
+    {
+      "path": "./packages/eslint-plugin-datalog"
+    },
+    {
+      "path": "./packages/eslint-plugin-typescript"
+    }
+  ]
+}

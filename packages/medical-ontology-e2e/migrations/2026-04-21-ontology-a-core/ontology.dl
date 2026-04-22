@@ -1,0 +1,26 @@
+ClinicalConcept@(concept/id="concept/acetaminophen", concept/kind="ingredient", concept/preferred_label="Acetaminophen").
+ClinicalConcept@(concept/id="concept/acetaminophen-500mg-oral-tablet", concept/kind="medication-product", concept/preferred_label="Acetaminophen 500 MG Oral Tablet").
+MedicationPresentation@(presentation/id="presentation/acetaminophen-500mg-oral-tablet", presentation/product="concept/acetaminophen-500mg-oral-tablet", presentation/dose_form="concept/oral-tablet", presentation/preferred_label="Acetaminophen 500 MG Oral Tablet").
+ForeignIdentifier@(foreign/id="foreign-id/rxnorm-rxcui-161", foreign/canonical="concept/acetaminophen", foreign/source_graph="source-graph/rxnorm", foreign/source_value="rxnorm/rxcui/161").
+ForeignIdentifier@(foreign/id="foreign-id/rxnorm-rxcui-1049630", foreign/canonical="concept/acetaminophen-500mg-oral-tablet", foreign/source_graph="source-graph/rxnorm", foreign/source_value="rxnorm/rxcui/1049630").
+IngredientStrengthRelation@(relation/id="relation/acetaminophen-500mg-tablet-ingredient", relation/product="concept/acetaminophen-500mg-oral-tablet", relation/ingredient="concept/acetaminophen", relation/strength_value="quantity/500", relation/strength_unit="unit/mg", relation/dose_form="concept/oral-tablet").
+
+Edge("concept/acetaminophen", "graph/preferred_label", "Acetaminophen").
+Edge("concept/acetaminophen-500mg-oral-tablet", "graph/preferred_label", "Acetaminophen 500 MG Oral Tablet").
+Edge("concept/oral-tablet", "graph/preferred_label", "Oral Tablet").
+Edge("source-graph/rxnorm", "graph/preferred_label", "RxNorm").
+Edge("quantity/500", "graph/preferred_label", "500").
+Edge("unit/mg", "graph/preferred_label", "mg").
+Edge("concept/acetaminophen", "graph/has_foreign_identifier", "foreign-id/rxnorm-rxcui-161").
+Edge("concept/acetaminophen-500mg-oral-tablet", "graph/has_foreign_identifier", "foreign-id/rxnorm-rxcui-1049630").
+Edge("foreign-id/rxnorm-rxcui-161", "graph/in_source_graph", "source-graph/rxnorm").
+Edge("foreign-id/rxnorm-rxcui-1049630", "graph/in_source_graph", "source-graph/rxnorm").
+Edge("foreign-id/rxnorm-rxcui-161", "graph/has_source_value", "rxnorm/rxcui/161").
+Edge("foreign-id/rxnorm-rxcui-1049630", "graph/has_source_value", "rxnorm/rxcui/1049630").
+Edge("concept/acetaminophen-500mg-oral-tablet", "graph/has_presentation", "presentation/acetaminophen-500mg-oral-tablet").
+Edge("concept/acetaminophen-500mg-oral-tablet", "graph/has_ingredient_relation", "relation/acetaminophen-500mg-tablet-ingredient").
+Edge("relation/acetaminophen-500mg-tablet-ingredient", "graph/relation_product", "concept/acetaminophen-500mg-oral-tablet").
+Edge("relation/acetaminophen-500mg-tablet-ingredient", "graph/relation_ingredient", "concept/acetaminophen").
+Edge("relation/acetaminophen-500mg-tablet-ingredient", "graph/relation_strength_value", "quantity/500").
+Edge("relation/acetaminophen-500mg-tablet-ingredient", "graph/relation_strength_unit", "unit/mg").
+Edge("relation/acetaminophen-500mg-tablet-ingredient", "graph/relation_dose_form", "concept/oral-tablet").

@@ -1,0 +1,31 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "./out-tsc/vitest",
+    "paths": {
+      "@datalog/parser": [
+        "../parser/src/index.ts"
+      ]
+    },
+    "types": [
+      "vitest/globals",
+      "vitest/importMeta",
+      "vite/client",
+      "node",
+      "vitest"
+    ]
+  },
+  "references": [
+    {
+      "path": "../parser/tsconfig.lib.json"
+    }
+  ],
+  "include": [
+    "vitest.config.ts",
+    "src/**/*.ts",
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}

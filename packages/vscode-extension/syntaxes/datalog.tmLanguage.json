@@ -1,0 +1,78 @@
+{
+  "name": "Datalog",
+  "scopeName": "source.datalog",
+  "fileTypes": [
+    "dl"
+  ],
+  "patterns": [
+    {
+      "include": "#comment"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#compound"
+    },
+    {
+      "include": "#predicate"
+    },
+    {
+      "include": "#variable"
+    }
+  ],
+  "repository": {
+    "comment": {
+      "patterns": [
+        {
+          "name": "comment.line.percentage.datalog",
+          "match": "^\\s*(%).*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.datalog",
+          "begin": "\"",
+          "end": "\""
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.operator.rule.datalog",
+          "match": ":-|@"
+        }
+      ]
+    },
+    "compound": {
+      "patterns": [
+        {
+          "name": "variable.parameter.datalog",
+          "match": "\\b[a-z][a-z0-9_/-]*(?==)"
+        }
+      ]
+    },
+    "predicate": {
+      "patterns": [
+        {
+          "name": "entity.name.function.datalog",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=@?\\()"
+        }
+      ]
+    },
+    "variable": {
+      "patterns": [
+        {
+          "name": "variable.other.datalog",
+          "match": "\\b[a-z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    }
+  }
+}

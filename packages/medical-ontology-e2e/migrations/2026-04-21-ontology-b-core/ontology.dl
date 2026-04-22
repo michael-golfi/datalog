@@ -1,0 +1,7 @@
+ClinicalConcept@(concept/id="concept/acetaminophen", concept/kind="ingredient", concept/preferred_label="Acetaminophen").
+ForeignIdentifier@(foreign/id="foreign-id/umls-cui-C0000970", foreign/canonical="concept/acetaminophen", foreign/source_graph="source-graph/umls", foreign/source_value="umls/cui/C0000970").
+
+Edge("source-graph/umls", "graph/preferred_label", "UMLS").
+Edge("concept/acetaminophen", "graph/has_foreign_identifier", "foreign-id/umls-cui-C0000970").
+Edge("foreign-id/umls-cui-C0000970", "graph/in_source_graph", "source-graph/umls").
+Edge("foreign-id/umls-cui-C0000970", "graph/has_source_value", "umls/cui/C0000970").
