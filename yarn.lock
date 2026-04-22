@@ -180,7 +180,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@datalog/datalog-to-sql@workspace:packages/datalog-to-sql":
+"@datalog/datalog-migrate@workspace:*, @datalog/datalog-migrate@workspace:packages/datalog-migrate":
+  version: 0.0.0-use.local
+  resolution: "@datalog/datalog-migrate@workspace:packages/datalog-migrate"
+  dependencies:
+    "@datalog/datalog-to-sql": "workspace:*"
+    "@eslint/js": "npm:^9.39.1"
+    "@types/node": "npm:^24.10.1"
+    eslint: "npm:^9.36.0"
+    typescript: "npm:^5.9.3"
+    typescript-eslint: "npm:^8.46.3"
+    vite: "npm:^6.0.0"
+    vitest: "npm:^3.2.4"
+  bin:
+    datalog-migrate-commit: ./dist/commit-current-datalog-migration.js
+    datalog-migrate-status: ./dist/status-datalog-migration.js
+    datalog-migrate-uncommit: ./dist/uncommit-datalog-migration.js
+    datalog-migrate-watch: ./dist/watch-current-datalog-migration.js
+  languageName: unknown
+  linkType: soft
+
+"@datalog/datalog-to-sql@workspace:*, @datalog/datalog-to-sql@workspace:packages/datalog-to-sql":
   version: 0.0.0-use.local
   resolution: "@datalog/datalog-to-sql@workspace:packages/datalog-to-sql"
   dependencies:
@@ -244,6 +264,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@datalog/medical-ontology-e2e@workspace:packages/medical-ontology-e2e"
   dependencies:
+    "@datalog/datalog-migrate": "workspace:*"
+    "@datalog/datalog-to-sql": "workspace:*"
+    "@datalog/parser": "workspace:*"
     "@eslint/js": "npm:^9.39.1"
     "@types/node": "npm:^24.10.1"
     eslint: "npm:^9.36.0"
@@ -283,6 +306,8 @@ __metadata:
     vite: "npm:^6.0.0"
     vitest: "npm:^3.2.4"
     vscode-languageclient: "npm:^9.0.0"
+  peerDependencies:
+    vscode: ^1.85.0
   languageName: unknown
   linkType: soft
 

@@ -13,6 +13,7 @@ The current package surfaces are:
 
 * `packages/parser` for parser contracts, syntax, semantics, and document analysis primitives
 * `packages/datalog-to-sql` for PostgreSQL 13+ graph translation and generic SQL/runtime helpers over `vertices` and `edges`
+* `packages/datalog-migrate` for generic Datalog migration workflow tooling and Graphile-Migrate-style command behavior
 * `packages/lsp` for language-server contracts, runtime wiring, protocol mapping, and editor-facing features
 * `packages/eslint-plugin-datalog` for Datalog-specific ESLint processor and rule behavior
 * `packages/eslint-plugin-typescript` for generic TypeScript/workspace ESLint rules
@@ -29,6 +30,7 @@ Use these boundaries:
 
 * `packages/parser` owns syntax, parsing, shared document analysis primitives, and parser-facing tests.
 * `packages/datalog-to-sql` owns Datalog-to-SQL translation behavior plus generic execution/runtime helpers and must stay independent from editor, LSP, and VS Code extension concerns.
+* `packages/datalog-migrate` owns generic Datalog migration workflow tooling and must stay independent from ontology-specific schema content and production SQL execution ownership.
 * `packages/lsp` owns language-server behavior and depends on parser package surfaces instead of reimplementing parser logic.
 * `packages/eslint-plugin-datalog` owns Datalog-specific lint processor/rule behavior only.
 * `packages/eslint-plugin-typescript` owns generic TypeScript/workspace lint rule behavior only.

@@ -8,6 +8,9 @@
       "path": "./packages/datalog-to-sql"
     },
     {
+      "path": "./packages/datalog-migrate"
+    },
+    {
       "path": "./packages/lsp"
     },
     {

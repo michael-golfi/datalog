@@ -23,7 +23,7 @@ const sourceFileGlobs = ['packages/**/*.{ts,mts,cts,tsx,js,mjs,cjs,jsx}'];
 const typedSourceGlobs = ['packages/**/*.{ts,mts,cts,tsx}'];
 const reactSourceGlobs = ['packages/vscode-extension/src/**/*.{tsx,jsx}'];
 const maintainabilityFileGlobs = ['packages/*/src/**/*.{ts,tsx,js,mjs,cjs,jsx}'];
-const librarySourceGlobs = ['packages/{parser,datalog-to-sql,lsp,eslint-plugin-datalog,eslint-plugin-typescript}/src/**/*.{ts,tsx}'];
+const librarySourceGlobs = ['packages/{parser,datalog-to-sql,datalog-migrate,lsp,eslint-plugin-datalog,eslint-plugin-typescript}/src/**/*.{ts,tsx}'];
 const testFileGlobs = [
   '**/*.test.{ts,tsx,js,jsx}',
   '**/*.spec.{ts,tsx,js,jsx}',
@@ -73,6 +73,19 @@ const workspaceLayerPolicies = [
   },
   {
     workspaceRoot: 'packages/datalog-to-sql',
+    sourceRoot: 'src',
+    defaultLayer: 'internal',
+    layers: [
+      { name: 'public', files: ['index.ts', 'index.tsx'] },
+      { name: 'internal', prefixes: [''] },
+    ],
+    allow: {
+      public: ['public', 'internal'],
+      internal: ['internal'],
+    },
+  },
+  {
+    workspaceRoot: 'packages/datalog-migrate',
     sourceRoot: 'src',
     defaultLayer: 'internal',
     layers: [
@@ -565,7 +578,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['packages/{parser,datalog-to-sql,lsp,eslint-plugin-datalog,eslint-plugin-typescript}/src/index.ts'],
+    files: ['packages/{parser,datalog-to-sql,datalog-migrate,lsp,eslint-plugin-datalog,eslint-plugin-typescript}/src/index.ts'],
     rules: {
       'no-restricted-syntax': [
         'error',
@@ -584,7 +597,7 @@ export default tseslint.config(
   },
   {
     files: librarySourceGlobs,
-    ignores: ['packages/{parser,datalog-to-sql,lsp,eslint-plugin-datalog,eslint-plugin-typescript}/src/**/*.test.ts', 'packages/{parser,datalog-to-sql,lsp,eslint-plugin-datalog,eslint-plugin-typescript}/src/**/*.spec.ts', 'packages/**/*.d.ts'],
+    ignores: ['packages/{parser,datalog-to-sql,datalog-migrate,lsp,eslint-plugin-datalog,eslint-plugin-typescript}/src/**/*.test.ts', 'packages/{parser,datalog-to-sql,datalog-migrate,lsp,eslint-plugin-datalog,eslint-plugin-typescript}/src/**/*.spec.ts', 'packages/**/*.d.ts'],
     plugins: {
       jsdoc,
     },
