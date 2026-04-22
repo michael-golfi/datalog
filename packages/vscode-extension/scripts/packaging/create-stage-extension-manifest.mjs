@@ -1,5 +1,5 @@
 const extensionIdName = 'datalog-language-support';
-const extensionPublisher = 'datalog';
+const extensionPublisher = 'michaelgolfi';
 
 export const stagedExtensionId = `${extensionPublisher}.${extensionIdName}`;
 

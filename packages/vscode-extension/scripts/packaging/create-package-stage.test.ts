@@ -59,7 +59,7 @@ describe('create-package-stage helpers', () => {
       }),
     ).toMatchObject({
       name: 'datalog-language-support',
-      publisher: 'datalog',
+      publisher: 'michaelgolfi',
       main: './out/extension.js',
     });
   });
