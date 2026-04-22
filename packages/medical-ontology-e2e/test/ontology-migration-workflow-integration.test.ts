@@ -9,8 +9,13 @@ import {
 import type { EdgeFact } from '@datalog/datalog-to-sql';
 
 import { createLocalhostPostgresFixture } from './fixtures/localhost-postgres-fixture.js';
+import {
+  createConditionCrosswalkOperation,
+  createMedicationCrosswalkOperation,
+  createVertexByIdOperation,
+} from './fixtures/ontology-graph-query-fixture.js';
 import { resolveMedicalOntologyWorkspacePath } from './fixtures/medical-ontology-workspace-path-support.js';
-import { loadCommittedOntologyFacts } from './fixtures/committed-ontology-facts-fixture.js';
+import { executeOntologyGraphQuery } from './fixtures/ontology-live-postgres-proof-fixture.js';
 
 const ontologyCompoundBacklinkExpander: CompoundBacklinkExpander = (clause): EdgeFact | null => {
   const fieldValues = new Map<string, string>();
@@ -45,7 +50,7 @@ const ontologyCompoundBacklinkExpander: CompoundBacklinkExpander = (clause): Edg
 };
 
 describe('ontology migration workflow integration', () => {
-  it('applies committed migrations through the public migration workflow and verifies graph persistence', async () => {
+  it('applies committed migrations through the public migration workflow and verifies graph-query semantics', async () => {
     const fixture = await createLocalhostPostgresFixture();
     const workspaceRoot = resolveMedicalOntologyWorkspacePath();
 
@@ -80,25 +85,37 @@ describe('ontology migration workflow integration', () => {
       expect(status.canDeterminePendingCommittedMigrations).toBe(true);
       expect(status.pendingCommittedMigrations).toBe(false);
 
-      const vertexCount = await fixture.sql<Array<{ count: string }>>`select count(*)::text as count from vertices`;
-      const edgeCount = await fixture.sql<Array<{ count: string }>>`select count(*)::text as count from edges`;
+      const [vertexLookupResult, medicationCrosswalkResult, conditionCrosswalkResult] = await Promise.all([
+        executeOntologyGraphQuery<{ id: string }>(fixture.sql, createVertexByIdOperation('medication/metformin')),
+        executeOntologyGraphQuery<{
+          medication_label: string;
+          rxnorm_label: string;
+          umls_label: string;
+          drugbank_label: string;
+        }>(fixture.sql, createMedicationCrosswalkOperation()),
+        executeOntologyGraphQuery<{
+          condition_label: string;
+          snomed_label: string;
+          umls_label: string;
+        }>(fixture.sql, createConditionCrosswalkOperation()),
+      ]);
 
-      expect(Number.parseInt(vertexCount[0]?.count ?? '0', 10)).toBeGreaterThan(0);
-      expect(Number.parseInt(edgeCount[0]?.count ?? '0', 10)).toBeGreaterThan(0);
-
-      const mappingEdge = await fixture.sql<Array<{ subject_id: string; predicate_id: string; object_id: string }>>`
-        select subject_id, predicate_id, object_id from edges
-        where predicate_id = 'med/has_mapping'
-        limit 1
-      `;
-      expect(mappingEdge.length).toBeGreaterThan(0);
-
-      const fixtureFacts = loadCommittedOntologyFacts({ workspaceRoot });
-      const fixtureVertexCount = fixtureFacts.filter((fact) => fact.kind === 'vertex').length;
-      const fixtureEdgeCount = fixtureFacts.filter((fact) => fact.kind === 'edge').length;
-
-      expect(Number.parseInt(vertexCount[0]?.count ?? '0', 10)).toBe(fixtureVertexCount);
-      expect(Number.parseInt(edgeCount[0]?.count ?? '0', 10)).toBe(fixtureEdgeCount);
+      expect(vertexLookupResult).toEqual([{ id: 'medication/metformin' }]);
+      expect(medicationCrosswalkResult).toEqual([
+        {
+          medication_label: 'Metformin',
+          rxnorm_label: 'RxNorm 6809',
+          umls_label: 'UMLS C0025598',
+          drugbank_label: 'DrugBank DB00331',
+        },
+      ]);
+      expect(conditionCrosswalkResult).toEqual([
+        {
+          condition_label: 'Type 2 Diabetes Mellitus',
+          snomed_label: 'SNOMED CT 44054006',
+          umls_label: 'UMLS C0011860',
+        },
+      ]);
     } finally {
       await fixture.cleanup();
     }
