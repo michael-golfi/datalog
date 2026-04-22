@@ -1,0 +1,15 @@
+build/**
+!build/package-stage/**
+fixtures/**
+node_modules/**
+out-tsc/**
+scripts/**
+src/**
+.gitignore
+.vscode-test/**
+**/*.test.*
+**/*.spec.*
+tsconfig.json
+tsconfig.build.json
+tsconfig.spec.json
+vitest.config.ts
