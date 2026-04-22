@@ -1,0 +1,88 @@
+name: Publish VS Code Extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Optional extension version to publish
+        required: false
+        type: string
+  repository_dispatch:
+    types:
+      - extension-release
+
+permissions:
+  contents: write
+
+jobs:
+  publish-extension:
+    runs-on: ubuntu-latest
+    env:
+      PUBLISH_VERSION: ${{ github.event.inputs.version || github.event.client_payload.version || '' }}
+      VSIX_PATH: ${{ github.workspace }}/artifacts/datalog-language-support.vsix
+      EXTENSION_README_PATH: ${{ github.workspace }}/packages/vscode-extension/README.md
+      EXTENSION_CHANGELOG_PATH: ${{ github.workspace }}/packages/vscode-extension/CHANGELOG.md
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build and stage VS Code extension package
+        run: yarn workspace @datalog/vscode-extension package
+
+      - name: Create artifact directory
+        run: mkdir -p artifacts
+
+      - name: Package VSIX from staged extension
+        working-directory: packages/vscode-extension/build/package-stage
+        shell: bash
+        run: |
+          vsce_version_args=()
+          if [ -n "$PUBLISH_VERSION" ]; then
+            vsce_version_args+=("$PUBLISH_VERSION")
+          fi
+
+          "$GITHUB_WORKSPACE/node_modules/.bin/vsce" package "${vsce_version_args[@]}" --no-dependencies --allow-missing-repository --readme-path "$EXTENSION_README_PATH" --changelog-path "$EXTENSION_CHANGELOG_PATH" --out "$VSIX_PATH"
+
+      - name: Publish VSIX to Microsoft Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        shell: bash
+        run: |
+          vsce_version_args=()
+          if [ -n "$PUBLISH_VERSION" ]; then
+            vsce_version_args+=("$PUBLISH_VERSION")
+          fi
+
+          "$GITHUB_WORKSPACE/node_modules/.bin/vsce" publish "${vsce_version_args[@]}" --packagePath "$VSIX_PATH" --readme-path "$EXTENSION_README_PATH" --changelog-path "$EXTENSION_CHANGELOG_PATH"
+
+      - name: Publish VSIX to Open VSX
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        shell: bash
+        run: |
+          ovsx_version_args=()
+          if [ -n "$PUBLISH_VERSION" ]; then
+            ovsx_version_args+=(--packageVersion "$PUBLISH_VERSION")
+          fi
+
+          "$GITHUB_WORKSPACE/node_modules/.bin/ovsx" publish "$VSIX_PATH" "${ovsx_version_args[@]}"
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: datalog-language-support-vsix
+          path: ${{ env.VSIX_PATH }}
+          if-no-files-found: error
