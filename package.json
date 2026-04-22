@@ -9,11 +9,16 @@
     "lint": "yarn workspaces foreach -Apt run lint",
     "typecheck": "yarn workspaces foreach -Apt run typecheck",
     "test": "yarn workspaces foreach -Apt run test",
-    "build": "yarn workspaces foreach -Apt run build"
+    "build": "yarn workspaces foreach -Apt run build",
+    "changeset": "node ./node_modules/@changesets/cli/bin.js",
+    "version-packages": "changeset version",
+    "release": "yarn build && changeset publish --access public"
   },
   "description": "Root workspace for the @datalog/* package graph.",
   "devDependencies": {
+    "@changesets/cli": "^2.31.0",
     "@eslint/js": "^9.39.1",
+    "@vscode/vsce": "^3.9.1",
     "eslint": "^9.36.0",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
@@ -21,6 +26,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
+    "ovsx": "^0.10.11",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3"
   }

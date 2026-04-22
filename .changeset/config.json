@@ -1,0 +1,23 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.4/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [
+    [
+      "@datalog/parser",
+      "@datalog/datalog-to-sql",
+      "@datalog/lsp",
+      "@datalog/datalog-migrate"
+    ]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "@datalog/eslint-plugin-datalog",
+    "@datalog/eslint-plugin-typescript",
+    "@datalog/medical-ontology-e2e",
+    "@datalog/vscode-extension"
+  ]
+}
