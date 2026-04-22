@@ -1,3 +1,11 @@
+% migration.previous: none
+% migration.sha256: ef9910157a00b9645bfec767a5b7eee733d38339e17fd28e83a51e46850294f7
+
+DefCompound("ClinicalConcept", "concept/id", "concept/kind", "concept/preferred_label").
+DefCompound("MedicationPresentation", "presentation/id", "presentation/product", "presentation/dose_form", "presentation/preferred_label").
+DefCompound("ForeignIdentifier", "foreign/id", "foreign/canonical", "foreign/source_graph", "foreign/source_value").
+DefCompound("IngredientStrengthRelation", "relation/id", "relation/product", "relation/ingredient", "relation/strength_value", "relation/strength_unit", "relation/dose_form").
+
 ClinicalConcept@(concept/id="concept/acetaminophen", concept/kind="ingredient", concept/preferred_label="Acetaminophen").
 ClinicalConcept@(concept/id="concept/acetaminophen-500mg-oral-tablet", concept/kind="medication-product", concept/preferred_label="Acetaminophen 500 MG Oral Tablet").
 MedicationPresentation@(presentation/id="presentation/acetaminophen-500mg-oral-tablet", presentation/product="concept/acetaminophen-500mg-oral-tablet", presentation/dose_form="concept/oral-tablet", presentation/preferred_label="Acetaminophen 500 MG Oral Tablet").

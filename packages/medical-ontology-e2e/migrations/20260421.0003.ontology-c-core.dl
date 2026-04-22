@@ -1,3 +1,9 @@
+% migration.previous: 20260421.0002.ontology-b-core.dl
+% migration.sha256: e4d1b1bf07a01c4c246e0143e5c4bb5a061d7b21ae068f3bd9a936675e486222
+
+DefCompound("ClinicalConcept", "concept/id", "concept/kind", "concept/preferred_label").
+DefCompound("ForeignIdentifier", "foreign/id", "foreign/canonical", "foreign/source_graph", "foreign/source_value").
+
 ClinicalConcept@(concept/id="concept/acute-bronchitis", concept/kind="disorder", concept/preferred_label="Acute bronchitis").
 ClinicalConcept@(concept/id="concept/bronchitis-disorder", concept/kind="disorder-class", concept/preferred_label="Bronchitis disorder").
 ForeignIdentifier@(foreign/id="foreign-id/snomed-387458008", foreign/canonical="concept/acute-bronchitis", foreign/source_graph="source-graph/snomed-ct", foreign/source_value="snomed/387458008").

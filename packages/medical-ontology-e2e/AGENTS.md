@@ -10,8 +10,9 @@
 ## Package shape
 
 - Keep `src/index.ts` export-only.
-- Organize code by aspect under `src/contracts`, `src/project`, `src/migrations`, `src/mappings`, and `src/queries`.
-- Keep immutable source slices under `migrations/<migration-id>/` with colocated metadata and `ontology.dl` files.
+- Keep runtime code minimal: small path-resolution and migration-discovery helpers only.
+- Keep ontology meaning in Datalog files under `migrations/` rather than expanding TypeScript modeling layers.
+- Committed migrations are moving to flat dated `.dl` files, with `current.dl` reserved as the mutable working area for later CLI tasks.
 - Keep tests colocated as `*.test.ts` beside the module they prove.
 - Avoid deep imports into other workspaces; use `@datalog/*` package surfaces when cross-workspace dependencies become necessary in later tasks.
 
@@ -24,12 +25,9 @@
 
 ## Current ownership seams
 
-- `src/contracts/*` defines immutable migration/project contracts and local structural types.
-- `src/project/*` owns immutable project construction and applied-history validation.
-- `src/migrations/*` loads immutable migration metadata and records.
-- `src/mappings/*` owns ontology fixture loading and mapping-oriented helper logic.
-- `src/queries/*` owns ontology-specific query builders and DB-backed ontology assertions.
-- Tests may call generic SQL helpers from `@datalog/datalog-to-sql`, but production ontology modules must not depend on SQL package types or runtime ownership.
+- `src/resolve-medical-ontology-workspace-path.ts` owns package-root path resolution.
+- `src/load-ontology-project-files.ts` owns minimal committed-migration/current-work-area discovery for future CLI support.
+- Later tasks will add commit metadata/hashing and the actual commit CLI workflow on top of the flat/current layout.
 
 ## Verification
 

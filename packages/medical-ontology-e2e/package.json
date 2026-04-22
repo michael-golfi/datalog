@@ -10,13 +10,11 @@
     "dist/**"
   ],
   "scripts": {
+    "commit:current": "node ./dist/commit-current-migration.js",
     "lint": "eslint --max-warnings=0 .",
     "typecheck": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && tsc -p ./tsconfig.lib.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
-    "build": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && tsc -b ./tsconfig.lib.json",
+    "build": "tsc -b ./tsconfig.lib.json",
     "test": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && vitest run --config ./vitest.config.ts"
-  },
-  "dependencies": {
-    "@datalog/parser": "workspace:*"
   },
   "devDependencies": {
     "@datalog/datalog-to-sql": "workspace:*",
