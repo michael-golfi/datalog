@@ -1,7 +1,10 @@
 {
   "name": "@datalog/lsp",
   "version": "0.0.0",
-  "private": true,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -34,7 +37,7 @@
     "test": "vitest run --config ./vitest.config.ts"
   },
   "dependencies": {
-    "@datalog/parser": "workspace:*",
+    "@datalog/parser": "^0.0.0",
     "vscode-languageserver": "^9.0.0",
     "vscode-languageserver-textdocument": "^1.0.0"
   },
