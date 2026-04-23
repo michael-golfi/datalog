@@ -54,7 +54,7 @@ jobs:
           git -c user.name="${GITHUB_ACTOR}" -c user.email="${GITHUB_ACTOR}@users.noreply.github.com" commit -m "chore: version packages"
 
       - name: Publish packages to npm
-        run: yarn build && changeset publish --provenance
+        run: yarn build && yarn changeset publish --provenance
 
       - name: Generate release tags
         run: yarn changeset tag
