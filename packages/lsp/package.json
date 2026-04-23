@@ -37,7 +37,7 @@
     "test": "vitest run --config ./vitest.config.ts"
   },
   "dependencies": {
-    "@datalog/parser": "^0.0.0",
+    "@datalog/parser": "workspace:*",
     "vscode-languageserver": "^9.0.0",
     "vscode-languageserver-textdocument": "^1.0.0"
   },
