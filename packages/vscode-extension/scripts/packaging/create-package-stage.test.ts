@@ -12,6 +12,7 @@ import {
   createStageExtensionManifest,
   extensionRoot,
 } from './create-package-stage.mjs';
+import { compiledExtensionMainRelativePath } from './extension-package-paths.mjs';
 
 describe('create-package-stage helpers', () => {
   it('rewrites workspace dependencies to concrete consumer versions', () => {
@@ -61,12 +62,17 @@ describe('create-package-stage helpers', () => {
         categories: ['Programming Languages'],
         activationEvents: ['onLanguage:datalog'],
         contributes: { languages: [] },
-        main: './out/extension.js',
+        main: './build/out/extension.js',
       }),
     ).toMatchObject({
       name: 'datalog-language-support',
       publisher: 'michaelgolfi',
-      main: './out/extension.js',
+      main: './build/out/extension.js',
+      files: [
+        'README.md',
+        'CHANGELOG.md',
+        'node_modules/**',
+      ],
     });
   });
 
@@ -93,5 +99,9 @@ describe('create-package-stage helpers', () => {
     } finally {
       await rm(stageRoot, { recursive: true, force: true });
     }
+  });
+
+  it('exposes the compiled extension entry under build/out', () => {
+    expect(compiledExtensionMainRelativePath).toBe(path.join('build', 'out', 'extension.js'));
   });
 });

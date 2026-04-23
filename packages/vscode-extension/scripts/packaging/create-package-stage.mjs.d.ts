@@ -18,6 +18,7 @@ export interface ExtensionManifest {
   activationEvents: string[];
   contributes: { languages: unknown[] };
   main: string;
+  files?: string[];
 }
 
 export const extensionRoot: string;
@@ -36,7 +37,7 @@ export function createLanguageServerModuleResolverSource(
 
 export function createStageExtensionManifest(
   extensionManifest: ExtensionManifest,
-): ExtensionManifest & { name: string; publisher: string };
+): ExtensionManifest & { name: string; publisher: string; files: string[] };
 
 export function createPackageStage(options?: {
   stageRoot?: string;

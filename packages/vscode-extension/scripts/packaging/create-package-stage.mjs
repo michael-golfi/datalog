@@ -2,6 +2,7 @@ import { mkdir, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 import {
+  compiledExtensionRelativeRoot,
   defaultLanguageServerModuleId,
   defaultStageRoot,
   extensionRoot,
@@ -33,7 +34,7 @@ export async function createPackageStage(options = {}) {
   await rm(stageRoot, { recursive: true, force: true });
   await mkdir(stageRoot, { recursive: true });
   await writeStageExtensionManifest(stageRoot, extensionManifest);
-  await copyStageAsset(stageRoot, 'out');
+  await copyStageAsset(stageRoot, compiledExtensionRelativeRoot);
   await copyStageAsset(stageRoot, 'syntaxes');
   await copyStageAsset(stageRoot, 'language-configuration.json');
   await copyStageAsset(stageRoot, 'README.md');

@@ -4,7 +4,7 @@
   "description": "Syntax highlighting and editor configuration for Datalog source files (.dl).",
   "version": "0.0.0",
   "private": true,
-  "main": "./out/extension.js",
+  "main": "./build/out/extension.js",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -21,7 +21,7 @@
     "onLanguage:datalog"
   ],
   "files": [
-    "out/**",
+    "build/out/**",
     "syntaxes/**",
     "language-configuration.json",
     "package.json"
@@ -50,12 +50,15 @@
   },
   "scripts": {
     "build": "tsc -b ./tsconfig.build.json",
+    "dev": "yarn workspace @datalog/parser build && yarn workspace @datalog/lsp build && yarn watch",
     "lint": "eslint --max-warnings=0 .",
     "package": "yarn workspace @datalog/parser build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/create-package-stage.mjs",
+    "vsce:package": "yarn workspace @datalog/parser build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/create-package-vsix.mjs",
     "smoke": "yarn workspace @datalog/parser build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/run-smoke.mjs",
     "smoke:broken": "yarn workspace @datalog/parser build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/run-smoke.mjs --broken",
     "typecheck": "tsc -p ./tsconfig.build.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
-    "test": "vitest run --config ./vitest.config.ts"
+    "test": "vitest run --config ./vitest.config.ts",
+    "watch": "tsc -b ./tsconfig.build.json --watch --preserveWatchOutput"
   },
   "dependencies": {
     "@datalog/lsp": "workspace:*",

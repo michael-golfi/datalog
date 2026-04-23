@@ -13,8 +13,8 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "rootDir": "src",
-    "outDir": "out",
-    "tsBuildInfoFile": "out/tsconfig.build.tsbuildinfo",
+    "outDir": "build/out",
+    "tsBuildInfoFile": "build/tsconfig.build.tsbuildinfo",
     "types": [
       "node"
     ]

@@ -15,5 +15,11 @@ export function createStageExtensionManifest(extensionManifest) {
     activationEvents: extensionManifest.activationEvents,
     contributes: extensionManifest.contributes,
     main: extensionManifest.main,
+    files: [
+      ...(extensionManifest.files ?? []),
+      'README.md',
+      'CHANGELOG.md',
+      'node_modules/**',
+    ],
   };
 }
