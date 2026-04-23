@@ -14,7 +14,7 @@
   },
   "scripts": {
     "lint": "eslint --max-warnings=0 .",
-    "typecheck": "tsc -p ./tsconfig.lib.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
+    "typecheck": "yarn workspace @datalog/datalog-to-sql build && tsc -p ./tsconfig.lib.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
     "build": "tsc -b ./tsconfig.lib.json",
     "test": "yarn workspace @datalog/datalog-to-sql build && vitest run --config ./vitest.config.ts"
   },
