@@ -69,10 +69,10 @@ describe('ontology migration workflow integration', () => {
       });
 
       expect(appliedState.appliedMigrationFileNames).toEqual([
-        '20260422.0001.ontology-foundation.dl',
-        '20260422.0002.ontology-core-concepts.dl',
-        '20260422.0003.ontology-clinical-relationships.dl',
-        '20260422.0004.ontology-mappings-and-tags.dl',
+        expect.stringMatching(/^\d{8}\.0001\.ontology-foundation\.dl$/u),
+        expect.stringMatching(/^\d{8}\.0002\.ontology-core-concepts\.dl$/u),
+        expect.stringMatching(/^\d{8}\.0003\.ontology-clinical-relationships\.dl$/u),
+        expect.stringMatching(/^\d{8}\.0004\.ontology-mappings-and-tags\.dl$/u),
       ]);
 
       const status = readMigrationStatus({

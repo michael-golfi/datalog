@@ -55,10 +55,10 @@ describe('ontology graph query behavior', () => {
       ]);
 
       expect(fixture.committedFileNames).toEqual([
-        '20260422.0001.ontology-foundation.dl',
-        '20260422.0002.ontology-core-concepts.dl',
-        '20260422.0003.ontology-clinical-relationships.dl',
-        '20260422.0004.ontology-mappings-and-tags.dl',
+        expect.stringMatching(/^\d{8}\.0001\.ontology-foundation\.dl$/u),
+        expect.stringMatching(/^\d{8}\.0002\.ontology-core-concepts\.dl$/u),
+        expect.stringMatching(/^\d{8}\.0003\.ontology-clinical-relationships\.dl$/u),
+        expect.stringMatching(/^\d{8}\.0004\.ontology-mappings-and-tags\.dl$/u),
       ]);
       expect(vertexLookupResult).toEqual([{ id: 'medication/metformin' }]);
       expect(preferredLabelResult).toEqual([{ label: 'Type 2 Diabetes Mellitus' }]);

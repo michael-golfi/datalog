@@ -69,11 +69,27 @@ describe('ontology migration chain incremental delta', () => {
     }
 
     expect(snapshots).toHaveLength(4);
-    expect(snapshots.map((snapshot) => snapshot.migrationFileName)).toEqual([
-      '20260422.0001.ontology-foundation.dl',
-      '20260422.0002.ontology-core-concepts.dl',
-      '20260422.0003.ontology-clinical-relationships.dl',
-      '20260422.0004.ontology-mappings-and-tags.dl',
+
+    const parsedMigrationFileNames = snapshots.map((snapshot) => parseCommittedMigrationFileName(snapshot.migrationFileName));
+    const expectedSequences = ['0001', '0002', '0003', '0004'] as const;
+    const expectedSlugs = [
+      'ontology-foundation',
+      'ontology-core-concepts',
+      'ontology-clinical-relationships',
+      'ontology-mappings-and-tags',
+    ] as const;
+
+    expect(parsedMigrationFileNames.map((snapshot) => snapshot.sequence)).toEqual(expectedSequences);
+    expect(parsedMigrationFileNames.map((snapshot) => snapshot.slug)).toEqual(expectedSlugs);
+
+    const migrationDatePrefix = parsedMigrationFileNames[0]?.datePrefix;
+
+    expect(migrationDatePrefix).toMatch(/^\d{8}$/u);
+    expect(parsedMigrationFileNames.map((snapshot) => snapshot.datePrefix)).toEqual([
+      migrationDatePrefix,
+      migrationDatePrefix,
+      migrationDatePrefix,
+      migrationDatePrefix,
     ]);
 
     expect(snapshots[0]?.vertexCount).toBeGreaterThan(20);
@@ -134,7 +150,9 @@ function extractFactsFromMigration(
   const facts = [...vertexFacts, ...edgeFacts];
 
   if (facts.length === 0) {
-    throw new Error(`Expected migration ${migration.fileName} to contain ontology facts.`);
+    const migrationFileName = String(migration.fileName);
+
+    throw new Error(`Expected migration ${migrationFileName} to contain ontology facts.`);
   }
 
   return facts as [DatalogFact, ...DatalogFact[]];
@@ -239,6 +257,30 @@ function countIncrementalDelta(input: {
   }
 
   return { vertexDelta, edgeDelta };
+}
+
+function parseCommittedMigrationFileName(fileName: string): {
+  readonly datePrefix: string;
+  readonly sequence: string;
+  readonly slug: string;
+} {
+  const match = /^(?<datePrefix>\d{8})\.(?<sequence>\d{4})\.(?<slug>.+)\.dl$/u.exec(fileName);
+
+  if (match?.groups === undefined) {
+    throw new Error(`Unexpected committed migration file name: ${fileName}`);
+  }
+
+  const groups = match.groups as {
+    readonly datePrefix: string;
+    readonly sequence: string;
+    readonly slug: string;
+  };
+
+  return {
+    datePrefix: groups.datePrefix,
+    sequence: groups.sequence,
+    slug: groups.slug,
+  };
 }
 
 async function readGraphCounts(sql: Awaited<ReturnType<typeof createLocalhostPostgresFixture>>['sql']): Promise<{
