@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Build internal ESLint plugins
+        run: yarn workspace @datalog/eslint-plugin-datalog build && yarn workspace @datalog/eslint-plugin-typescript build
+
       - name: Run lint
         run: yarn lint
 

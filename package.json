@@ -12,7 +12,7 @@
     "build": "yarn workspaces foreach -Apt run build",
     "changeset": "node ./node_modules/@changesets/cli/bin.js",
     "version-packages": "changeset version",
-    "release": "yarn build && changeset publish --access public"
+    "release": "yarn build && changeset publish"
   },
   "description": "Root workspace for the @datalog/* package graph.",
   "devDependencies": {
