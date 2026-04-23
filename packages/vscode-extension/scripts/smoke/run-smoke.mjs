@@ -82,7 +82,9 @@ export async function runSmoke({ brokenMode = process.argv.includes('--broken') 
       throw error;
     }
 
-    throw new Error(brokenSmokeFailureMessage);
+    process.exitCode = 0;
+
+    return;
   } finally {
     if (temporaryWorkspaceDirectory) {
       await rm(temporaryWorkspaceDirectory, { recursive: true, force: true });

@@ -45,6 +45,7 @@ declare module 'vscode-languageclient/node' {
   export class LanguageClient {
     constructor(id: string, name: string, serverOptions: ServerOptions, clientOptions: LanguageClientOptions);
     start(): unknown;
+    dispose(): void;
     stop(): Promise<void>;
   }
 }
