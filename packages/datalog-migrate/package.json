@@ -27,8 +27,8 @@
     "datalog-migrate-watch": "./dist/watch-current-datalog-migration.js"
   },
   "dependencies": {
-    "@datalog/datalog-to-sql": "^0.0.0",
-    "@datalog/parser": "^0.0.0"
+    "@datalog/datalog-to-sql": "workspace:*",
+    "@datalog/parser": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
