@@ -1,24 +1,26 @@
-name: Publish VS Code Extension
+name: Package VS Code Extension
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: Optional extension version to publish
+        description: Optional extension version for the VSIX
         required: false
         type: string
-  repository_dispatch:
-    types:
-      - extension-release
+  push:
+    branches:
+      - main
+    paths:
+      - packages/vscode-extension/**
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  publish-extension:
+  package-extension:
     runs-on: ubuntu-latest
     env:
-      PUBLISH_VERSION: ${{ github.event.inputs.version || github.event.client_payload.version || '' }}
+      PACKAGE_VERSION: ${{ github.event.inputs.version || github.event.client_payload.version || '' }}
       VSIX_PATH: ${{ github.workspace }}/artifacts/datalog-language-support.vsix
 
     steps:
@@ -47,23 +49,11 @@ jobs:
         shell: bash
         run: |
           vsce_version_args=()
-          if [ -n "$PUBLISH_VERSION" ]; then
-            vsce_version_args+=("$PUBLISH_VERSION")
+          if [ -n "$PACKAGE_VERSION" ]; then
+            vsce_version_args+=("$PACKAGE_VERSION")
           fi
 
           "$GITHUB_WORKSPACE/node_modules/.bin/vsce" package "${vsce_version_args[@]}" --no-dependencies --allow-missing-repository --out "$VSIX_PATH"
-
-      - name: Publish VSIX to Microsoft Marketplace
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        shell: bash
-        run: |
-          vsce_version_args=()
-          if [ -n "$PUBLISH_VERSION" ]; then
-            vsce_version_args+=("$PUBLISH_VERSION")
-          fi
-
-          "$GITHUB_WORKSPACE/node_modules/.bin/vsce" publish "${vsce_version_args[@]}" --packagePath "$VSIX_PATH"
 
       - name: Upload VSIX artifact
         uses: actions/upload-artifact@v4
