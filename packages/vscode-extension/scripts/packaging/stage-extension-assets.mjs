@@ -1,4 +1,4 @@
-import { cp, writeFile } from 'node:fs/promises';
+import { cp, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { extensionRoot } from './extension-package-paths.mjs';
@@ -26,5 +26,6 @@ export async function writeStageLanguageServerModuleResolver(stageRoot, language
   const resolverModulePath = path.join(stageRoot, 'out', 'runtime', 'resolve-language-server-module.js');
   const resolverModuleSource = createLanguageServerModuleResolverSource(languageServerModuleId);
 
+  await mkdir(path.dirname(resolverModulePath), { recursive: true });
   await writeFile(resolverModulePath, resolverModuleSource, 'utf8');
 }
