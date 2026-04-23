@@ -20,8 +20,6 @@ jobs:
     env:
       PUBLISH_VERSION: ${{ github.event.inputs.version || github.event.client_payload.version || '' }}
       VSIX_PATH: ${{ github.workspace }}/artifacts/datalog-language-support.vsix
-      EXTENSION_README_PATH: ${{ github.workspace }}/packages/vscode-extension/README.md
-      EXTENSION_CHANGELOG_PATH: ${{ github.workspace }}/packages/vscode-extension/CHANGELOG.md
 
     steps:
       - name: Check out repository
@@ -53,7 +51,7 @@ jobs:
             vsce_version_args+=("$PUBLISH_VERSION")
           fi
 
-          "$GITHUB_WORKSPACE/node_modules/.bin/vsce" package "${vsce_version_args[@]}" --no-dependencies --allow-missing-repository --readme-path "$EXTENSION_README_PATH" --changelog-path "$EXTENSION_CHANGELOG_PATH" --out "$VSIX_PATH"
+          "$GITHUB_WORKSPACE/node_modules/.bin/vsce" package "${vsce_version_args[@]}" --no-dependencies --allow-missing-repository --out "$VSIX_PATH"
 
       - name: Publish VSIX to Microsoft Marketplace
         env:
@@ -65,7 +63,7 @@ jobs:
             vsce_version_args+=("$PUBLISH_VERSION")
           fi
 
-          "$GITHUB_WORKSPACE/node_modules/.bin/vsce" publish "${vsce_version_args[@]}" --packagePath "$VSIX_PATH" --readme-path "$EXTENSION_README_PATH" --changelog-path "$EXTENSION_CHANGELOG_PATH"
+          "$GITHUB_WORKSPACE/node_modules/.bin/vsce" publish "${vsce_version_args[@]}" --packagePath "$VSIX_PATH"
 
       - name: Publish VSIX to Open VSX
         env:

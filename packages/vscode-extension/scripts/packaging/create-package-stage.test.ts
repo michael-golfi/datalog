@@ -1,10 +1,16 @@
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import {
   collectExportTargets,
+  createPackageStage,
   createConsumerPackageManifest,
   createLanguageServerModuleResolverSource,
   createStageExtensionManifest,
+  extensionRoot,
 } from './create-package-stage.mjs';
 
 describe('create-package-stage helpers', () => {
@@ -70,5 +76,22 @@ describe('create-package-stage helpers', () => {
     expect(source).toContain('exports.resolveLanguageServerModule');
     expect(source).toContain('require.resolve(languageServerModuleId)');
     expect(source).toContain('@datalog/lsp/server');
+  });
+
+  it('stages README and changelog at the package root', async () => {
+    const stageRoot = await mkdtemp(path.join(tmpdir(), 'datalog-vscode-package-stage-'));
+
+    try {
+      await createPackageStage({ stageRoot });
+
+      await expect(readFile(path.join(stageRoot, 'README.md'), 'utf8')).resolves.toBe(
+        await readFile(path.join(extensionRoot, 'README.md'), 'utf8'),
+      );
+      await expect(readFile(path.join(stageRoot, 'CHANGELOG.md'), 'utf8')).resolves.toBe(
+        await readFile(path.join(extensionRoot, 'CHANGELOG.md'), 'utf8'),
+      );
+    } finally {
+      await rm(stageRoot, { recursive: true, force: true });
+    }
   });
 });

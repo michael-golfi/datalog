@@ -36,6 +36,8 @@ export async function createPackageStage(options = {}) {
   await copyStageAsset(stageRoot, 'out');
   await copyStageAsset(stageRoot, 'syntaxes');
   await copyStageAsset(stageRoot, 'language-configuration.json');
+  await copyStageAsset(stageRoot, 'README.md');
+  await copyStageAsset(stageRoot, 'CHANGELOG.md');
   await writeStageLanguageServerModuleResolver(stageRoot, languageServerModuleId);
   await stageWorkspacePackage('@datalog/parser', stageRoot, stagedExternalPackages);
   await stageWorkspacePackage('@datalog/lsp', stageRoot, stagedExternalPackages);
