@@ -87,7 +87,7 @@ describe('translateGraphOperation', () => {
       ok: true,
       value: {
         operation: 'select',
-        text: 'select distinct vertex_1.id as "person", edge_2.object_id as "friend" from vertices vertex_1, edges edge_2 where edge_2.subject_id = vertex_1.id and edge_2.predicate_id = $1;',
+        text: 'select distinct scan_1.id as "person", scan_2.object_id as "friend" from vertices scan_1 join edges scan_2 on scan_1.id = scan_2.subject_id and scan_2.predicate_id = $1;',
         values: ['graph/likes'],
       },
     });
