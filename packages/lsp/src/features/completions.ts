@@ -30,10 +30,13 @@ function getCompletionItemsForSlot(
 
   return {
     suppressed: (): LanguageServerCompletionItem[] => [],
-    'graph-predicate-string': (): LanguageServerCompletionItem[] => createGraphPredicateCompletions(parsed.graphPredicateIds, prefix),
+    'graph-predicate-string': (): LanguageServerCompletionItem[] => createGraphPredicateCompletions([
+      ...parsed.graphPredicateIds,
+      ...(context.workspaceIndex?.getGraphPredicateIds() ?? []),
+    ], prefix),
     'node-id-string': (): LanguageServerCompletionItem[] => createNodeReferenceCompletions({
       localNodeIds: parsed.nodeIds,
-      workspaceNodeIds: context.workspaceIndex?.getGraphNodeIds() ?? [],
+      workspaceNodeIds: getWorkspaceNodeIds(context.workspaceIndex),
       prefix,
     }),
     'compound-field-key': (): LanguageServerCompletionItem[] => createCompoundFieldCompletions({
@@ -48,4 +51,20 @@ function getCompletionItemsForSlot(
       ...(context.workspaceIndex ? { workspaceIndex: context.workspaceIndex } : {}),
     }),
   }[slot.kind]();
+}
+
+function getWorkspaceNodeIds(workspaceIndex: DatalogWorkspaceIndex | undefined): readonly string[] {
+  if (!workspaceIndex) {
+    return [];
+  }
+
+  const nodeIds = new Set(workspaceIndex.getGraphNodeIds());
+  for (const uri of workspaceIndex.getIndexedDocumentUris()) {
+    const document = workspaceIndex.getDocument(uri);
+    for (const nodeId of document?.parsedDocument.nodeIds ?? []) {
+      nodeIds.add(nodeId);
+    }
+  }
+
+  return [...nodeIds].sort((left, right) => left.localeCompare(right));
 }
