@@ -21,14 +21,15 @@
     "dist/**"
   ],
   "scripts": {
-    "benchmark:recursive-closure": "yarn workspace @datalog/parser build && tsc -b ./tsconfig.lib.json && node ./dist/benchmarks/run-recursive-closure-benchmark.js",
-    "benchmark:recursive-closure:validate": "yarn workspace @datalog/parser build && tsc -b ./tsconfig.lib.json && node ./dist/benchmarks/run-recursive-closure-benchmark.js --validate",
-    "build": "yarn workspace @datalog/parser build && tsc -b ./tsconfig.lib.json",
+    "benchmark:recursive-closure": "yarn workspace @datalog/ast build && yarn workspace @datalog/parser build && tsc -b ./tsconfig.lib.json && node ./dist/benchmarks/run-recursive-closure-benchmark.js",
+    "benchmark:recursive-closure:validate": "yarn workspace @datalog/ast build && yarn workspace @datalog/parser build && tsc -b ./tsconfig.lib.json && node ./dist/benchmarks/run-recursive-closure-benchmark.js --validate",
+    "build": "yarn workspace @datalog/ast build && yarn workspace @datalog/parser build && tsc -b ./tsconfig.lib.json",
     "lint": "eslint --max-warnings=0 .",
-    "typecheck": "yarn workspace @datalog/parser build && tsc -p ./tsconfig.lib.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
-    "test": "yarn workspace @datalog/parser build && vitest run --config ./vitest.config.ts"
+    "typecheck": "yarn workspace @datalog/ast build && yarn workspace @datalog/parser build && tsc -p ./tsconfig.lib.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
+    "test": "yarn workspace @datalog/ast build && yarn workspace @datalog/parser build && vitest run --config ./vitest.config.ts"
   },
   "dependencies": {
+    "@datalog/ast": "workspace:*",
     "postgres": "^3.4.7"
   },
   "devDependencies": {

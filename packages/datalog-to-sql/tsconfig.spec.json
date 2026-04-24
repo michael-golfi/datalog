@@ -2,6 +2,12 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./out-tsc/vitest",
+    "rootDir": "../..",
+    "paths": {
+      "@datalog/datalog-to-sql": [
+        "packages/datalog-to-sql/src/index.ts"
+      ]
+    },
     "types": [
       "vitest/globals",
       "vitest/importMeta",
