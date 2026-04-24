@@ -1,7 +1,13 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "outDir": "./out-tsc/vitest",
+    "paths": {
+      "@datalog/ast": [
+        "../datalog-ast/src/index.ts"
+      ]
+    },
     "types": [
       "vitest/globals",
       "vitest/importMeta",
@@ -10,6 +16,11 @@
       "vitest"
     ]
   },
+  "references": [
+    {
+      "path": "../datalog-ast/tsconfig.lib.json"
+    }
+  ],
   "include": [
     "vitest.config.ts",
     "src/**/*.ts",
