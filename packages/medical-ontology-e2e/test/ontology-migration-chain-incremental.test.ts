@@ -1,21 +1,21 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import {
-  applyDatalogFacts,
-  type DatalogFact,
-  type EdgeFact,
-  type VertexFact,
-} from '@datalog/datalog-to-sql';
+import type { DatalogFact } from '@datalog/ast';
+import { applyDatalogFacts } from '@datalog/datalog-to-sql';
 import {
   loadDatalogMigrationProjectFiles,
   type CommittedDatalogMigrationFile,
 } from '@datalog/datalog-migrate';
-import { parseDocument } from '@datalog/parser';
 import { describe, expect, it } from 'vitest';
 
-import { loadCommittedOntologyFacts, type OntologyEdgeFact, type OntologyFact } from './fixtures/committed-ontology-facts-fixture.js';
+import { loadCommittedOntologyFacts } from './fixtures/committed-ontology-facts-fixture.js';
 import { createLocalhostPostgresFixture } from './fixtures/localhost-postgres-fixture.js';
+import {
+  extractOntologyFactsFromSource,
+  type OntologyEdgeFact,
+  type OntologyFact,
+} from './fixtures/ontology-migration-fact-extraction-fixture.js';
 
 const e2eWorkspaceRoot = path.dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
@@ -119,35 +119,7 @@ interface Snapshot {
 function extractFactsFromMigration(
   migration: CommittedDatalogMigrationFile,
 ): readonly [DatalogFact, ...DatalogFact[]] {
-  const vertexIds = new Set<string>();
-  const edgeFacts: EdgeFact[] = [];
-  const parsed = parseDocument(migration.body);
-
-  for (const clause of parsed.clauses) {
-    if (clause.predicate === 'DefCompound' || clause.predicate === 'DefPred' || clause.isRule) {
-      continue;
-    }
-
-    if (clause.isCompound) {
-      const backlink = createCompoundBacklink(clause);
-
-      if (backlink !== undefined) {
-        vertexIds.add(backlink.subjectId);
-        vertexIds.add(backlink.objectId);
-        edgeFacts.push(backlink);
-      }
-
-      continue;
-    }
-
-    const edgeFact = parseEdgeFact(clause);
-    vertexIds.add(edgeFact.subjectId);
-    vertexIds.add(edgeFact.objectId);
-    edgeFacts.push(edgeFact);
-  }
-
-  const vertexFacts: VertexFact[] = [...vertexIds].map((id) => ({ kind: 'vertex', id }));
-  const facts = [...vertexFacts, ...edgeFacts];
+  const facts = extractOntologyFactsFromSource(migration.body).facts;
 
   if (facts.length === 0) {
     const migrationFileName = String(migration.fileName);
@@ -156,78 +128,6 @@ function extractFactsFromMigration(
   }
 
   return facts as [DatalogFact, ...DatalogFact[]];
-}
-
-function createCompoundBacklink(
-  clause: ReturnType<typeof parseDocument>['clauses'][number],
-): EdgeFact | undefined {
-  const compoundFieldValues = new Map<string, string>();
-
-  for (const [index, field] of clause.compoundFields.entries()) {
-    const reference = clause.references[index];
-
-    if (reference !== undefined) {
-      compoundFieldValues.set(field, reference.value);
-    }
-  }
-
-  if (clause.predicate === 'ExternalMapping') {
-    return createBacklinkEdge({
-      subjectId: compoundFieldValues.get('mapping/concept'),
-      predicateId: 'med/has_mapping',
-      objectId: compoundFieldValues.get('cid'),
-    });
-  }
-
-  if (clause.predicate === 'MedicationClassMembership') {
-    return createBacklinkEdge({
-      subjectId: compoundFieldValues.get('clinical/medication'),
-      predicateId: 'med/has_drug_class',
-      objectId: compoundFieldValues.get('clinical/drug_class'),
-    });
-  }
-
-  return undefined;
-}
-
-function createBacklinkEdge(input: {
-  readonly subjectId: string | undefined;
-  readonly predicateId: string;
-  readonly objectId: string | undefined;
-}): OntologyEdgeFact {
-  const { subjectId, predicateId, objectId } = input;
-
-  if (subjectId === undefined || objectId === undefined) {
-    throw new Error('Committed ontology compound declarations must provide all required backlink fields.');
-  }
-
-  return {
-    kind: 'edge',
-    subjectId,
-    predicateId,
-    objectId,
-  };
-}
-
-function parseEdgeFact(
-  clause: ReturnType<typeof parseDocument>['clauses'][number],
-): EdgeFact {
-  if (clause.predicate !== 'Edge') {
-    throw new Error('Committed ontology migrations must only contain Edge facts outside compound declarations.');
-  }
-
-  const [subject, predicate, object] = clause.references;
-
-  if (!subject || !predicate || !object || clause.references.length !== 3) {
-    throw new Error('Committed ontology Edge facts must use quoted Edge(subject, predicate, object) clauses.');
-  }
-
-  return {
-    kind: 'edge',
-    subjectId: subject.value,
-    predicateId: predicate.value,
-    objectId: object.value,
-  };
 }
 
 function countIncrementalDelta(input: {
