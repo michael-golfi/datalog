@@ -58,4 +58,4 @@ Use the package-local scripts from `packages/vscode-extension`:
 - `yarn workspace @datalog/vscode-extension vsce:package` rebuilds the same workspaces and emits the final VSIX.
 - `yarn workspace @datalog/vscode-extension smoke` rebuilds the same workspaces, creates a staged extension, and runs the smoke suite against an Extension Development Host.
 
-For editor debugging, open `packages/vscode-extension` in VS Code and run the checked-in **Launch Extension Development Host** configuration from `.vscode/launch.json`. That launch config starts the Extension Development Host with `fixtures/smoke/smoke.dl` opened, so the smoke fixture is the default debugging context.
+For editor debugging, open `packages/vscode-extension` in VS Code and run the checked-in **Launch Extension Development Host** configuration from `.vscode/launch.json`. That launch config opens the workspace-shaped smoke fixture at `fixtures/smoke/workspace/` and focuses `fixtures/smoke/workspace/current.dl`, so the same workspace context used by smoke is the default debugging context.
