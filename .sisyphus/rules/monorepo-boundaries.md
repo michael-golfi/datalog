@@ -63,6 +63,16 @@ import { parseDocument } from '../../parser/src/index.js';
 - New shared types, constants, and utilities belong in the lowest package that can own them.
 - If multiple packages need the same logic, do not duplicate it in the extension package.
 
+## TypeScript Build Output Boundaries
+
+Compiler output is a generated artifact, not package source. `tsc` must never emit JavaScript, declarations, source maps, build info, coverage, or temporary compiler files into `src/` or another source-owned directory.
+
+Required behavior:
+- Use `outDir`, declaration output settings, or `noEmit` so generated files land outside source directories.
+- If `tsc` output appears in a source directory, remove it immediately and fix the package configuration before continuing.
+- Generated sources are allowed only in directories explicitly designated for generated code. Do not silently treat accidental compiler output as source.
+- Dirty source directories caused by compiler output are blocking until cleaned.
+
 ## New Workspace Checklist
 
 When creating a new package under `packages/*`:

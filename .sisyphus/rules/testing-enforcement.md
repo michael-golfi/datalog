@@ -67,6 +67,13 @@ it('calls parse error branch');
 - Boundary validation logic (input parsing, schema enforcement) must have tests for valid input, invalid input, and edge cases (missing fields, wrong types, extra fields).
 - Error handling paths must be tested — a catch block without a test proving it executes is a gap.
 
+## Validation and Debugging Feedback Loops
+
+- Keep the tightest useful feedback loop while debugging. Start with the smallest command that can reproduce the failure, then expand only after that signal is green.
+- If CI fails, reproduce and debug the failure locally before relaunching CI. A CI retry is not a debugging strategy.
+- Prefer the narrowest relevant validation command first: one test file, one package, one focused lint target, or one benchmark case. After the targeted command is green, run the broader workspace or repo command.
+- Do not weaken assertions, delete coverage, or skip benchmarks to make validation pass. Fix the underlying behavior or document a concrete, reviewable reason the failing check is inapplicable.
+
 ## Conventions
 
 - Test file naming: `*.test.ts`. Do not use `*.spec.ts` unless a workspace AGENTS.md explicitly requires it.
