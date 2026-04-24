@@ -4,52 +4,86 @@ import type { LanguageServerFoldingRange } from '../contracts/language-feature-t
 
 /** Compute folding ranges for comment blocks and multiline clauses. */
 export function computeFoldingRanges(source: string): LanguageServerFoldingRange[] {
+  const commentRanges = collectCommentRanges(source);
+  const clauseRanges = parseDocument(source).clauses
+    .map((clause) => createFoldingRange({
+      startLine: clause.range.start.line,
+      endLine: clause.range.end.line,
+      kind: 'region',
+    }))
+    .filter((range): range is LanguageServerFoldingRange => range !== null);
+
+  return [...commentRanges, ...clauseRanges].sort(compareFoldingRanges);
+}
+
+function collectCommentRanges(source: string): LanguageServerFoldingRange[] {
   const ranges: LanguageServerFoldingRange[] = [];
   const lines = source.split('\n');
   let commentStart: number | null = null;
 
-  lines.forEach((line, index) => {
+  for (const [index, line] of lines.entries()) {
     const isComment = line.trim().startsWith('%');
 
-    if (isComment && commentStart === null) {
-      commentStart = index;
-      return;
+    if (isComment) {
+      commentStart ??= index;
+      continue;
     }
 
-    if (!isComment && commentStart !== null) {
-      if (index - commentStart > 1) {
-        ranges.push({ startLine: commentStart, endLine: index - 1, kind: 'comment' });
-      }
+    pushCommentRange(ranges, commentStart, index - 1);
 
-      commentStart = null;
-    }
-  });
-
-  const trailingCommentRange = createTrailingCommentRange(commentStart, lines.length);
-  if (trailingCommentRange) {
-    ranges.push(trailingCommentRange);
+    commentStart = null;
   }
 
-  for (const clause of parseDocument(source).clauses) {
-    if (clause.range.end.line > clause.range.start.line) {
-      ranges.push({
-        startLine: clause.range.start.line,
-        endLine: clause.range.end.line,
-        kind: 'region',
-      });
-    }
-  }
+  pushCommentRange(ranges, commentStart, lines.length - 1);
 
   return ranges;
 }
 
-function createTrailingCommentRange(
-  commentStart: number | null,
-  lineCount: number,
+function pushCommentRange(
+  ranges: LanguageServerFoldingRange[],
+  startLine: number | null,
+  endLine: number,
+): void {
+  const range = createCommentRange(startLine, endLine);
+  if (range) {
+    ranges.push(range);
+  }
+}
+
+function createCommentRange(
+  startLine: number | null,
+  endLine: number,
 ): LanguageServerFoldingRange | null {
-  if (typeof commentStart !== 'number' || lineCount - commentStart <= 1) {
+  if (typeof startLine !== 'number') {
     return null;
   }
 
-  return { startLine: commentStart, endLine: lineCount - 1, kind: 'comment' };
+  return createFoldingRange({ startLine, endLine, kind: 'comment' });
+}
+
+function createFoldingRange(range: LanguageServerFoldingRange): LanguageServerFoldingRange | null {
+  if (range.startLine < 0 || range.endLine <= range.startLine) {
+    return null;
+  }
+
+  return range;
+}
+
+function compareFoldingRanges(
+  left: LanguageServerFoldingRange,
+  right: LanguageServerFoldingRange,
+): number {
+  if (left.startLine !== right.startLine) {
+    return left.startLine - right.startLine;
+  }
+
+  if (left.endLine !== right.endLine) {
+    return left.endLine - right.endLine;
+  }
+
+  if (left.kind === right.kind) {
+    return 0;
+  }
+
+  return left.kind === 'comment' ? -1 : 1;
 }
