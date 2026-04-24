@@ -12,6 +12,15 @@ export interface DefinitionContext {
   readonly workspaceIndex?: DatalogWorkspaceIndex;
 }
 
+type ParsedDocument = ReturnType<typeof parseDocument>;
+interface StringReferenceDefinitionOptions {
+  readonly parsed: ParsedDocument;
+  readonly source: string;
+  readonly position: Position;
+  readonly targetUri?: string;
+  readonly workspaceIndex?: DatalogWorkspaceIndex;
+}
+
 /** Resolve a definition target for the symbol or reference at the given position. */
 export function computeDefinition(
   source: string,
@@ -23,43 +32,54 @@ export function computeDefinition(
     parsed,
     source,
     position,
+    ...(context.workspaceIndex ? { workspaceIndex: context.workspaceIndex } : {}),
     ...(context.targetUri ? { targetUri: context.targetUri } : {}),
   });
   if (stringReferenceDefinition) {
-    return [stringReferenceDefinition];
+    return stringReferenceDefinition;
   }
 
   return getDerivedPredicateDefinition(parsed, position, context);
 }
 
 function getStringReferenceDefinition(
-  options: {
-    readonly parsed: ReturnType<typeof parseDocument>;
-    readonly source: string;
-    readonly position: Position;
-    readonly targetUri?: string;
-  },
-): LanguageServerDefinitionTarget | null {
+  options: StringReferenceDefinitionOptions,
+): LanguageServerDefinition | null {
   const stringReference = getStringReferenceAtPosition(options.source, options.position);
   if (!stringReference) {
     return null;
   }
 
-  const schema = options.parsed.predicateSchemas.get(stringReference.value);
+  return getLocalStringReferenceDefinition(options.parsed, stringReference.value, options.targetUri)
+    ?? getWorkspaceStringReferenceDefinition(options.workspaceIndex, stringReference.value)
+    ?? null;
+}
+
+function getLocalStringReferenceDefinition(
+  parsed: ParsedDocument,
+  referenceId: string,
+  targetUri?: string,
+): LanguageServerDefinition | null {
+  const schema = parsed.predicateSchemas.get(referenceId);
   if (schema) {
-    return createDefinitionResult(schema.range, options.targetUri);
+    return [createDefinitionResult(schema.range, targetUri)];
   }
 
-  const node = options.parsed.nodeSummaries.get(stringReference.value);
-  if (node) {
-    return createDefinitionResult(node.range, options.targetUri);
-  }
+  const node = parsed.nodeSummaries.get(referenceId);
+  return node ? [createDefinitionResult(node.range, targetUri)] : null;
+}
 
-  return null;
+function getWorkspaceStringReferenceDefinition(
+  workspaceIndex: DatalogWorkspaceIndex | undefined,
+  referenceId: string,
+): LanguageServerDefinition | null {
+  return mapDefinitionTargets(workspaceIndex?.getPredicateSchemaTargets(referenceId) ?? [])
+    ?? mapDefinitionTargets(workspaceIndex?.getNodeSummaryTargets(referenceId) ?? [])
+    ?? null;
 }
 
 function getDerivedPredicateDefinition(
-  parsed: ReturnType<typeof parseDocument>,
+  parsed: ParsedDocument,
   position: Position,
   context: DefinitionContext,
 ): LanguageServerDefinition | null {
@@ -83,7 +103,7 @@ function getDerivedPredicateDefinition(
 }
 
 function findPredicateOccurrence(
-  parsed: ReturnType<typeof parseDocument>,
+  parsed: ParsedDocument,
   position: Position,
 ) {
   for (const predicate of parsed.datalogSymbols.predicates) {
@@ -100,7 +120,7 @@ function findPredicateOccurrence(
 }
 
 function getPredicateDefinitions(options: {
-  readonly parsed: ReturnType<typeof parseDocument>;
+  readonly parsed: ParsedDocument;
   readonly identityKey: string;
   readonly predicateName: string;
   readonly arity: number;
@@ -115,6 +135,12 @@ function getPredicateDefinitions(options: {
     .filter((clause) => clause.arity === options.arity)
     .sort((left, right) => compareRanges(left.predicateRange, right.predicateRange))
     .map((clause) => createDefinitionResult(clause.predicateRange, options.context.targetUri));
+}
+
+function mapDefinitionTargets(
+  targets: ReadonlyArray<{ readonly range: LanguageServerDefinitionTarget['targetSelectionRange']; readonly uri: string }>,
+): LanguageServerDefinition | null {
+  return targets.length > 0 ? targets.map((target) => createDefinitionResult(target.range, target.uri)) : null;
 }
 
 function containsPosition(position: Position, range: LanguageServerDefinitionTarget['targetSelectionRange']): boolean {

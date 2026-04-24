@@ -30,6 +30,116 @@ describe('computeDefinition', () => {
     ]);
   });
 
+  it('resolves cross-file graph predicate ids to DefPred declarations through the workspace index', () => {
+    const workspaceIndex = new DatalogWorkspaceIndex({
+      documentStore: new DatalogDocumentStore(),
+    });
+    const schemaUri = 'file:///workspace/schema.dl';
+    const currentUri = 'file:///workspace/current.dl';
+    const schemaSource = 'DefPred("food/has_spice", "0", "liquid/node", "0", "liquid/node").';
+    const currentSource = 'Edge("concept/stew", "food/has_spice", "spice/cumin").';
+
+    workspaceIndex.upsertOpenDocument({ uri: schemaUri, source: schemaSource });
+    workspaceIndex.upsertOpenDocument({ uri: currentUri, source: currentSource });
+
+    expect(computeDefinition(currentSource, positionOf(currentSource, 'food/has_spice'), {
+      targetUri: currentUri,
+      workspaceIndex,
+    })).toEqual([
+      {
+        targetUri: schemaUri,
+        targetSelectionRange: stringValueRange(schemaSource, 'food/has_spice'),
+      },
+    ]);
+  });
+
+  it('resolves cross-file node ids to node summary sources through the workspace index', () => {
+    const workspaceIndex = new DatalogWorkspaceIndex({
+      documentStore: new DatalogDocumentStore(),
+    });
+    const summaryUri = 'file:///workspace/summary.dl';
+    const currentUri = 'file:///workspace/current.dl';
+    const summarySource = 'Edge("class/Dish", "food/preferred_label", "Dish").';
+    const currentSource = 'Edge("concept/stew", "food/instance_of", "class/Dish").';
+
+    workspaceIndex.upsertOpenDocument({ uri: summaryUri, source: summarySource });
+    workspaceIndex.upsertOpenDocument({ uri: currentUri, source: currentSource });
+
+    expect(computeDefinition(currentSource, positionOf(currentSource, 'class/Dish'), {
+      targetUri: currentUri,
+      workspaceIndex,
+    })).toEqual([
+      {
+        targetUri: summaryUri,
+        targetSelectionRange: stringValueRange(summarySource, 'class/Dish'),
+      },
+    ]);
+  });
+
+  it('keeps local string-reference definitions before workspace fallbacks', () => {
+    const workspaceIndex = new DatalogWorkspaceIndex({
+      documentStore: new DatalogDocumentStore(),
+    });
+    const workspaceUri = 'file:///workspace/schema.dl';
+    const currentUri = 'file:///workspace/current.dl';
+    const workspaceSource = 'DefPred("food/local", "0", "liquid/node", "0", "liquid/node").';
+    const currentSource = [
+      'DefPred("food/local", "0", "liquid/node", "0", "liquid/node").',
+      'Edge("concept/stew", "food/local", "spice/cumin").',
+    ].join('\n');
+
+    workspaceIndex.upsertOpenDocument({ uri: workspaceUri, source: workspaceSource });
+    workspaceIndex.upsertOpenDocument({ uri: currentUri, source: currentSource });
+
+    expect(computeDefinition(currentSource, positionOf(currentSource, 'food/local', 1), {
+      targetUri: currentUri,
+      workspaceIndex,
+    })).toEqual([
+      {
+        targetUri: currentUri,
+        targetSelectionRange: stringValueRange(currentSource, 'food/local'),
+      },
+    ]);
+  });
+
+  it('returns duplicate workspace metadata targets in deterministic sorted order', async () => {
+    const workspaceRoot = await mkdtemp(join(tmpdir(), 'datalog-definition-metadata-'));
+
+    try {
+      const workspaceIndex = new DatalogWorkspaceIndex({
+        documentStore: new DatalogDocumentStore(),
+      });
+      const firstUri = pathToFileURL(join(workspaceRoot, 'a-schema.dl')).href;
+      const secondUri = pathToFileURL(join(workspaceRoot, 'nested/b-schema.dl')).href;
+      const currentUri = pathToFileURL(join(workspaceRoot, 'current.dl')).href;
+      const firstSource = 'DefPred("food/shared", "0", "liquid/node", "0", "liquid/node").';
+      const secondSource = 'DefPred("food/shared", "1", "liquid/node", "0", "liquid/string").';
+      const currentSource = 'Edge("concept/stew", "food/shared", "spice/cumin").';
+
+      await writeWorkspaceFile(workspaceRoot, 'nested/b-schema.dl', secondSource);
+      await writeWorkspaceFile(workspaceRoot, 'a-schema.dl', firstSource);
+      await writeWorkspaceFile(workspaceRoot, 'current.dl', currentSource);
+      await workspaceIndex.setWorkspaceRootPath(workspaceRoot);
+      workspaceIndex.upsertOpenDocument({ uri: currentUri, source: currentSource });
+
+      expect(computeDefinition(currentSource, positionOf(currentSource, 'food/shared'), {
+        targetUri: currentUri,
+        workspaceIndex,
+      })).toEqual([
+        {
+          targetUri: firstUri,
+          targetSelectionRange: stringValueRange(firstSource, 'food/shared'),
+        },
+        {
+          targetUri: secondUri,
+          targetSelectionRange: stringValueRange(secondSource, 'food/shared'),
+        },
+      ]);
+    } finally {
+      await rm(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
   it('resolves cross-file predicate references through the workspace index', () => {
     const workspaceIndex = new DatalogWorkspaceIndex({
       documentStore: new DatalogDocumentStore(),
@@ -122,6 +232,32 @@ describe('computeDefinition', () => {
     })).toBeNull();
   });
 
+  it('continues to resolve user predicates independently from quoted string metadata', () => {
+    const workspaceIndex = new DatalogWorkspaceIndex({
+      documentStore: new DatalogDocumentStore(),
+    });
+    const schemaUri = 'file:///workspace/schema.dl';
+    const currentUri = 'file:///workspace/current.dl';
+    const schemaSource = [
+      'DefPred("Shared", "0", "liquid/node", "0", "liquid/node").',
+      'Shared(child, parent) :- Parent(child, parent).',
+    ].join('\n');
+    const currentSource = 'UsesShared(child, parent) :- Shared(child, parent).';
+
+    workspaceIndex.upsertOpenDocument({ uri: schemaUri, source: schemaSource });
+    workspaceIndex.upsertOpenDocument({ uri: currentUri, source: currentSource });
+
+    expect(computeDefinition(currentSource, positionOf(currentSource, 'Shared(child, parent)', 1), {
+      targetUri: currentUri,
+      workspaceIndex,
+    })).toEqual([
+      {
+        targetUri: schemaUri,
+        targetSelectionRange: predicateRange(schemaSource, 'Shared(child, parent)'),
+      },
+    ]);
+  });
+
   it('returns null for builtins and unknown symbols', () => {
     const source = [
       'Parent(child, parent).',
@@ -133,6 +269,12 @@ describe('computeDefinition', () => {
     })).toBeNull();
     expect(computeDefinition(source, positionOf(source, 'Missing(object)', 0), {
       targetUri: 'file:///workspace/current.dl',
+    })).toBeNull();
+    expect(computeDefinition('Edge("node/a", "graph/missing", "node/b").', positionOf('Edge("node/a", "graph/missing", "node/b").', 'graph/missing'), {
+      targetUri: 'file:///workspace/current.dl',
+      workspaceIndex: new DatalogWorkspaceIndex({
+        documentStore: new DatalogDocumentStore(),
+      }),
     })).toBeNull();
   });
 });
@@ -180,6 +322,28 @@ function predicateRange(source: string, predicateCall: string) {
   }
 
   throw new Error(`Could not find predicate call: ${predicateCall}`);
+}
+
+function stringValueRange(source: string, value: string) {
+  const lines = source.split('\n');
+
+  for (const [lineNumber, line] of lines.entries()) {
+    const startCharacter = line.indexOf(value);
+    if (startCharacter >= 0) {
+      return {
+        start: {
+          line: lineNumber,
+          character: startCharacter,
+        },
+        end: {
+          line: lineNumber,
+          character: startCharacter + value.length,
+        },
+      };
+    }
+  }
+
+  throw new Error(`Could not find string value: ${value}`);
 }
 
 async function writeWorkspaceFile(workspaceRoot: string, relativePath: string, source: string): Promise<void> {
