@@ -1,4 +1,4 @@
-import { cp, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,6 +14,7 @@ const smokeSuitePath = path.join(extensionRoot, 'fixtures', 'smoke', 'smoke-suit
 const brokenServerModuleId = '@datalog/lsp/broken-server-entry';
 const brokenSmokeFailureMessage = `DATALOG_SMOKE_BROKEN_EXPECTED_FAILURE: intentionally failed smoke run using ${brokenServerModuleId}.`;
 const brokenSmokeFailurePrefix = 'DATALOG_SMOKE_BROKEN_EXPECTED_FAILURE:';
+const smokeEvidencePathEnvironmentVariable = 'DATALOG_SMOKE_EVIDENCE_PATH';
 
 export async function wasExpectedBrokenFailure(message, brokenSmokeMarkerPath) {
   if (message.includes(brokenSmokeFailurePrefix)) {
@@ -51,13 +52,18 @@ export async function runSmoke({ brokenMode = process.argv.includes('--broken') 
   let temporaryWorkspaceDirectory;
   let temporaryStageDirectory;
   let brokenSmokeMarkerPath;
+  let stageRoot;
+  let workspaceRoot;
+  let commandOutcome = 'success';
+  let status = 'pass';
+  let errorMessage;
 
   try {
     temporaryWorkspaceDirectory = await mkdtemp(path.join(os.tmpdir(), 'datalog-vscode-smoke-'));
     temporaryStageDirectory = await mkdtemp(path.join(os.tmpdir(), 'datalog-vscode-stage-'));
 
-    const stageRoot = path.join(temporaryStageDirectory, 'extension');
-    const workspaceRoot = path.join(temporaryWorkspaceDirectory, 'workspace');
+    stageRoot = path.join(temporaryStageDirectory, 'extension');
+    workspaceRoot = path.join(temporaryWorkspaceDirectory, 'workspace');
     brokenSmokeMarkerPath = path.join(temporaryWorkspaceDirectory, 'broken-smoke-marker.txt');
     await createPackageStage({
       stageRoot,
@@ -74,20 +80,37 @@ export async function runSmoke({ brokenMode = process.argv.includes('--broken') 
       throw new Error(`${brokenSmokeFailureMessage} Smoke unexpectedly passed.`);
     }
   } catch (error) {
+    errorMessage = error instanceof Error ? error.message : String(error);
+
     if (!brokenMode) {
+      commandOutcome = 'failure';
+      status = 'fail';
       throw error;
     }
 
-    const message = error instanceof Error ? error.message : String(error);
+    const message = errorMessage;
 
     if (!(await wasExpectedBrokenFailure(message, brokenSmokeMarkerPath))) {
+      commandOutcome = 'failure';
+      status = 'fail';
       throw error;
     }
 
+    commandOutcome = 'expected-failure';
     process.exitCode = 0;
 
     return;
   } finally {
+    await writeSmokeEvidence({
+      evidencePath: process.env[smokeEvidencePathEnvironmentVariable],
+      mode: brokenMode ? 'broken' : 'normal',
+      commandOutcome,
+      status,
+      stagedExtensionPath: stageRoot,
+      fixtureWorkspacePath: workspaceRoot,
+      errorMessage,
+    });
+
     if (temporaryWorkspaceDirectory) {
       await rm(temporaryWorkspaceDirectory, { recursive: true, force: true });
     }
@@ -96,6 +119,37 @@ export async function runSmoke({ brokenMode = process.argv.includes('--broken') 
       await rm(temporaryStageDirectory, { recursive: true, force: true });
     }
   }
+}
+
+async function writeSmokeEvidence(options) {
+  if (!options.evidencePath) {
+    return;
+  }
+
+  const resolvedEvidencePath = path.isAbsolute(options.evidencePath)
+    ? options.evidencePath
+    : path.resolve(extensionRoot, '..', '..', options.evidencePath);
+
+  await mkdir(path.dirname(resolvedEvidencePath), { recursive: true });
+  await writeFile(resolvedEvidencePath, formatSmokeEvidence(options), 'utf8');
+}
+
+function formatSmokeEvidence(options) {
+  const lines = [
+    '# Smoke Evidence',
+    '',
+    `- mode: ${options.mode}`,
+    `- status: ${options.status}`,
+    `- commandOutcome: ${options.commandOutcome}`,
+    `- stagedExtensionPath: ${options.stagedExtensionPath ?? 'unavailable'}`,
+    `- fixtureWorkspacePath: ${options.fixtureWorkspacePath ?? 'unavailable'}`,
+  ];
+
+  if (options.errorMessage) {
+    lines.push(`- errorMessage: ${options.errorMessage}`);
+  }
+
+  return `${lines.join('\n')}\n`;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
