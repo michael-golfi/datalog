@@ -12,7 +12,7 @@ import {
 
 import { createGraphClassNodeSummaryInput, createNodeSummary } from './node-summary.js';
 
-type CollectedGraphSemantics = Omit<ParsedDocument, 'clauses' | 'lineStarts'>;
+type CollectedGraphSemantics = Omit<ParsedDocument, 'clauses' | 'datalogSymbols' | 'lineStarts'>;
 
 interface GraphSemanticsState {
   readonly predicateSchemas: Map<string, PredicateSchema>;
