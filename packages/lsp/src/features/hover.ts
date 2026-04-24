@@ -1,7 +1,5 @@
-import {
-  getStringReferenceAtPosition,
-  parseDocument,
-} from '@datalog/parser';
+import type { NodeSummary, PredicateSchema } from '@datalog/parser';
+import { getStringReferenceAtPosition, parseDocument } from '@datalog/parser';
 
 import type { LanguageServerHover, Position } from '../contracts/language-feature-types.js';
 import type { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
@@ -12,6 +10,15 @@ export interface HoverContext {
   readonly workspaceIndex?: DatalogWorkspaceIndex;
 }
 
+type ParsedDocument = ReturnType<typeof parseDocument>;
+type HoverRange = NonNullable<LanguageServerHover['range']>;
+interface PredicateOccurrence {
+  readonly identity: ParsedDocument['datalogSymbols']['predicates'][number]['identity'];
+  readonly range: HoverRange;
+}
+
+interface UserPredicateIdentity { readonly key: string; readonly name: string; readonly arity: number; }
+
 /** Compute hover content for parser-backed graph ids, predicates, and rules. */
 export function computeHover(
   source: string,
@@ -19,7 +26,7 @@ export function computeHover(
   context: HoverContext = {},
 ): LanguageServerHover | null {
   const parsed = parseDocument(source);
-  const stringReferenceHover = getStringReferenceHover(parsed, source, position);
+  const stringReferenceHover = getStringReferenceHover({ parsed, source, position, context });
   if (stringReferenceHover) {
     return stringReferenceHover;
   }
@@ -30,60 +37,90 @@ export function computeHover(
   }
 
   if (occurrence.identity.kind === 'user-predicate') {
-    return getUserPredicateHover(parsed, occurrence, context);
+    const identity: UserPredicateIdentity = occurrence.identity;
+    return getUserPredicateHover({ parsed, identity, range: occurrence.range, context });
   }
 
   return getBuiltinHover(occurrence.identity.name, occurrence.range);
 }
 
 function getStringReferenceHover(
-  parsed: ReturnType<typeof parseDocument>,
-  source: string,
-  position: Position,
+  options: {
+    readonly parsed: ParsedDocument;
+    readonly source: string;
+    readonly position: Position;
+    readonly context: HoverContext;
+  },
 ): LanguageServerHover | null {
-  const stringReference = getStringReferenceAtPosition(source, position);
+  const stringReference = getStringReferenceAtPosition(options.source, options.position);
   if (!stringReference) {
     return null;
   }
 
-  const schema = parsed.predicateSchemas.get(stringReference.value);
+  const contents = getStringReferenceHoverContents(options.parsed, stringReference.value, options.context);
+  return contents ? { contents, range: stringReference.range } : null;
+}
+
+function getStringReferenceHoverContents(
+  parsed: ParsedDocument,
+  referenceId: string,
+  context: HoverContext,
+): string | null {
+  return getLocalStringReferenceHoverContents(parsed, referenceId)
+    ?? getWorkspaceStringReferenceHoverContents(context, referenceId)
+    ?? null;
+}
+
+function getLocalStringReferenceHoverContents(parsed: ParsedDocument, referenceId: string): string | null {
+  const schema = parsed.predicateSchemas.get(referenceId);
   if (schema) {
-    return {
-      contents: [
-        `**${schema.predicateId}**`,
-        '',
-        'Graph predicate contract.',
-        '',
-        `- subject: \`${schema.subjectType}\` (cardinality \`${schema.subjectCardinality}\`)`,
-        `- object: \`${schema.objectType}\` (cardinality \`${schema.objectCardinality}\`)`,
-      ].join('\n'),
-      range: stringReference.range,
-    };
+    return formatPredicateSchemaHover(schema);
   }
 
-  const node = parsed.nodeSummaries.get(stringReference.value);
-  if (node) {
-    return {
-      contents: [
-        `**${node.id}**`,
-        '',
-        node.label ? `Preferred label: ${node.label}` : 'Graph node id.',
-        getNodeClassLine(node.classes),
-      ].join('\n'),
-      range: stringReference.range,
-    };
+  const node = parsed.nodeSummaries.get(referenceId);
+  return node ? formatNodeSummaryHover(node) : null;
+}
+
+function getWorkspaceStringReferenceHoverContents(context: HoverContext, referenceId: string): string | null {
+  if (!context.workspaceIndex) {
+    return null;
   }
 
-  return null;
+  const schema = context.workspaceIndex.getPredicateSchemaTargets(referenceId)
+    .find((target) => target.uri !== context.targetUri)?.schema;
+  if (schema) {
+    return formatPredicateSchemaHover(schema);
+  }
+
+  const node = context.workspaceIndex.getNodeSummaryTargets(referenceId)
+    .find((target) => target.uri !== context.targetUri)?.summary;
+  return node ? formatNodeSummaryHover(node) : null;
+}
+
+function formatPredicateSchemaHover(schema: PredicateSchema): string {
+  return [
+    `**${schema.predicateId}**`,
+    '',
+    'Graph predicate contract.',
+    '',
+    `- subject: \`${schema.subjectType}\` (cardinality \`${schema.subjectCardinality}\`)`,
+    `- object: \`${schema.objectType}\` (cardinality \`${schema.objectCardinality}\`)`,
+  ].join('\n');
+}
+
+function formatNodeSummaryHover(node: NodeSummary): string {
+  return [
+    `**${node.id}**`,
+    '',
+    node.label ? `Preferred label: ${node.label}` : 'Graph node id.',
+    getNodeClassLine(node.classes),
+  ].join('\n');
 }
 
 function findPredicateOccurrence(
-  parsed: ReturnType<typeof parseDocument>,
+  parsed: ParsedDocument,
   position: Position,
-): {
-  readonly identity: NonNullable<ReturnType<typeof parseDocument>['datalogSymbols']['predicates'][number]>['identity'];
-  readonly range: NonNullable<LanguageServerHover['range']>;
-} | null {
+): PredicateOccurrence | null {
   for (const predicate of parsed.datalogSymbols.predicates) {
     const occurrence = predicate.occurrences.find((candidate) => containsPosition(position, candidate.range));
     if (occurrence) {
@@ -98,39 +135,49 @@ function findPredicateOccurrence(
 }
 
 function getUserPredicateHover(
-  parsed: ReturnType<typeof parseDocument>,
-  occurrence: NonNullable<ReturnType<typeof findPredicateOccurrence>>,
-  context: HoverContext,
+  options: {
+    readonly parsed: ParsedDocument;
+    readonly identity: UserPredicateIdentity;
+    readonly range: HoverRange;
+    readonly context: HoverContext;
+  },
 ): LanguageServerHover | null {
-  const definitions = [
-    ...getLocalPredicateDefinitions({
-      parsed,
-      identity: occurrence.identity,
-      ...(context.targetUri ? { targetUri: context.targetUri } : {}),
-    }),
-    ...getWorkspacePredicateDefinitions({
-      workspaceIndex: context.workspaceIndex,
-      identity: occurrence.identity,
-      ...(context.targetUri ? { targetUri: context.targetUri } : {}),
-    }),
-  ];
+  const definitions = getPredicateDefinitions(options);
 
   if (definitions.length === 0) {
     return null;
   }
 
   return {
-    contents: [
-      `**${occurrence.identity.name}/${occurrence.identity.arity}**`,
-      '',
-      `${definitions.length} definition${definitions.length === 1 ? '' : 's'} across the workspace.`,
-      `Arity: \`${occurrence.identity.arity}\``,
-      '',
-      'Definitions:',
-      ...definitions.map(formatDefinitionProvenance),
-    ].join('\n'),
-    range: occurrence.range,
+    contents: formatUserPredicateHoverContents(options.identity, definitions),
+    range: options.range,
   };
+}
+
+function getPredicateDefinitions(options: {
+  readonly parsed: ParsedDocument;
+  readonly identity: UserPredicateIdentity;
+  readonly context: HoverContext;
+}): readonly PredicateDefinitionProvenance[] {
+  return [
+    ...getLocalPredicateDefinitions(options.parsed, options.identity, options.context.targetUri),
+    ...getWorkspacePredicateDefinitions(options.context.workspaceIndex, options.identity, options.context.targetUri),
+  ];
+}
+
+function formatUserPredicateHoverContents(
+  identity: UserPredicateIdentity,
+  definitions: readonly PredicateDefinitionProvenance[],
+): string {
+  return [
+    `**${identity.name}/${identity.arity}**`,
+    '',
+    `${definitions.length} definition${definitions.length === 1 ? '' : 's'} across the workspace.`,
+    `Arity: \`${identity.arity}\``,
+    '',
+    'Definitions:',
+    ...definitions.map(formatDefinitionProvenance),
+  ].join('\n');
 }
 
 function getBuiltinHover(
@@ -148,38 +195,30 @@ function getBuiltinHover(
   return null;
 }
 
-function getLocalPredicateDefinitions(options: {
-  readonly parsed: ReturnType<typeof parseDocument>;
-  readonly identity: {
-    readonly key: string;
-    readonly name: string;
-    readonly arity: number;
-  };
-  readonly targetUri?: string;
-}): readonly PredicateDefinitionProvenance[] {
-  return (options.parsed.derivedPredicates.get(options.identity.name) ?? [])
-    .filter((clause) => clause.arity === options.identity.arity)
+function getLocalPredicateDefinitions(
+  parsed: ParsedDocument,
+  identity: UserPredicateIdentity,
+  targetUri?: string,
+): readonly PredicateDefinitionProvenance[] {
+  return (parsed.derivedPredicates.get(identity.name) ?? [])
+    .filter((clause) => clause.arity === identity.arity)
     .map((clause) => ({
-      uri: options.targetUri ?? 'current document',
+      uri: targetUri ?? 'current document',
       range: clause.predicateRange,
     }));
 }
 
-function getWorkspacePredicateDefinitions(options: {
-  readonly workspaceIndex: DatalogWorkspaceIndex | undefined;
-  readonly identity: {
-    readonly key: string;
-    readonly name: string;
-    readonly arity: number;
-  };
-  readonly targetUri?: string;
-}): readonly PredicateDefinitionProvenance[] {
-  if (!options.workspaceIndex) {
+function getWorkspacePredicateDefinitions(
+  workspaceIndex: DatalogWorkspaceIndex | undefined,
+  identity: UserPredicateIdentity,
+  targetUri?: string,
+): readonly PredicateDefinitionProvenance[] {
+  if (!workspaceIndex) {
     return [];
   }
 
-  return options.workspaceIndex.getPredicateDefinitions(options.identity.key)
-    .filter((definition) => definition.uri !== options.targetUri)
+  return workspaceIndex.getPredicateDefinitions(identity.key)
+    .filter((definition) => definition.uri !== targetUri)
     .map((definition) => ({
       uri: definition.uri,
       range: definition.range,
@@ -192,7 +231,7 @@ function formatDefinitionProvenance(definition: PredicateDefinitionProvenance): 
 
 function containsPosition(
   position: Position,
-  range: NonNullable<LanguageServerHover['range']>,
+  range: HoverRange,
 ): boolean {
   const startsBefore = position.line > range.start.line
     || (position.line === range.start.line && position.character >= range.start.character);
@@ -208,7 +247,4 @@ function getNodeClassLine(classes: readonly string[]): string {
     : '- class: not declared in this document';
 }
 
-interface PredicateDefinitionProvenance {
-  readonly uri: string;
-  readonly range: NonNullable<LanguageServerHover['range']>;
-}
+interface PredicateDefinitionProvenance { readonly uri: string; readonly range: HoverRange; }
