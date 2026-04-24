@@ -7,7 +7,8 @@
       "request": "launch",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "${workspaceFolder}/fixtures/smoke/smoke.dl"
+        "${workspaceFolder}/fixtures/smoke/workspace",
+        "${workspaceFolder}/fixtures/smoke/workspace/current.dl"
       ],
       "outFiles": [
         "${workspaceFolder}/build/out/**/*.js"

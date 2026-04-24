@@ -18,7 +18,9 @@
     "syntax highlighting"
   ],
   "activationEvents": [
-    "onLanguage:datalog"
+    "onLanguage:datalog",
+    "onCommand:datalog.restartLanguageServer",
+    "onCommand:datalog.showLanguageServerOutput"
   ],
   "files": [
     "build/out/**",
@@ -27,6 +29,44 @@
     "package.json"
   ],
   "contributes": {
+    "commands": [
+      {
+        "command": "datalog.restartLanguageServer",
+        "title": "Datalog: Restart Language Server"
+      },
+      {
+        "command": "datalog.showLanguageServerOutput",
+        "title": "Datalog: Show Language Server Output"
+      }
+    ],
+    "configuration": {
+      "title": "Datalog",
+      "properties": {
+        "datalog.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "markdownDescription": "Controls the amount of language-server protocol trace written to the Datalog Language Server output channel.",
+          "scope": "window"
+        },
+        "datalog.server.revealOutputChannelOn": {
+          "type": "string",
+          "enum": [
+            "never",
+            "error",
+            "warn",
+            "info"
+          ],
+          "default": "error",
+          "markdownDescription": "Controls when VS Code automatically reveals the Datalog Language Server output channel.",
+          "scope": "window"
+        }
+      }
+    },
     "languages": [
       {
         "id": "datalog",
