@@ -1,4 +1,4 @@
-import type { DatalogPredicateName, DatalogRuleId } from './datalog-program.js';
+import type { DatalogPredicateName, DatalogRuleId } from '@datalog/ast';
 import type { LogicalColumnId, LogicalNodeId } from './logical-plan.js';
 import type { RelationColumnBinding } from './predicate-catalog.js';
 

@@ -1,4 +1,5 @@
-import type { DatalogPredicateName, DatalogTypeName, PredicateSignature } from './datalog-program.js';
+import type { DatalogPredicateName, DatalogTypeName } from '@datalog/ast';
+import type { PredicateSignature } from './datalog-program.js';
 
 export interface RelationColumnBinding {
   readonly name: string;

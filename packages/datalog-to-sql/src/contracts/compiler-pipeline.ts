@@ -1,4 +1,6 @@
-import type { DatalogProgram, NormalizedProgram } from './datalog-program.js';
+import type { DatalogProgram } from '@datalog/ast';
+
+import type { NormalizedProgram } from './datalog-program.js';
 import type { LogicalPlan } from './logical-plan.js';
 import type { BackendKind, PhysicalPlan } from './physical-plan.js';
 import type { PredicateCatalog } from './predicate-catalog.js';
