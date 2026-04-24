@@ -38,6 +38,31 @@ describe('extractDatalogFactsFromMigrations', () => {
     });
   });
 
+  it('keeps explicit Vertex and Node facts from the parser AST seam', () => {
+    expect(
+      extractDatalogFactsFromMigrations([
+        {
+          body: 'Vertex("node/alice").\nNode("node/bob").\nEdge("node/alice", "graph/likes", "node/bob").\n',
+        },
+      ]),
+    ).toEqual({
+      vertexCount: 2,
+      edgeCount: 1,
+      vertices: [
+        { kind: 'vertex', id: 'node/alice' },
+        { kind: 'vertex', id: 'node/bob' },
+      ],
+      edges: [
+        {
+          kind: 'edge',
+          subjectId: 'node/alice',
+          predicateId: 'graph/likes',
+          objectId: 'node/bob',
+        },
+      ],
+    });
+  });
+
   it('skips compound declarations, DefCompound clauses, and DefPred clauses', () => {
     const extraction = extractDatalogFactsFromMigrations([
       {

@@ -4,11 +4,15 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
+  edgeFact,
+  vertexFact,
   type DatalogFact,
+  type DatalogFactStatement,
+  type DatalogAtomArgument,
   type EdgeFact,
   type VertexFact,
-} from '@datalog/datalog-to-sql';
-import { parseDocument, type ParsedClause } from '@datalog/parser';
+ } from '@datalog/ast';
+import { parseDatalogProgram, parseDocument, type ParsedClause } from '@datalog/parser';
 
 import { applyFactsAndRecordMigrations } from './apply-facts-to-database.js';
 import { loadDatalogMigrationProjectFiles } from './load-datalog-migration-project-files.js';
@@ -43,11 +47,15 @@ export function extractDatalogFactsFromMigrations(
   migrations: ReadonlyArray<{ readonly body: string }>,
   options: ExtractDatalogFactsOptions = {},
 ): DatalogMigrationFactExtraction {
-  const edges: EdgeFact[] = collectEdgeFacts(migrations, options);
-  const vertexIds = collectVertexIds(edges);
-  const vertices = [...vertexIds].map<VertexFact>((id) => ({ kind: 'vertex', id }));
+  const extraction = collectGraphFacts(migrations, options);
+  const vertices = [...extraction.vertexIds].map<VertexFact>((id) => vertexFact(id));
 
-  return { vertexCount: vertices.length, edgeCount: edges.length, vertices, edges };
+  return {
+    vertexCount: vertices.length,
+    edgeCount: extraction.edges.length,
+    vertices,
+    edges: extraction.edges,
+  };
 }
 
 /** Apply committed Datalog Edge facts from a workspace into PostgreSQL graph tables. */
@@ -71,24 +79,71 @@ export async function applyDatalogMigrations(
   };
 }
 
-function collectEdgeFacts(
+function collectGraphFacts(
   migrations: ReadonlyArray<{ readonly body: string }>,
   options: ExtractDatalogFactsOptions,
-): EdgeFact[] {
+): {
+  readonly vertexIds: Set<string>;
+  readonly edges: EdgeFact[];
+} {
+  const vertexIds = new Set<string>();
   const edges: EdgeFact[] = [];
 
   for (const migration of migrations) {
-    edges.push(...extractEdgesFromBody(migration.body, options));
+    const facts = extractFactsFromBody(migration.body, options);
+
+    for (const fact of facts) {
+      addGraphFactToExtraction(fact, vertexIds, edges);
+    }
   }
 
-  return edges;
+  return { vertexIds, edges };
 }
 
-function extractEdgesFromBody(body: string, options: ExtractDatalogFactsOptions): readonly EdgeFact[] {
+function extractFactsFromBody(body: string, options: ExtractDatalogFactsOptions): readonly DatalogFact[] {
+  return [
+    ...extractStandardGraphFacts(body),
+    ...extractCompoundBacklinksFromBody(body, options),
+  ];
+}
+
+function addGraphFactToExtraction(fact: DatalogFact, vertexIds: Set<string>, edges: EdgeFact[]): void {
+  if (fact.kind === 'vertex') {
+    vertexIds.add(fact.id);
+    return;
+  }
+
+  vertexIds.add(fact.subjectId);
+  vertexIds.add(fact.objectId);
+  edges.push(fact);
+}
+
+function extractStandardGraphFacts(body: string): readonly DatalogFact[] {
+  const facts: DatalogFact[] = [];
+
+  for (const statement of parseDatalogProgram(body).statements) {
+    const fact = tryExtractGraphFact(statement);
+
+    if (fact !== null) {
+      facts.push(fact);
+    }
+  }
+
+  return facts;
+}
+
+function extractCompoundBacklinksFromBody(
+  body: string,
+  options: ExtractDatalogFactsOptions,
+): readonly EdgeFact[] {
+  if (options.compoundBacklinkExpander === undefined) {
+    return [];
+  }
+
   const edges: EdgeFact[] = [];
 
   for (const clause of parseDocument(body).clauses) {
-    const compoundBacklink = tryExpandCompoundBacklink(clause, options);
+    const compoundBacklink = tryExpandCompoundBacklink(clause, options.compoundBacklinkExpander);
 
     if (compoundBacklink === null) {
       continue;
@@ -96,71 +151,78 @@ function extractEdgesFromBody(body: string, options: ExtractDatalogFactsOptions)
 
     if (compoundBacklink !== undefined) {
       edges.push(compoundBacklink);
-      continue;
-    }
-
-    const edge = tryExtractEdge(clause);
-
-    if (edge !== null) {
-      edges.push(edge);
     }
   }
 
   return edges;
 }
 
-function collectVertexIds(edges: readonly EdgeFact[]): Set<string> {
-  const vertexIds = new Set<string>();
-
-  for (const edge of edges) {
-    vertexIds.add(edge.subjectId);
-    vertexIds.add(edge.objectId);
-  }
-
-  return vertexIds;
-}
-
-function tryExtractEdge(clause: ParsedClause): EdgeFact | null {
-  if (!isEdgeFactClause(clause)) {
+function tryExtractGraphFact(statement: ReturnType<typeof parseDatalogProgram>['statements'][number]): DatalogFact | null {
+  if (statement.kind !== 'fact') {
     return null;
   }
 
-  const subjectId = clause.references[0]?.value;
-  const predicateId = clause.references[1]?.value;
-  const objectId = clause.references[2]?.value;
+  if (isEdgeFactStatement(statement)) {
+    return toEdgeFact(statement);
+  }
+
+  if (isVertexFactStatement(statement)) {
+    return toVertexFact(statement);
+  }
+
+  return null;
+}
+
+function isEdgeFactStatement(statement: DatalogFactStatement): boolean {
+  return statement.atom.predicate === 'Edge' && statement.atom.terms.length === 3;
+}
+
+function isVertexFactStatement(statement: DatalogFactStatement): boolean {
+  return (statement.atom.predicate === 'Vertex' || statement.atom.predicate === 'Node')
+    && statement.atom.terms.length === 1;
+}
+
+function toEdgeFact(statement: DatalogFactStatement): EdgeFact | null {
+  const [subject, predicate, object] = statement.atom.terms;
+  const subjectId = getQuotedGraphId(subject);
+  const predicateId = getQuotedGraphId(predicate);
+  const objectId = getQuotedGraphId(object);
 
   if (subjectId === undefined || predicateId === undefined || objectId === undefined) {
     return null;
   }
 
-  return { kind: 'edge', subjectId, predicateId, objectId };
+  return edgeFact({ subjectId, predicateId, objectId });
 }
 
-function isEdgeFactClause(clause: ParsedClause): boolean {
-  if (clause.isCompound || clause.isRule) {
-    return false;
+function toVertexFact(statement: DatalogFactStatement): VertexFact | null {
+  const [vertexIdTerm] = statement.atom.terms;
+  const id = getQuotedGraphId(vertexIdTerm);
+
+  if (id === undefined) {
+    return null;
   }
 
-  if (clause.predicate === 'DefCompound' || clause.predicate === 'DefPred') {
-    return false;
+  return vertexFact(id);
+}
+
+function getQuotedGraphId(term: DatalogAtomArgument | undefined): string | undefined {
+  if (term === undefined || term.kind === 'named' || term.kind !== 'constant' || typeof term.value !== 'string') {
+    return undefined;
   }
 
-  return clause.predicate === 'Edge';
+  return term.value;
 }
 
 function tryExpandCompoundBacklink(
   clause: ParsedClause,
-  options: ExtractDatalogFactsOptions,
+  compoundBacklinkExpander: CompoundBacklinkExpander,
 ): EdgeFact | null | undefined {
   if (!clause.isCompound || clause.predicate === 'DefCompound') {
     return undefined;
   }
 
-  if (options.compoundBacklinkExpander === undefined) {
-    return undefined;
-  }
-
-  return options.compoundBacklinkExpander(clause);
+  return compoundBacklinkExpander(clause);
 }
 
 function loadCommittedProjectFilesOrThrow(workspaceRoot: string) {
