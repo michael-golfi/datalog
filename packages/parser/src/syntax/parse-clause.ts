@@ -1,6 +1,9 @@
 import type { ParsedClause } from '../contracts/parsed-document.js';
 
-import { extractCompoundFields } from './extract-compound-fields.js';
+import {
+  extractCompoundFieldOccurrences,
+  extractCompoundFields,
+} from './extract-compound-fields.js';
 import { extractPredicateOccurrences } from './extract-predicate-occurrences.js';
 import {
   extractStringReferences,
@@ -120,12 +123,18 @@ function getHeadArguments(text: string, firstParenOffset: number, closeParenOffs
 }
 
 function createParsedClause(input: ParsedClauseInput): ParsedClause {
+  const compoundFieldOccurrences = extractCompoundFieldOccurrences({
+    statement: input.statement,
+    lineStarts: input.lineStarts,
+  });
+
   return {
     predicate: input.predicate,
     isCompound: input.isCompound,
     isRule: input.text.includes(':-'),
     arity: splitTopLevelArgs(input.headArguments).length,
     compoundFields: input.isCompound ? extractCompoundFields(input.headArguments) : [],
+    compoundFieldOccurrences,
     range: {
       start: offsetToPosition(input.lineStarts, input.statement.startOffset),
       end: offsetToPosition(input.lineStarts, input.statement.startOffset + input.statement.text.length),

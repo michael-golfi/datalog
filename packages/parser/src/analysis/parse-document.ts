@@ -5,6 +5,7 @@ import { parseClause } from '../syntax/parse-clause.js';
 import { splitStatements } from '../syntax/split-statements.js';
 
 import { collectGraphSemantics } from './collect-graph-semantics.js';
+import { collectDatalogSymbols } from './collect-datalog-symbols.js';
 
 /** Parse a Datalog document into clauses plus derived graph-oriented indexes. */
 export function parseDocument(source: string): ParsedDocument {
@@ -13,10 +14,12 @@ export function parseDocument(source: string): ParsedDocument {
     .map((statement) => parseClause(statement, lineStarts, classifyReferenceRole))
     .filter((clause): clause is NonNullable<typeof clause> => clause !== null);
   const semantics = collectGraphSemantics(clauses);
+  const datalogSymbols = collectDatalogSymbols(clauses);
 
   return {
     clauses,
     ...semantics,
+    datalogSymbols,
     lineStarts,
   };
 }

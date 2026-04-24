@@ -7,16 +7,16 @@ describe('run-smoke helpers', () => {
     const options = createSmokeRunOptions({
       brokenMode: false,
       stageRoot: '/tmp/stage',
-      smokeFilePath: '/tmp/work/smoke.dl',
+      currentFilePath: '/tmp/workspace/current.dl',
       brokenSmokeMarkerPath: '/tmp/work/marker.txt',
     });
 
     expect(options).toMatchObject({
       extensionDevelopmentPath: '/tmp/stage',
-      launchArgs: ['/tmp/work', '--disable-extensions'],
+      launchArgs: ['/tmp/workspace', '--disable-extensions'],
       extensionTestsEnv: {
         DATALOG_SMOKE_EXPECT_FAILURE: '0',
-        DATALOG_SMOKE_FILE_PATH: '/tmp/work/smoke.dl',
+        DATALOG_SMOKE_CURRENT_FILE_PATH: '/tmp/workspace/current.dl',
       },
     });
   });
@@ -25,7 +25,7 @@ describe('run-smoke helpers', () => {
     const options = createSmokeRunOptions({
       brokenMode: true,
       stageRoot: '/tmp/stage',
-      smokeFilePath: '/tmp/work/smoke.dl',
+      currentFilePath: '/tmp/workspace/current.dl',
       brokenSmokeMarkerPath: '/tmp/work/marker.txt',
     });
 

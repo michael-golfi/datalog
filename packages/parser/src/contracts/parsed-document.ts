@@ -1,4 +1,5 @@
 import type { Range } from './position.js';
+import type { DatalogSymbols } from './datalog-symbol-identity.js';
 
 export interface PredicateSchema {
   readonly predicateId: string;
@@ -27,6 +28,13 @@ export interface ParsedReference {
 export interface ParsedPredicateOccurrence {
   readonly name: string;
   readonly kind: 'head' | 'body';
+  readonly arity: number;
+  readonly range: Range;
+}
+
+export interface ParsedCompoundFieldOccurrence {
+  readonly predicateName: string;
+  readonly name: string;
   readonly range: Range;
 }
 
@@ -36,6 +44,7 @@ export interface ParsedClause {
   readonly isRule: boolean;
   readonly arity: number;
   readonly compoundFields: readonly string[];
+  readonly compoundFieldOccurrences: readonly ParsedCompoundFieldOccurrence[];
   readonly range: Range;
   readonly predicateRange: Range;
   readonly occurrences: readonly ParsedPredicateOccurrence[];
@@ -50,6 +59,7 @@ export interface ParsedDocument {
   readonly nodeSummaries: ReadonlyMap<string, NodeSummary>;
   readonly graphPredicateIds: readonly string[];
   readonly nodeIds: readonly string[];
+  readonly datalogSymbols: DatalogSymbols;
   readonly lineStarts: readonly number[];
 }
 

@@ -1,0 +1,2 @@
+% Passive migration fixture to mirror a realistic authoring workspace.
+MigrationNote("migration/bootstrap").

@@ -1,3 +1,0 @@
-% Smoke fixture for Datalog VS Code extension validation.
-DefPred("Meal", "meal").
-Serving@("breakfast", "pancakes").

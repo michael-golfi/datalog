@@ -46,6 +46,7 @@ export function toLspDocumentSymbol(symbol: LanguageServerDocumentSymbol): Docum
     range: symbol.range,
     selectionRange: symbol.selectionRange,
     ...(symbol.detail ? { detail: symbol.detail } : {}),
+    ...(symbol.children ? { children: symbol.children.map((child) => toLspDocumentSymbol(child)) } : {}),
   };
 }
 
