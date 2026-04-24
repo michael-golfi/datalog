@@ -3,7 +3,9 @@ import {
   computeRecursiveClosureVertexCount,
   type RecursiveClosureBenchmarkContract,
 } from './recursive-closure-benchmark-contract.js';
-import type { DatalogFact, SelectRecursiveClosureCountOperation } from '../contracts/postgres-graph-operation.js';
+import type { DatalogFact } from '@datalog/ast';
+
+import type { SelectRecursiveClosureCountOperation } from '../contracts/postgres-graph-operation.js';
 
 export interface RecursiveClosureBenchmarkFixture {
   readonly seedFacts: readonly [DatalogFact, ...DatalogFact[]];

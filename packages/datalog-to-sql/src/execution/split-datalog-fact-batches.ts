@@ -1,4 +1,4 @@
-import type { DatalogFact } from '../contracts/postgres-graph-operation.js';
+import type { DatalogFact } from '@datalog/ast';
 
 const DEFAULT_MAX_PARAMETERS = 60_000;
 type FactBatch = readonly [DatalogFact, ...DatalogFact[]];

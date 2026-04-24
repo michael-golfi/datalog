@@ -1,7 +1,7 @@
 import { createPostgresGraphTranslator } from '../runtime/create-postgres-graph-translator.js';
 import type { PostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
 import { executeTranslatedSql } from './execute-translated-sql.js';
-import type { DatalogFact } from '../contracts/postgres-graph-operation.js';
+import type { DatalogFact } from '@datalog/ast';
 import { splitDatalogFactBatches } from './split-datalog-fact-batches.js';
 
 /** Apply a non-empty batch of Datalog facts through the generic SQL translation surface. */

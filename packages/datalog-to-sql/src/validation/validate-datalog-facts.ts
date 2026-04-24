@@ -1,5 +1,6 @@
+import type { DatalogFact } from '@datalog/ast';
+
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
-import type { DatalogFact } from '../contracts/postgres-graph-operation.js';
 
 /** Validate that fact insert/delete operations contain only non-empty identifiers. */
 export function validateDatalogFacts(facts: readonly DatalogFact[], mode: 'insert' | 'delete'): void {
