@@ -1,0 +1,18 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "never"
+  },
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "prettier.configPath": ".prettierrc",
+  "git.detectWorktrees": true,
+  "git.autoRepositoryDetection": true,
+  "scm.alwaysShowRepositories": true,
+  "scm.repositories.selectionMode": "multiple"
+}
