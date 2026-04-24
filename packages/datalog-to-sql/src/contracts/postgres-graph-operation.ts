@@ -1,3 +1,8 @@
+import type {
+  DatalogFactPatternMatch,
+  DatalogFactSet,
+} from '@datalog/ast';
+
 export interface SelectVertexByIdOperation {
   readonly kind: 'select-vertex-by-id';
   readonly vertexId: string;
@@ -12,59 +17,19 @@ export interface SelectEdgesOperation {
   };
 }
 
-export interface DatalogVariableTerm {
-  readonly kind: 'variable';
-  readonly name: string;
-}
-
-export interface DatalogConstantTerm {
-  readonly kind: 'constant';
-  readonly value: string;
-}
-
-export type DatalogTerm = DatalogVariableTerm | DatalogConstantTerm;
-
-export interface VertexFactPattern {
-  readonly kind: 'vertex';
-  readonly id: DatalogTerm;
-}
-
-export interface EdgeFactPattern {
-  readonly kind: 'edge';
-  readonly subject: DatalogTerm;
-  readonly predicate: DatalogTerm;
-  readonly object: DatalogTerm;
-}
-
-export type DatalogFactPattern = VertexFactPattern | EdgeFactPattern;
-
 export interface SelectFactsOperation {
   readonly kind: 'select-facts';
-  readonly match: readonly [DatalogFactPattern, ...DatalogFactPattern[]];
+  readonly match: DatalogFactPatternMatch;
 }
-
-export interface VertexFact {
-  readonly kind: 'vertex';
-  readonly id: string;
-}
-
-export interface EdgeFact {
-  readonly kind: 'edge';
-  readonly subjectId: string;
-  readonly predicateId: string;
-  readonly objectId: string;
-}
-
-export type DatalogFact = VertexFact | EdgeFact;
 
 export interface InsertFactsOperation {
   readonly kind: 'insert-facts';
-  readonly facts: readonly [DatalogFact, ...DatalogFact[]];
+  readonly facts: DatalogFactSet;
 }
 
 export interface DeleteFactsOperation {
   readonly kind: 'delete-facts';
-  readonly facts: readonly [DatalogFact, ...DatalogFact[]];
+  readonly facts: DatalogFactSet;
 }
 
 export interface SelectRecursiveClosureCountOperation {

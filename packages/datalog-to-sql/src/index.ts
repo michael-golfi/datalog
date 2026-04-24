@@ -3,24 +3,16 @@ export { createPostgresSqlClient } from './runtime/create-postgres-sql-client.js
 export { initializeGraphSchema, startRecursiveClosurePostgresRuntime, waitForPostgres } from './runtime/recursive-closure-postgres-runtime.js';
 export { applyDatalogFacts } from './execution/apply-datalog-facts.js';
 export { executeTranslatedSql } from './execution/execute-translated-sql.js';
+export { createSelectFactsOperationFromDatalogQuery } from './translation/create-select-facts-operation-from-datalog-query.js';
 export { translateGraphOperation } from './translation/translate-graph-operation.js';
 export type {
-  DatalogConstantTerm,
-  DatalogFact,
-  DatalogFactPattern,
-  DatalogTerm,
-  DatalogVariableTerm,
   DeleteFactsOperation,
-  EdgeFact,
-  EdgeFactPattern,
   InsertFactsOperation,
   PostgresGraphOperation,
   SelectFactsOperation,
   SelectRecursiveClosureCountOperation,
   SelectEdgesOperation,
   SelectVertexByIdOperation,
-  VertexFact,
-  VertexFactPattern,
 } from './contracts/postgres-graph-operation.js';
 export { GraphTranslationError } from './contracts/graph-translation-error.js';
 export type { GraphTranslationResult } from './contracts/graph-translation-result.js';
@@ -29,20 +21,6 @@ export type { PostgresGraphTranslator } from './contracts/postgres-graph-transla
 export type { PostgresSqlClient } from './runtime/create-postgres-sql-client.js';
 export type { TranslatedSqlQuery } from './contracts/translated-sql-query.js';
 export type {
-  DatalogAtom,
-  DatalogComparison,
-  DatalogDirectiveStatement,
-  DatalogFunctionCall,
-  DatalogLiteral,
-  DatalogNegatedAtom,
-  DatalogProgram,
-  DatalogQueryStatement,
-  DatalogRuleStatement,
-  DatalogScalarValue,
-  DatalogSourceLocation,
-  DatalogStatement,
-  DatalogTypeName,
-  DatalogWildcardTerm,
   NormalizedAtom,
   NormalizedFact,
   NormalizedFunctionCall,

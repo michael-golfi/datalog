@@ -1,4 +1,4 @@
-import type { DatalogPredicateName, DatalogScalarValue, DatalogTypeName } from './datalog-program.js';
+import type { DatalogPredicateName, DatalogScalarValue, DatalogTypeName } from '@datalog/ast';
 import type { PredicateCatalog } from './predicate-catalog.js';
 
 export type LogicalNodeId = string;
