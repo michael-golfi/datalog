@@ -1,4 +1,4 @@
-import type { ParsedDocument, Position } from '@datalog/parser';
+import type { ParsedDocument } from '@datalog/parser';
 
 import type {
   LanguageServerCompletionItem,
@@ -7,6 +7,7 @@ import type {
   LanguageServerDocumentSymbol,
   LanguageServerFoldingRange,
   LanguageServerHover,
+  Position,
 } from './language-feature-types.js';
 import type { SemanticToken } from '../features/semantic-tokens.js';
 import type { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';

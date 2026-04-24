@@ -33,10 +33,11 @@
   "scripts": {
     "build": "tsc -b ./tsconfig.lib.json",
     "lint": "eslint --max-warnings=0 .",
-    "typecheck": "yarn workspace @datalog/parser build && tsc -p ./tsconfig.lib.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
+    "typecheck": "yarn workspace @datalog/ast build && yarn workspace @datalog/parser build && tsc -p ./tsconfig.lib.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
     "test": "vitest run --config ./vitest.config.ts"
   },
   "dependencies": {
+    "@datalog/ast": "workspace:*",
     "@datalog/parser": "workspace:*",
     "vscode-languageserver": "^9.0.0",
     "vscode-languageserver-textdocument": "^1.0.0"

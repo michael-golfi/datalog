@@ -1,7 +1,7 @@
-import type { Position as ParserPosition, Range as ParserRange } from '@datalog/parser';
+import type { Position as DatalogPosition, Range as DatalogRange } from '@datalog/ast';
 
-export type Position = ParserPosition;
-export type Range = ParserRange;
+export type Position = DatalogPosition;
+export type Range = DatalogRange;
 
 export interface LanguageServerDiagnostic {
   readonly range: Range;
