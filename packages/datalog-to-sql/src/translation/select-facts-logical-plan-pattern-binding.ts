@@ -1,4 +1,6 @@
-import type { DatalogTerm } from '../contracts/postgres-graph-operation.js';
+import type { DatalogTerm } from '@datalog/ast';
+
+import { GraphTranslationError } from '../contracts/graph-translation-error.js';
 import type { LogicalExpression, LogicalNodeId } from '../contracts/logical-plan.js';
 import type { RelationColumnBinding } from '../contracts/predicate-catalog.js';
 
@@ -37,9 +39,20 @@ export function bindPatternTerm(input: {
   );
 
   if (input.binding.term.kind === 'constant') {
+    if (typeof input.binding.term.value !== 'string') {
+      throw new GraphTranslationError(
+        'datalog-to-sql.query.invalid-term',
+        'Query constants must use string graph identifiers.',
+      );
+    }
+
     input.localFilters.push(
       createEqualityExpression(scanReference, createLiteral(input.binding.term.value, input.binding.column.type)),
     );
+    return;
+  }
+
+  if (input.binding.term.kind === 'wildcard') {
     return;
   }
 

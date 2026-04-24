@@ -1,9 +1,7 @@
+import type { DatalogFactPattern, DatalogTerm } from '@datalog/ast';
+
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
-import type {
-  DatalogFactPattern,
-  DatalogTerm,
-  SelectFactsOperation,
-} from '../contracts/postgres-graph-operation.js';
+import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
 
 /** Validate that a select-facts operation uses non-empty constants and variable names. */
 export function validateSelectFactsOperation(operation: SelectFactsOperation): void {
@@ -25,14 +23,18 @@ function validateFactPattern(pattern: DatalogFactPattern): void {
 
 function validateTerm(term: DatalogTerm): void {
   if (term.kind === 'constant') {
-    if (term.value.trim().length > 0) {
+    if (typeof term.value === 'string' && term.value.trim().length > 0) {
       return;
     }
 
     throw new GraphTranslationError(
       'datalog-to-sql.query.invalid-term',
-      'Query constants must use non-empty values.',
+      'Query constants must use non-empty string values.',
     );
+  }
+
+  if (term.kind === 'wildcard') {
+    return;
   }
 
   if (term.name.trim().length > 0) {
