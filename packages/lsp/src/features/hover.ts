@@ -1,26 +1,39 @@
 import {
   getStringReferenceAtPosition,
-  getWordRangeAtPosition,
   parseDocument,
 } from '@datalog/parser';
 
 import type { LanguageServerHover, Position } from '../contracts/language-feature-types.js';
+import type { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
 import { BUILTIN_PREDICATE_DOCS } from './builtin-predicate-docs.js';
 
+export interface HoverContext {
+  readonly targetUri?: string;
+  readonly workspaceIndex?: DatalogWorkspaceIndex;
+}
+
 /** Compute hover content for parser-backed graph ids, predicates, and rules. */
-export function computeHover(source: string, position: Position): LanguageServerHover | null {
+export function computeHover(
+  source: string,
+  position: Position,
+  context: HoverContext = {},
+): LanguageServerHover | null {
   const parsed = parseDocument(source);
   const stringReferenceHover = getStringReferenceHover(parsed, source, position);
   if (stringReferenceHover) {
     return stringReferenceHover;
   }
 
-  const word = getHoverWord(parsed, source, position);
-  if (!word) {
+  const occurrence = findPredicateOccurrence(parsed, position);
+  if (!occurrence) {
     return null;
   }
 
-  return getWordHover(parsed, word.value, word.range);
+  if (occurrence.identity.kind === 'user-predicate') {
+    return getUserPredicateHover(parsed, occurrence, context);
+  }
+
+  return getBuiltinHover(occurrence.identity.name, occurrence.range);
 }
 
 function getStringReferenceHover(
@@ -64,24 +77,63 @@ function getStringReferenceHover(
   return null;
 }
 
-function getHoverWord(
+function findPredicateOccurrence(
   parsed: ReturnType<typeof parseDocument>,
-  source: string,
   position: Position,
-): { value: string; range: NonNullable<LanguageServerHover['range']> } | null {
-  const wordRange = getWordRangeAtPosition(source, position, parsed.lineStarts);
-  if (!wordRange) {
+): {
+  readonly identity: NonNullable<ReturnType<typeof parseDocument>['datalogSymbols']['predicates'][number]>['identity'];
+  readonly range: NonNullable<LanguageServerHover['range']>;
+} | null {
+  for (const predicate of parsed.datalogSymbols.predicates) {
+    const occurrence = predicate.occurrences.find((candidate) => containsPosition(position, candidate.range));
+    if (occurrence) {
+      return {
+        identity: predicate.identity,
+        range: occurrence.range,
+      };
+    }
+  }
+
+  return null;
+}
+
+function getUserPredicateHover(
+  parsed: ReturnType<typeof parseDocument>,
+  occurrence: NonNullable<ReturnType<typeof findPredicateOccurrence>>,
+  context: HoverContext,
+): LanguageServerHover | null {
+  const definitions = [
+    ...getLocalPredicateDefinitions({
+      parsed,
+      identity: occurrence.identity,
+      ...(context.targetUri ? { targetUri: context.targetUri } : {}),
+    }),
+    ...getWorkspacePredicateDefinitions({
+      workspaceIndex: context.workspaceIndex,
+      identity: occurrence.identity,
+      ...(context.targetUri ? { targetUri: context.targetUri } : {}),
+    }),
+  ];
+
+  if (definitions.length === 0) {
     return null;
   }
 
   return {
-    value: getWordValue(source, parsed.lineStarts, wordRange),
-    range: wordRange,
+    contents: [
+      `**${occurrence.identity.name}/${occurrence.identity.arity}**`,
+      '',
+      `${definitions.length} definition${definitions.length === 1 ? '' : 's'} across the workspace.`,
+      `Arity: \`${occurrence.identity.arity}\``,
+      '',
+      'Definitions:',
+      ...definitions.map(formatDefinitionProvenance),
+    ].join('\n'),
+    range: occurrence.range,
   };
 }
 
-function getWordHover(
-  parsed: ReturnType<typeof parseDocument>,
+function getBuiltinHover(
   word: string,
   range: NonNullable<LanguageServerHover['range']>,
 ): LanguageServerHover | null {
@@ -93,37 +145,70 @@ function getWordHover(
     };
   }
 
-  const derived = parsed.derivedPredicates.get(word);
-  if (derived) {
-    return {
-      contents: [
-        `**${word}**`,
-        '',
-        `Derived predicate with ${derived.length} clause${derived.length === 1 ? '' : 's'}.`,
-        `Arity: \`${derived[0]?.arity ?? 0}\``,
-      ].join('\n'),
-      range,
-    };
-  }
-
   return null;
 }
 
-function getWordValue(
-  source: string,
-  lineStarts: readonly number[],
+function getLocalPredicateDefinitions(options: {
+  readonly parsed: ReturnType<typeof parseDocument>;
+  readonly identity: {
+    readonly key: string;
+    readonly name: string;
+    readonly arity: number;
+  };
+  readonly targetUri?: string;
+}): readonly PredicateDefinitionProvenance[] {
+  return (options.parsed.derivedPredicates.get(options.identity.name) ?? [])
+    .filter((clause) => clause.arity === options.identity.arity)
+    .map((clause) => ({
+      uri: options.targetUri ?? 'current document',
+      range: clause.predicateRange,
+    }));
+}
+
+function getWorkspacePredicateDefinitions(options: {
+  readonly workspaceIndex: DatalogWorkspaceIndex | undefined;
+  readonly identity: {
+    readonly key: string;
+    readonly name: string;
+    readonly arity: number;
+  };
+  readonly targetUri?: string;
+}): readonly PredicateDefinitionProvenance[] {
+  if (!options.workspaceIndex) {
+    return [];
+  }
+
+  return options.workspaceIndex.getPredicateDefinitions(options.identity.key)
+    .filter((definition) => definition.uri !== options.targetUri)
+    .map((definition) => ({
+      uri: definition.uri,
+      range: definition.range,
+    }));
+}
+
+function formatDefinitionProvenance(definition: PredicateDefinitionProvenance): string {
+  return `- \`${definition.uri}\`:${definition.range.start.line + 1}:${definition.range.start.character + 1}`;
+}
+
+function containsPosition(
+  position: Position,
   range: NonNullable<LanguageServerHover['range']>,
-): string {
-  const wordStartOffset = lineStarts[range.start.line] ?? 0;
-  const wordEndOffset = lineStarts[range.end.line] ?? 0;
-  return source.slice(
-    wordStartOffset + range.start.character,
-    wordEndOffset + range.end.character,
-  );
+): boolean {
+  const startsBefore = position.line > range.start.line
+    || (position.line === range.start.line && position.character >= range.start.character);
+  const endsAfter = position.line < range.end.line
+    || (position.line === range.end.line && position.character <= range.end.character);
+
+  return startsBefore && endsAfter;
 }
 
 function getNodeClassLine(classes: readonly string[]): string {
   return classes.length > 0
     ? `- class: ${classes.map((value: string) => `\`${value}\``).join(', ')}`
     : '- class: not declared in this document';
+}
+
+interface PredicateDefinitionProvenance {
+  readonly uri: string;
+  readonly range: NonNullable<LanguageServerHover['range']>;
 }
