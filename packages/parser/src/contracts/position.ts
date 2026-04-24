@@ -1,9 +1,7 @@
-export interface Position {
-  readonly line: number;
-  readonly character: number;
-}
+import type {
+  Position as DatalogAstPosition,
+  Range as DatalogAstRange,
+} from '@datalog/ast';
 
-export interface Range {
-  readonly start: Position;
-  readonly end: Position;
-}
+export type Position = DatalogAstPosition;
+export type Range = DatalogAstRange;

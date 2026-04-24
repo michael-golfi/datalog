@@ -26,6 +26,9 @@
     "typecheck": "tsc -p ./tsconfig.lib.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
     "test": "vitest run --config ./vitest.config.ts"
   },
+  "dependencies": {
+    "@datalog/ast": "workspace:*"
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
