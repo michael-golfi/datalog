@@ -562,6 +562,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@datalog/ast@workspace:*, @datalog/ast@workspace:packages/datalog-ast":
+  version: 0.0.0-use.local
+  resolution: "@datalog/ast@workspace:packages/datalog-ast"
+  dependencies:
+    "@eslint/js": "npm:^9.39.1"
+    "@types/node": "npm:^24.10.1"
+    eslint: "npm:^9.36.0"
+    typescript: "npm:^5.9.3"
+    typescript-eslint: "npm:^8.46.3"
+    vite: "npm:^6.0.0"
+    vitest: "npm:^3.2.4"
+  languageName: unknown
+  linkType: soft
+
 "@datalog/datalog-migrate@workspace:*, @datalog/datalog-migrate@workspace:packages/datalog-migrate":
   version: 0.0.0-use.local
   resolution: "@datalog/datalog-migrate@workspace:packages/datalog-migrate"
@@ -654,10 +668,12 @@ __metadata:
     "@eslint/js": "npm:^9.39.1"
     "@types/node": "npm:^24.10.1"
     eslint: "npm:^9.36.0"
+    openai: "npm:^6.34.0"
     typescript: "npm:^5.9.3"
     typescript-eslint: "npm:^8.46.3"
     vite: "npm:^6.0.0"
     vitest: "npm:^3.2.4"
+    zod: "npm:^4.3.6"
   languageName: unknown
   linkType: soft
 
@@ -665,6 +681,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@datalog/parser@workspace:packages/parser"
   dependencies:
+    "@datalog/ast": "workspace:*"
     "@eslint/js": "npm:^9.39.1"
     "@types/node": "npm:^24.10.1"
     eslint: "npm:^9.36.0"
@@ -6364,6 +6381,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"openai@npm:^6.34.0":
+  version: 6.34.0
+  resolution: "openai@npm:6.34.0"
+  peerDependencies:
+    ws: ^8.18.0
+    zod: ^3.25 || ^4.0
+  peerDependenciesMeta:
+    ws:
+      optional: true
+    zod:
+      optional: true
+  bin:
+    openai: bin/cli
+  checksum: 10c0/0d9652aea4b07d9be0f48fc30510c1caa05c24891ce5cdd6286df34b4d03f7a39ee289ff507e7c1a4c9cc2727a0ea799f1d545313ececd9979e4b3688583a1b5
+  languageName: node
+  linkType: hard
+
 "optionator@npm:^0.9.3":
   version: 0.9.4
   resolution: "optionator@npm:0.9.4"
@@ -8748,7 +8782,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.25.0 || ^4.0.0":
+"zod@npm:^3.25.0 || ^4.0.0, zod@npm:^4.3.6":
   version: 4.3.6
   resolution: "zod@npm:4.3.6"
   checksum: 10c0/860d25a81ab41d33aa25f8d0d07b091a04acb426e605f396227a796e9e800c44723ed96d0f53a512b57be3d1520f45bf69c0cb3b378a232a00787a2609625307
