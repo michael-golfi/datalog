@@ -30,6 +30,7 @@ export interface LanguageServerDocumentSymbol {
   readonly range: Range;
   readonly selectionRange: Range;
   readonly detail?: string;
+  readonly children?: readonly LanguageServerDocumentSymbol[];
 }
 
 export interface LanguageServerFoldingRange {
@@ -38,7 +39,9 @@ export interface LanguageServerFoldingRange {
   readonly kind?: 'comment' | 'region';
 }
 
-export interface LanguageServerDefinition {
+export interface LanguageServerDefinitionTarget {
   readonly targetSelectionRange: Range;
   readonly targetUri?: string;
 }
+
+export type LanguageServerDefinition = readonly LanguageServerDefinitionTarget[];
