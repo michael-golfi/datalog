@@ -324,6 +324,30 @@ describe('activateExtension', () => {
     );
   });
 
+  it('retries activation from a fresh runtime after module resolution fails', async () => {
+    const error = new Error('Unable to resolve @datalog/lsp/server');
+    mocks.resolveLanguageServerModule
+      .mockImplementationOnce(() => {
+        throw error;
+      })
+      .mockImplementation(() => '/tmp/datalog-lsp.js');
+
+    const { activateExtension } = await import('./extension-runtime.js');
+    const firstContext = createContext();
+
+    await expect(activateExtension(firstContext)).rejects.toThrow(error.message);
+
+    const secondContext = createContext();
+
+    await activateExtension(secondContext);
+
+    expect(mocks.resolveLanguageServerModule).toHaveBeenCalledTimes(2);
+    expect(mocks.createOutputChannel).toHaveBeenCalledTimes(2);
+    expect(mocks.start).toHaveBeenCalledTimes(1);
+    expect(mocks.statusBarItem.text).toBe('Datalog LSP: Running');
+    expect(secondContext.subscriptions).toContain(mocks.outputChannel);
+  });
+
   it('reports client startup failures after registering the client disposable', async () => {
     const error = new Error('Language client failed to start');
     mocks.start.mockRejectedValue(error);
@@ -340,6 +364,69 @@ describe('activateExtension', () => {
     expect(mocks.showErrorMessage).toHaveBeenCalledWith(
       'Failed to activate Datalog Language Server. See the "Datalog Language Server" output channel for details.',
     );
+  });
+
+  it('stops a partially started client and retries activation from a fresh runtime', async () => {
+    const error = new Error('Language client failed to start');
+    mocks.start.mockRejectedValueOnce(error).mockResolvedValue(undefined);
+
+    const { activateExtension } = await import('./extension-runtime.js');
+    const firstContext = createContext();
+
+    await expect(activateExtension(firstContext)).rejects.toThrow(error.message);
+
+    expect(mocks.stop).toHaveBeenCalledTimes(1);
+    expect(mocks.statusBarItem.text).toBe('Datalog LSP: Error');
+
+    const secondContext = createContext();
+
+    await activateExtension(secondContext);
+
+    expect(mocks.createOutputChannel).toHaveBeenCalledTimes(2);
+    expect(mocks.start).toHaveBeenCalledTimes(2);
+    expect(mocks.stop).toHaveBeenCalledTimes(1);
+    expect(mocks.statusBarItem.text).toBe('Datalog LSP: Running');
+    expect(secondContext.subscriptions).toContain(mocks.outputChannel);
+  });
+
+  it('keeps the original startup error when stop rejects for a startFailed client and still allows retry', async () => {
+    const startError = new Error('Language client failed to start');
+    const stopError = new Error("Client is not running and can't be stopped. It's current state is: startFailed");
+    mocks.start.mockRejectedValueOnce(startError).mockResolvedValue(undefined);
+    mocks.stop.mockRejectedValueOnce(stopError).mockResolvedValue(undefined);
+
+    const { activateExtension } = await import('./extension-runtime.js');
+    const firstContext = createContext();
+
+    await expect(activateExtension(firstContext)).rejects.toThrow(startError.message);
+
+    expect(mocks.stop).toHaveBeenCalledTimes(1);
+    expect(mocks.appendLine).toHaveBeenNthCalledWith(1, 'Failed to activate Datalog Language Server extension.');
+    expect(mocks.appendLine).toHaveBeenNthCalledWith(2, startError.stack);
+    expect(mocks.statusBarItem.text).toBe('Datalog LSP: Error');
+
+    const secondContext = createContext();
+
+    await activateExtension(secondContext);
+
+    expect(mocks.createOutputChannel).toHaveBeenCalledTimes(2);
+    expect(mocks.start).toHaveBeenCalledTimes(2);
+    expect(mocks.stop).toHaveBeenCalledTimes(1);
+    expect(mocks.statusBarItem.text).toBe('Datalog LSP: Running');
+    expect(secondContext.subscriptions).toContain(mocks.outputChannel);
+  });
+
+  it('treats deactivate after failed activation as already cleaned up', async () => {
+    const error = new Error('Language client failed to start');
+    mocks.start.mockRejectedValue(error);
+
+    const { activateExtension, deactivateExtension } = await import('./extension-runtime.js');
+    const context = createContext();
+
+    await expect(activateExtension(context)).rejects.toThrow(error.message);
+
+    expect(deactivateExtension()).toBeUndefined();
+    expect(mocks.stop).toHaveBeenCalledTimes(1);
   });
 });
 
