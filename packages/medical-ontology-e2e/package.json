@@ -8,14 +8,15 @@
     "commit:current": "yarn workspace @datalog/datalog-migrate build && datalog-migrate-commit",
     "lint": "eslint --max-warnings=0 .",
     "status": "yarn workspace @datalog/datalog-migrate build && datalog-migrate-status",
-    "typecheck": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && yarn workspace @datalog/datalog-migrate build && tsc -p ./tsconfig.spec.json --noEmit",
+    "typecheck": "yarn workspace @datalog/ast build && yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && yarn workspace @datalog/datalog-migrate build && tsc -p ./tsconfig.spec.json --noEmit",
     "uncommit": "yarn workspace @datalog/datalog-migrate build && datalog-migrate-uncommit",
     "watch": "yarn workspace @datalog/datalog-migrate build && datalog-migrate-watch",
     "build": "tsc -p ./tsconfig.spec.json --noEmit",
-    "test": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && yarn workspace @datalog/datalog-migrate build && vitest run --config ./vitest.config.ts",
-    "test:worker-collision-proof": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && yarn workspace @datalog/datalog-migrate build && MEDICAL_ONTOLOGY_E2E_RUN_WORKER_COLLISION_PROOF=1 vitest run --config ./vitest.config.ts --maxWorkers=2 test/localhost-postgres-fixture-worker-a.test.ts test/localhost-postgres-fixture-worker-b.test.ts"
+    "test": "yarn workspace @datalog/ast build && yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && yarn workspace @datalog/datalog-migrate build && vitest run --config ./vitest.config.ts",
+    "test:worker-collision-proof": "yarn workspace @datalog/ast build && yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && yarn workspace @datalog/datalog-migrate build && MEDICAL_ONTOLOGY_E2E_RUN_WORKER_COLLISION_PROOF=1 vitest run --config ./vitest.config.ts --maxWorkers=2 test/localhost-postgres-fixture-worker-a.test.ts test/localhost-postgres-fixture-worker-b.test.ts"
   },
   "dependencies": {
+    "@datalog/ast": "workspace:*",
     "@datalog/datalog-migrate": "workspace:*",
     "@datalog/parser": "workspace:*"
   },
@@ -24,9 +25,11 @@
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
     "eslint": "^9.36.0",
+    "openai": "^6.34.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3",
     "vite": "^6.0.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "zod": "^4.3.6"
   }
 }
