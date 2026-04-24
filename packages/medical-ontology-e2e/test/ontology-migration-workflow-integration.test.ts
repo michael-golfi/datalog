@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
+import { edgeFact, type EdgeFact } from '@datalog/ast';
 import type { CompoundBacklinkExpander } from '@datalog/datalog-migrate';
 import {
   applyDatalogMigrations,
   readAppliedMigrationStateFromDatabase,
   readMigrationStatus,
 } from '@datalog/datalog-migrate';
-import type { EdgeFact } from '@datalog/datalog-to-sql';
 
 import { createLocalhostPostgresFixture } from './fixtures/localhost-postgres-fixture.js';
 import {
@@ -33,7 +33,7 @@ const ontologyCompoundBacklinkExpander: CompoundBacklinkExpander = (clause): Edg
     const objectId = fieldValues.get('cid');
 
     if (subjectId !== undefined && objectId !== undefined) {
-      return { kind: 'edge', subjectId, predicateId: 'med/has_mapping', objectId };
+      return edgeFact({ subjectId, predicateId: 'med/has_mapping', objectId });
     }
   }
 
@@ -42,7 +42,7 @@ const ontologyCompoundBacklinkExpander: CompoundBacklinkExpander = (clause): Edg
     const objectId = fieldValues.get('clinical/drug_class');
 
     if (subjectId !== undefined && objectId !== undefined) {
-      return { kind: 'edge', subjectId, predicateId: 'med/has_drug_class', objectId };
+      return edgeFact({ subjectId, predicateId: 'med/has_drug_class', objectId });
     }
   }
 
