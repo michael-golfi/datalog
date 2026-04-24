@@ -42,6 +42,11 @@
   },
   "exports": {
     "./package.json": "./package.json",
+    "./load-datalog-migration-project-files": {
+      "types": "./dist/load-datalog-migration-project-files.d.ts",
+      "import": "./dist/load-datalog-migration-project-files.js",
+      "default": "./dist/load-datalog-migration-project-files.js"
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
