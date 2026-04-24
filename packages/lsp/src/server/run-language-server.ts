@@ -1,16 +1,25 @@
+import { fileURLToPath } from 'node:url';
+
 import {
   createConnection,
-  type Hover,
   ProposedFeatures,
   TextDocuments,
+  type InitializeParams,
 } from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
 import type { LanguageServerRuntime } from '../contracts/language-server-runtime.js';
 import { encodeSemanticTokens } from '../features/semantic-tokens.js';
 import {
+  clearDocumentDiagnostics,
+  createDefinitionLocation,
+  createHoverResponse,
+  getDeletedWatchedFileUris,
+  publishDiagnosticsForOpenDocuments,
+  publishDocumentDiagnostics,
+} from './language-server-diagnostics.js';
+import {
   toLspCompletionItem,
-  toLspDiagnostic,
   toLspDocumentSymbol,
   toLspFoldingRange,
 } from '../protocol/lsp-protocol-mappers.js';
@@ -29,14 +38,19 @@ export function runLanguageServer(runtime: LanguageServerRuntime): LanguageServe
   return runtime;
 }
 
-function registerLanguageServerHandlers(
+/** Register all document, workspace, and feature handlers on the server connection. */
+export function registerLanguageServerHandlers(
   connection: ReturnType<typeof createConnection>,
   documents: TextDocuments<TextDocument>,
   runtime: LanguageServerRuntime,
 ): void {
-  connection.onInitialize(() => ({
-    capabilities: createLanguageServerCapabilities(),
-  }));
+  connection.onInitialize(async (params) => {
+    await runtime.workspaceIndex.setWorkspaceRootPath(resolveWorkspaceRootPath(params));
+
+    return {
+      capabilities: createLanguageServerCapabilities(),
+    };
+  });
   registerDocumentChangeHandler(connection, documents, runtime);
   registerCompletionHandler(connection, documents, runtime);
   registerHoverHandler(connection, documents, runtime);
@@ -44,18 +58,33 @@ function registerLanguageServerHandlers(
   registerFoldingRangeHandler(connection, documents, runtime);
   registerDefinitionHandler(connection, documents, runtime);
   registerSemanticTokensHandler(connection, documents, runtime);
+  registerWatchedFileHandler(connection, documents, runtime);
 }
+
 
 function registerDocumentChangeHandler(
   connection: ReturnType<typeof createConnection>,
   documents: TextDocuments<TextDocument>,
   runtime: LanguageServerRuntime,
 ): void {
-  documents.onDidChangeContent((change) => {
-    void connection.sendDiagnostics({
+  documents.onDidOpen((change) => {
+    runtime.workspaceIndex.upsertOpenDocument({
       uri: change.document.uri,
-      diagnostics: runtime.computeDiagnostics(change.document.getText()).map(toLspDiagnostic),
+      source: change.document.getText(),
     });
+    void publishDocumentDiagnostics(connection, runtime, change.document);
+  });
+  documents.onDidChangeContent((change) => {
+    runtime.workspaceIndex.upsertOpenDocument({
+      uri: change.document.uri,
+      source: change.document.getText(),
+    });
+    void publishDocumentDiagnostics(connection, runtime, change.document);
+  });
+  documents.onDidClose(async (change) => {
+    runtime.workspaceIndex.removeOpenDocument(change.document.uri);
+    await runtime.workspaceIndex.refresh();
+    await clearDocumentDiagnostics(connection, change.document.uri);
   });
 }
 
@@ -70,7 +99,9 @@ function registerCompletionHandler(
       return [];
     }
 
-    return runtime.computeCompletions(document.getText(), params.position).map(toLspCompletionItem);
+    return runtime.computeCompletions(document.getText(), params.position, {
+      workspaceIndex: runtime.workspaceIndex,
+    }).map(toLspCompletionItem);
   });
 }
 
@@ -85,7 +116,10 @@ function registerHoverHandler(
       return null;
     }
 
-    const hover = runtime.computeHover(document.getText(), params.position);
+    const hover = runtime.computeHover(document.getText(), params.position, {
+      targetUri: document.uri,
+      workspaceIndex: runtime.workspaceIndex,
+    });
     return hover ? createHoverResponse(hover) : null;
   });
 }
@@ -131,15 +165,19 @@ function registerDefinitionHandler(
       return null;
     }
 
-    const definition = runtime.computeDefinition(document.getText(), params.position, document.uri);
+    const definition = runtime.computeDefinition(document.getText(), params.position, {
+      targetUri: document.uri,
+      workspaceIndex: runtime.workspaceIndex,
+    });
     if (!definition) {
       return null;
     }
 
-    return {
-      uri: definition.targetUri ?? document.uri,
-      range: definition.targetSelectionRange,
-    };
+    if (definition.length === 1) {
+      return createDefinitionLocation(definition[0]!, document.uri);
+    }
+
+    return definition.map((target) => createDefinitionLocation(target, document.uri));
   });
 }
 
@@ -160,16 +198,38 @@ function registerSemanticTokensHandler(
   });
 }
 
-function createHoverResponse(
-  hover: NonNullable<ReturnType<LanguageServerRuntime['computeHover']>>,
-): Hover {
-  const response: Hover = {
-    contents: { kind: 'markdown' as const, value: hover.contents },
-  };
+function registerWatchedFileHandler(
+  connection: ReturnType<typeof createConnection>,
+  documents: TextDocuments<TextDocument>,
+  runtime: LanguageServerRuntime,
+): void {
+  connection.onDidChangeWatchedFiles((params) => {
+    void handleWatchedFileChanges({ connection, documents, runtime, params });
+  });
+}
 
-  if (hover.range) {
-    response.range = hover.range;
+async function handleWatchedFileChanges(
+  options: {
+    readonly connection: ReturnType<typeof createConnection>;
+    readonly documents: TextDocuments<TextDocument>;
+    readonly runtime: LanguageServerRuntime;
+    readonly params: Parameters<Parameters<ReturnType<typeof createConnection>['onDidChangeWatchedFiles']>[0]>[0];
+  },
+): Promise<void> {
+  await options.runtime.workspaceIndex.refresh();
+
+  for (const deletedUri of getDeletedWatchedFileUris(options.params)) {
+    await clearDocumentDiagnostics(options.connection, deletedUri);
   }
 
-  return response;
+  await publishDiagnosticsForOpenDocuments(options.connection, options.documents, options.runtime);
+}
+
+function resolveWorkspaceRootPath(params: InitializeParams): string | null {
+  const workspaceUri = params.workspaceFolders?.[0]?.uri ?? params.rootUri;
+  if (!workspaceUri?.startsWith('file://')) {
+    return null;
+  }
+
+  return fileURLToPath(workspaceUri);
 }
