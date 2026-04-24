@@ -13,6 +13,7 @@ export const compiledExtensionMainRelativePath = path.join(compiledExtensionRela
 export const defaultStageRoot = path.join(extensionRoot, 'build', 'package-stage');
 export const defaultLanguageServerModuleId = '@datalog/lsp/server';
 export const workspacePackageRoots = {
+  '@datalog/ast': path.join(workspaceRoot, 'packages', 'datalog-ast'),
   '@datalog/parser': path.join(workspaceRoot, 'packages', 'parser'),
   '@datalog/lsp': path.join(workspaceRoot, 'packages', 'lsp'),
 };

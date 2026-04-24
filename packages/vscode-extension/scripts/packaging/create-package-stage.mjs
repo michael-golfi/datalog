@@ -40,6 +40,7 @@ export async function createPackageStage(options = {}) {
   await copyStageAsset(stageRoot, 'README.md');
   await copyStageAsset(stageRoot, 'CHANGELOG.md');
   await writeStageLanguageServerModuleResolver(stageRoot, languageServerModuleId);
+  await stageWorkspacePackage('@datalog/ast', stageRoot, stagedExternalPackages);
   await stageWorkspacePackage('@datalog/parser', stageRoot, stagedExternalPackages);
   await stageWorkspacePackage('@datalog/lsp', stageRoot, stagedExternalPackages);
   await stageExternalDependency('vscode-languageclient', stageRoot, stagedExternalPackages);
