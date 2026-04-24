@@ -5,6 +5,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   resolve: {
     alias: {
+      '@datalog/ast': fileURLToPath(new URL('../datalog-ast/src/index.ts', import.meta.url)),
       '@datalog/parser': fileURLToPath(new URL('../parser/src/index.ts', import.meta.url)),
     },
   },

@@ -3,6 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@datalog/ast": [
+        "../datalog-ast/src/index.ts"
+      ],
       "@datalog/parser": [
         "../parser/src/index.ts"
       ]
@@ -16,6 +19,9 @@
     ]
   },
   "references": [
+    {
+      "path": "../datalog-ast/tsconfig.lib.json"
+    },
     {
       "path": "../parser/tsconfig.lib.json"
     }
