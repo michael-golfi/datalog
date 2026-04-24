@@ -4,6 +4,7 @@ import { parseDocument } from '../analysis/parse-document.js';
 
 import { parseDatalogFacts } from './parse-datalog-facts.js';
 import { parseDatalogProgram } from './parse-datalog-program.js';
+import { parseDatalogProgramSources } from './parse-datalog-program-sources.js';
 import { parseDatalogQuery } from './parse-datalog-query.js';
 
 describe('parseDatalogProgram', () => {
@@ -174,6 +175,42 @@ describe('parseDatalogProgram', () => {
       startOffset: source.indexOf('?- Edge'),
       endOffset: source.indexOf('?- Edge') + querySource.slice(0, -1).length,
     });
+  });
+
+  it('preserves source order when parsing multiple sources into one program surface', () => {
+    const parsed = parseDatalogProgramSources([
+      {
+        sourceId: 'migrations/20260422.0001.foundation.dl',
+        source: 'Foundation(node_a).',
+      },
+      {
+        sourceId: 'current.dl',
+        source: [
+          'Current(node_b).',
+          'Derived(node_b) :- Current(node_b).',
+        ].join('\n'),
+      },
+    ]);
+
+    expect(parsed.sources.map((source) => source.sourceId)).toEqual([
+      'migrations/20260422.0001.foundation.dl',
+      'current.dl',
+    ]);
+    expect(parsed.sources.map((source) => source.parsedDocument.clauses.map((clause) => clause.predicate))).toEqual([
+      ['Foundation'],
+      ['Current', 'Derived'],
+    ]);
+    expect(parsed.program.statements.map((statement) => {
+      if (statement.kind === 'fact') {
+        return statement.atom.predicate;
+      }
+
+      if (statement.kind === 'rule') {
+        return statement.head.predicate;
+      }
+
+      return statement.kind;
+    })).toEqual(['Foundation', 'Current', 'Derived']);
   });
 });
 
