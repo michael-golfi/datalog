@@ -16,7 +16,6 @@ import {
   createHoverResponse,
   getDeletedWatchedFileUris,
   publishDiagnosticsForOpenDocuments,
-  publishDocumentDiagnostics,
 } from './language-server-diagnostics.js';
 import {
   toLspCompletionItem,
@@ -72,19 +71,20 @@ function registerDocumentChangeHandler(
       uri: change.document.uri,
       source: change.document.getText(),
     });
-    void publishDocumentDiagnostics(connection, runtime, change.document);
+    void publishDiagnosticsForOpenDocuments(connection, documents, runtime);
   });
   documents.onDidChangeContent((change) => {
     runtime.workspaceIndex.upsertOpenDocument({
       uri: change.document.uri,
       source: change.document.getText(),
     });
-    void publishDocumentDiagnostics(connection, runtime, change.document);
+    void publishDiagnosticsForOpenDocuments(connection, documents, runtime);
   });
   documents.onDidClose(async (change) => {
     runtime.workspaceIndex.removeOpenDocument(change.document.uri);
     await runtime.workspaceIndex.refresh();
     await clearDocumentDiagnostics(connection, change.document.uri);
+    await publishDiagnosticsForOpenDocuments(connection, documents, runtime);
   });
 }
 
