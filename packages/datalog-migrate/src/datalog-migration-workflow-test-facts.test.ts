@@ -2,12 +2,12 @@ import { loadDatalogMigrationProjectFiles } from './load-datalog-migration-proje
 
 import { describe } from 'vitest';
 
-type DatalogFact =
+type WorkflowFact =
   | { kind: 'vertex'; id: string }
   | { kind: 'edge'; subjectId: string; predicateId: string; objectId: string };
 
 /** Load committed workflow facts from a temporary migration workspace for DB application. */
-export function loadCommittedWorkflowFacts(workspaceRoot: string): readonly [DatalogFact, ...DatalogFact[]] {
+export function loadCommittedWorkflowFacts(workspaceRoot: string): readonly [WorkflowFact, ...WorkflowFact[]] {
   const projectFiles = loadDatalogMigrationProjectFiles({ workspaceRoot });
   const subjectIds = new Set<string>();
   const objectIds = new Set<string>();

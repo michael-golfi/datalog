@@ -1,7 +1,7 @@
+import type { DatalogFact } from '@datalog/ast';
 import {
   applyDatalogFacts,
   createPostgresSqlClient,
-  type DatalogFact,
   type PostgresSqlClient,
 } from '@datalog/datalog-to-sql';
 

@@ -14,9 +14,9 @@
   },
   "scripts": {
     "lint": "eslint --max-warnings=0 .",
-    "typecheck": "yarn workspace @datalog/datalog-to-sql build && tsc -p ./tsconfig.lib.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
+    "typecheck": "yarn workspace @datalog/ast build && yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && tsc -p ./tsconfig.lib.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
     "build": "tsc -b ./tsconfig.lib.json",
-    "test": "yarn workspace @datalog/datalog-to-sql build && vitest run --config ./vitest.config.ts"
+    "test": "yarn workspace @datalog/ast build && yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-to-sql build && vitest run --config ./vitest.config.ts"
   },
   "bin": {
     "datalog-migrate-apply": "./dist/apply-datalog-migrations.js",
@@ -27,6 +27,7 @@
     "datalog-migrate-watch": "./dist/watch-current-datalog-migration.js"
   },
   "dependencies": {
+    "@datalog/ast": "workspace:*",
     "@datalog/datalog-to-sql": "workspace:*",
     "@datalog/parser": "workspace:*"
   },
