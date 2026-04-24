@@ -23,7 +23,10 @@ export async function publishDocumentDiagnostics(
 ): Promise<void> {
   await connection.sendDiagnostics({
     uri: document.uri,
-    diagnostics: runtime.computeDiagnostics(document.getText()).map(toLspDiagnostic),
+    diagnostics: runtime.computeDiagnostics(document.getText(), {
+      targetUri: document.uri,
+      workspaceIndex: runtime.workspaceIndex,
+    }).map(toLspDiagnostic),
   });
 }
 

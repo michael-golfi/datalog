@@ -33,11 +33,13 @@ export async function activateExtension(context: ExtensionContext): Promise<void
   statusBarItem.command = restartLanguageServerCommand;
   statusBarItem.show();
 
-  runtimeState = {
+  const state: ExtensionRuntimeState = {
     client: undefined,
     outputChannel,
     statusBarItem,
   };
+
+  runtimeState = state;
 
   context.subscriptions.push(
     outputChannel,
@@ -53,11 +55,14 @@ export async function activateExtension(context: ExtensionContext): Promise<void
     }),
   );
 
-  await enqueueLifecycleOperation(async () => {
-    const state = requireRuntimeState();
-
-    await startLanguageClient(state, 'Starting');
-  });
+  try {
+    await enqueueLifecycleOperation(async () => {
+      await startLanguageClient(state, 'Starting');
+    });
+  } catch (error) {
+    await cleanupFailedInitialActivation(state);
+    throw error;
+  }
 }
 
 export function deactivateExtension(): Promise<void> | undefined {
@@ -142,8 +147,29 @@ async function stopLanguageClient(state: ExtensionRuntimeState): Promise<void> {
   await stopLanguageClientInstance(activeClient);
 }
 
+async function cleanupFailedInitialActivation(state: ExtensionRuntimeState): Promise<void> {
+  await stopLanguageClient(state);
+
+  if (runtimeState === state) {
+    runtimeState = undefined;
+  }
+}
+
 async function stopLanguageClientInstance(client: LanguageClient): Promise<void> {
-  await client.stop();
+  try {
+    await client.stop();
+  } catch (error) {
+    if (isStartFailedStopError(error)) {
+      return;
+    }
+
+    throw error;
+  }
+}
+
+function isStartFailedStopError(error: unknown): boolean {
+  return error instanceof Error
+    && error.message.includes(`Client is not running and can't be stopped. It's current state is: startFailed`);
 }
 
 async function handleConfigurationChange(event: ConfigurationChangeEvent): Promise<void> {
@@ -191,14 +217,6 @@ async function enqueueLifecycleOperation(operation: () => Promise<void>): Promis
 function updateStatus(statusBarItem: StatusBarItem, label: string, tooltip: string): void {
   statusBarItem.text = `Datalog LSP: ${label}`;
   statusBarItem.tooltip = tooltip;
-}
-
-function requireRuntimeState(): ExtensionRuntimeState {
-  if (!runtimeState) {
-    throw new Error('Datalog extension runtime is not initialized.');
-  }
-
-  return runtimeState;
 }
 
 interface ExtensionRuntimeState {

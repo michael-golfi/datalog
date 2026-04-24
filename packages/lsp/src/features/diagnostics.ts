@@ -1,6 +1,8 @@
 import { parseDocument } from '@datalog/parser';
 
 import type { LanguageServerDiagnostic } from '../contracts/language-feature-types.js';
+import type { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
+import { collectDuplicateSchemaClauses } from './diagnostic-duplicate-defpred-schemas.js';
 
 const EXPECTED_ARITY = new Map<string, number>([
   ['DefPred', 5],
@@ -8,17 +10,91 @@ const EXPECTED_ARITY = new Map<string, number>([
 ]);
 
 /** Compute diagnostics for the current document text. */
-export function computeDiagnostics(source: string): LanguageServerDiagnostic[] {
-  const parsed = parseDocument(source);
+export function computeDiagnostics(
+  source: string,
+  context: {
+    readonly targetUri?: string;
+    readonly workspaceIndex?: DatalogWorkspaceIndex;
+  } = {},
+): LanguageServerDiagnostic[] {
+  const diagnosticsContext = createDiagnosticsContext(source, context);
   const diagnostics = createSourceDiagnostics(source);
-  const seenSchemas = new Set<string>();
-  const allowInteractiveQuery = isLikelyInteractiveQuery(source, parsed.clauses.length);
+  const allowInteractiveQuery = isLikelyInteractiveQuery(source, diagnosticsContext.parsedDocument.clauses.length);
 
-  for (const clause of parsed.clauses) {
-    diagnostics.push(...createClauseDiagnostics({ source, clause, seenSchemas, allowInteractiveQuery }));
+  for (const clause of diagnosticsContext.parsedDocument.clauses) {
+    diagnostics.push(...createClauseDiagnostics({
+      source,
+      clause,
+      duplicateSchemaClauses: diagnosticsContext.duplicateSchemaClauses,
+      allowInteractiveQuery,
+    }));
   }
 
   return diagnostics;
+}
+
+function createDiagnosticsContext(
+  source: string,
+  context: {
+    readonly targetUri?: string;
+    readonly workspaceIndex?: DatalogWorkspaceIndex;
+  },
+): {
+  readonly parsedDocument: ReturnType<typeof parseDocument>;
+  readonly duplicateSchemaClauses: ReadonlySet<ReturnType<typeof parseDocument>['clauses'][number]>;
+} {
+  const targetDocument = getProgramTargetDocument(source, context);
+  const parsedDocument = targetDocument?.parsedDocument ?? parseDocument(source);
+  const sources = getDiagnosticsSources({
+    parsedDocument,
+    targetDocument,
+    ...(context.targetUri ? { targetUri: context.targetUri } : {}),
+    ...(context.workspaceIndex ? { workspaceIndex: context.workspaceIndex } : {}),
+  });
+
+  return {
+    parsedDocument,
+    duplicateSchemaClauses: collectDuplicateSchemaClauses({
+      targetSourceId: targetDocument?.sourceId ?? context.targetUri ?? 'local',
+      sources,
+    }),
+  };
+}
+
+function getDiagnosticsSources(options: {
+  readonly parsedDocument: ReturnType<typeof parseDocument>;
+  readonly targetDocument: ReturnType<typeof getProgramTargetDocument>;
+  readonly targetUri?: string;
+  readonly workspaceIndex?: DatalogWorkspaceIndex;
+}): ReadonlyArray<{
+  readonly sourceId: string;
+  readonly parsedDocument: ReturnType<typeof parseDocument>;
+}> {
+  if (options.targetDocument) {
+    return options.workspaceIndex?.getProgram()?.sources ?? [options.targetDocument];
+  }
+
+  return [{ sourceId: options.targetUri ?? 'local', parsedDocument: options.parsedDocument }];
+}
+
+function getProgramTargetDocument(
+  source: string,
+  context: {
+    readonly targetUri?: string;
+    readonly workspaceIndex?: DatalogWorkspaceIndex;
+  },
+): (NonNullable<ReturnType<DatalogWorkspaceIndex['getProgram']>>['sources'][number] & { readonly sourceId: string }) | null {
+  if (!context.targetUri) {
+    return null;
+  }
+
+  const program = context.workspaceIndex?.getProgram();
+  const targetDocument = program?.sources.find((candidate) => candidate.sourceId === context.targetUri);
+  if (targetDocument?.source !== source) {
+    return null;
+  }
+
+  return targetDocument;
 }
 
 function createSourceDiagnostics(source: string): LanguageServerDiagnostic[] {
@@ -41,13 +117,13 @@ function createClauseDiagnostics(
   options: {
     readonly source: string;
     readonly clause: ReturnType<typeof parseDocument>['clauses'][number];
-    readonly seenSchemas: Set<string>;
+    readonly duplicateSchemaClauses: ReadonlySet<ReturnType<typeof parseDocument>['clauses'][number]>;
     readonly allowInteractiveQuery: boolean;
   },
 ): LanguageServerDiagnostic[] {
   return [
     ...createArityDiagnostics(options.clause),
-    ...createDuplicateSchemaDiagnostics(options.clause, options.seenSchemas),
+    ...createDuplicateSchemaDiagnostics(options.clause, options.duplicateSchemaClauses),
     ...createClauseTerminationDiagnostics(options.source, options.clause, options.allowInteractiveQuery),
   ];
 }
@@ -70,7 +146,7 @@ function createArityDiagnostics(
 
 function createDuplicateSchemaDiagnostics(
   clause: ReturnType<typeof parseDocument>['clauses'][number],
-  seenSchemas: Set<string>,
+  duplicateSchemaClauses: ReadonlySet<ReturnType<typeof parseDocument>['clauses'][number]>,
 ): LanguageServerDiagnostic[] {
   if (clause.predicate !== 'DefPred') {
     return [];
@@ -82,7 +158,7 @@ function createDuplicateSchemaDiagnostics(
     return [];
   }
 
-  const diagnostics = seenSchemas.has(predicateId)
+  return duplicateSchemaClauses.has(clause)
     ? [{
       range: predicateReference.range,
       severity: 'warning' as const,
@@ -90,9 +166,6 @@ function createDuplicateSchemaDiagnostics(
       message: `Duplicate DefPred for ${predicateId}.`,
     }]
     : [];
-
-  seenSchemas.add(predicateId);
-  return diagnostics;
 }
 
 function createClauseTerminationDiagnostics(

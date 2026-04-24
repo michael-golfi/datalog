@@ -90,12 +90,12 @@
   },
   "scripts": {
     "build": "tsc -b ./tsconfig.build.json",
-    "dev": "yarn workspace @datalog/parser build && yarn workspace @datalog/lsp build && yarn watch",
+    "dev": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-migrate build && yarn workspace @datalog/lsp build && yarn watch",
     "lint": "eslint --max-warnings=0 .",
-    "package": "yarn workspace @datalog/parser build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/create-package-stage.mjs",
-    "vsce:package": "yarn workspace @datalog/parser build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/create-package-vsix.mjs",
-    "smoke": "yarn workspace @datalog/parser build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/run-smoke.mjs",
-    "smoke:broken": "yarn workspace @datalog/parser build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/run-smoke.mjs --broken",
+    "package": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-migrate build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/create-package-stage.mjs",
+    "vsce:package": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-migrate build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/create-package-vsix.mjs",
+    "smoke": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-migrate build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/run-smoke.mjs",
+    "smoke:broken": "yarn workspace @datalog/parser build && yarn workspace @datalog/datalog-migrate build && yarn workspace @datalog/lsp build && yarn workspace @datalog/vscode-extension build && node ./scripts/run-smoke.mjs --broken",
     "typecheck": "tsc -p ./tsconfig.build.json --noEmit && tsc -p ./tsconfig.spec.json --noEmit",
     "test": "vitest run --config ./vitest.config.ts",
     "watch": "tsc -b ./tsconfig.build.json --watch --preserveWatchOutput"

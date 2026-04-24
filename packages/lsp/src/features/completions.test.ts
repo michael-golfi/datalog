@@ -22,6 +22,89 @@ describe('computeCompletions', () => {
     expect(items.map((item) => item.label)).toContain('food/preferred_label');
   });
 
+  it('merges workspace graph predicates in DefPred and Edge string slots with deduped labels', async () => {
+    const workspaceRoot = await mkdtemp(join(tmpdir(), 'datalog-completions-'));
+
+    try {
+      await writeFile(join(workspaceRoot, 'workspace.dl'), [
+        'DefPred("food/workspace_only", "1", "class/WorkspaceSubject", "1", "class/WorkspaceObject").',
+        'DefPred("food/shared_predicate", "1", "class/WorkspaceSubject", "1", "class/WorkspaceObject").',
+      ].join('\n'), 'utf8');
+
+      const workspaceIndex = new DatalogWorkspaceIndex({
+        documentStore: new DatalogDocumentStore(),
+      });
+      await workspaceIndex.setWorkspaceRootPath(workspaceRoot);
+
+      const defPredSource = 'DefPred("food/';
+      const defPredItems = computeCompletions(defPredSource, {
+        line: 0,
+        character: defPredSource.length,
+      }, {
+        workspaceIndex,
+      });
+
+      const edgeSource = [
+        'DefPred("food/shared_predicate", "1", "class/LocalSubject", "1", "class/LocalObject").',
+        'Edge("concept/local", "food/',
+      ].join('\n');
+      const edgeItems = computeCompletions(edgeSource, {
+        line: 1,
+        character: 'Edge("concept/local", "food/'.length,
+      }, {
+        workspaceIndex,
+      });
+      const edgeLabels = edgeItems.map((item) => item.label);
+
+      expect(defPredItems.map((item) => item.label)).toContain('food/workspace_only');
+      expect(edgeLabels).toContain('food/workspace_only');
+      expect(edgeLabels.filter((label) => label === 'food/shared_predicate')).toHaveLength(1);
+    } finally {
+      await rm(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
+  it('suggests local graph predicates without a workspace index', () => {
+    const source = [
+      'DefPred("food/local_only", "1", "class/LocalSubject", "1", "class/LocalObject").',
+      'Edge("concept/local", "food/',
+    ].join('\n');
+    const items = computeCompletions(source, {
+      line: 1,
+      character: 'Edge("concept/local", "food/'.length,
+    });
+
+    expect(items.map((item) => item.label)).toEqual(['food/local_only']);
+  });
+
+  it('suggests schema-derived workspace node ids in node string slots', async () => {
+    const workspaceRoot = await mkdtemp(join(tmpdir(), 'datalog-completions-'));
+
+    try {
+      await writeFile(join(workspaceRoot, 'workspace.dl'), [
+        'DefPred("food/schema_only", "1", "class/WorkspaceSubject", "1", "class/WorkspaceObject").',
+      ].join('\n'), 'utf8');
+
+      const workspaceIndex = new DatalogWorkspaceIndex({
+        documentStore: new DatalogDocumentStore(),
+      });
+      await workspaceIndex.setWorkspaceRootPath(workspaceRoot);
+
+      const source = 'Edge("class/';
+      const items = computeCompletions(source, {
+        line: 0,
+        character: source.length,
+      }, {
+        workspaceIndex,
+      });
+
+      expect(items.map((item) => item.label)).toContain('class/WorkspaceSubject');
+      expect(items.map((item) => item.label)).toContain('class/WorkspaceObject');
+    } finally {
+      await rm(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
   it('suggests rule predicates at clause start', () => {
     const source = `${DATALOG_SAMPLE}\nCla`;
     const items = computeCompletions(source, { line: source.split('\n').length - 1, character: 3 });

@@ -580,6 +580,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@datalog/datalog-migrate@workspace:packages/datalog-migrate"
   dependencies:
+    "@datalog/ast": "workspace:*"
     "@datalog/datalog-to-sql": "workspace:*"
     "@datalog/parser": "workspace:*"
     "@eslint/js": "npm:^9.39.1"
@@ -603,6 +604,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@datalog/datalog-to-sql@workspace:packages/datalog-to-sql"
   dependencies:
+    "@datalog/ast": "workspace:*"
     "@eslint/js": "npm:^9.39.1"
     "@types/node": "npm:^24.10.1"
     eslint: "npm:^9.36.0"
@@ -645,6 +647,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@datalog/lsp@workspace:packages/lsp"
   dependencies:
+    "@datalog/ast": "workspace:*"
+    "@datalog/datalog-migrate": "workspace:*"
     "@datalog/parser": "workspace:*"
     "@eslint/js": "npm:^9.39.1"
     "@types/node": "npm:^24.10.1"
@@ -662,6 +666,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@datalog/medical-ontology-e2e@workspace:packages/medical-ontology-e2e"
   dependencies:
+    "@datalog/ast": "workspace:*"
     "@datalog/datalog-migrate": "workspace:*"
     "@datalog/datalog-to-sql": "workspace:*"
     "@datalog/parser": "workspace:*"

@@ -18,7 +18,9 @@ describe('registerLanguageServerHandlers', () => {
     await harness.initialize();
 
     harness.openDocument('file:///workspace/current.dl', 'warn open');
+    await harness.flushPendingNotifications();
     harness.changeDocument('file:///workspace/current.dl', 'error change');
+    await harness.flushPendingNotifications();
     await harness.closeDocument('file:///workspace/current.dl');
 
     expect(harness.sentDiagnostics).toEqual([
@@ -29,6 +31,29 @@ describe('registerLanguageServerHandlers', () => {
         createDiagnostic('error', 'error change'),
       ]),
       createPublishedDiagnostics('file:///workspace/current.dl', []),
+    ]);
+  });
+
+  it('revalidates every open document when one open document changes', async () => {
+    const harness = createServerHarness();
+    await harness.initialize();
+
+    harness.openDocument('file:///workspace/first.dl', 'warn first');
+    await harness.flushPendingNotifications();
+    harness.openDocument('file:///workspace/second.dl', 'warn second');
+    await harness.flushPendingNotifications();
+    harness.clearSentDiagnostics();
+
+    harness.changeDocument('file:///workspace/second.dl', 'error second');
+    await harness.flushPendingNotifications();
+
+    expect(harness.sentDiagnostics).toEqual([
+      createPublishedDiagnostics('file:///workspace/first.dl', [
+        createDiagnostic('warning', 'warn first'),
+      ]),
+      createPublishedDiagnostics('file:///workspace/second.dl', [
+        createDiagnostic('error', 'error second'),
+      ]),
     ]);
   });
 
@@ -184,9 +209,10 @@ function createServerHarness(options?: {
     },
     async changeWatchedFiles(params) {
       handlers.didChangeWatchedFiles?.(params);
-      await Promise.resolve();
-      await Promise.resolve();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await flushPendingNotifications();
+    },
+    async flushPendingNotifications() {
+      await flushPendingNotifications();
     },
     setDiskFile(filePath, source) {
       diskFiles.set(filePath, source);
@@ -252,6 +278,7 @@ interface ServerHarness {
   readonly changeDocument: (uri: string, source: string) => void;
   readonly closeDocument: (uri: string) => Promise<void>;
   readonly changeWatchedFiles: (params: DidChangeWatchedFilesParams) => Promise<void>;
+  readonly flushPendingNotifications: () => Promise<void>;
   readonly setDiskFile: (filePath: string, source: string) => void;
   readonly deleteDiskFile: (filePath: string) => void;
   readonly clearSentDiagnostics: () => void;
@@ -268,4 +295,10 @@ interface HandlerRegistry {
 interface PublishedDiagnostics {
   readonly uri: string;
   readonly diagnostics: readonly Diagnostic[];
+}
+
+async function flushPendingNotifications(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+  await new Promise((resolve) => setTimeout(resolve, 0));
 }

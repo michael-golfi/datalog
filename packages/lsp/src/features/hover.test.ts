@@ -98,6 +98,116 @@ describe('computeHover', () => {
     }
   });
 
+  it('describes cross-file graph predicate schemas from workspace metadata', async () => {
+    const workspaceRoot = await createWorkspaceRoot();
+
+    try {
+      const currentUri = pathToFileURL(join(workspaceRoot, 'current.dl')).href;
+      const source = 'Edge("concept/taco", "food/has_cuisine", "cuisine/mexican").';
+
+      await writeWorkspaceFile(workspaceRoot, 'schema.dl', 'DefPred("food/has_cuisine", "0", "liquid/node", "1", "liquid/string").');
+
+      const workspaceIndex = await createWorkspaceIndex(workspaceRoot, currentUri, source);
+      const hover = computeHover(source, {
+        line: 0,
+        character: source.indexOf('food/has_cuisine') + 2,
+      }, {
+        targetUri: currentUri,
+        workspaceIndex,
+      });
+
+      expect(hover?.contents).toContain('**food/has_cuisine**');
+      expect(hover?.contents).toContain('Graph predicate contract.');
+      expect(hover?.contents).toContain('- subject: `liquid/node` (cardinality `0`)');
+      expect(hover?.contents).toContain('- object: `liquid/string` (cardinality `1`)');
+    } finally {
+      await rm(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
+  it('describes cross-file node summaries from workspace class and label metadata', async () => {
+    const workspaceRoot = await createWorkspaceRoot();
+
+    try {
+      const currentUri = pathToFileURL(join(workspaceRoot, 'current.dl')).href;
+      const source = 'Edge("concept/ramen", "food/related_to", "concept/noodle").';
+
+      await writeWorkspaceFile(workspaceRoot, 'nodes.dl', [
+        'Edge("class/Dish", "food/preferred_label", "Dish").',
+        'Edge("concept/ramen", "food/preferred_label", "Ramen").',
+        'Edge("concept/ramen", "food/instance_of", "class/Dish").',
+      ].join('\n'));
+
+      const workspaceIndex = await createWorkspaceIndex(workspaceRoot, currentUri, source);
+      const hover = computeHover(source, {
+        line: 0,
+        character: source.indexOf('concept/ramen') + 2,
+      }, {
+        targetUri: currentUri,
+        workspaceIndex,
+      });
+
+      expect(hover?.contents).toContain('**concept/ramen**');
+      expect(hover?.contents).toContain('Preferred label: Ramen');
+      expect(hover?.contents).toContain('`class/Dish`');
+    } finally {
+      await rm(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
+  it('prefers local quoted string metadata over workspace metadata', async () => {
+    const workspaceRoot = await createWorkspaceRoot();
+
+    try {
+      const currentUri = pathToFileURL(join(workspaceRoot, 'current.dl')).href;
+      const source = [
+        'DefPred("food/has_cuisine", "0", "local/subject", "0", "local/object").',
+        'Edge("concept/ramen", "food/has_cuisine", "cuisine/japanese").',
+      ].join('\n');
+
+      await writeWorkspaceFile(workspaceRoot, 'schema.dl', 'DefPred("food/has_cuisine", "0", "workspace/subject", "0", "workspace/object").');
+
+      const workspaceIndex = await createWorkspaceIndex(workspaceRoot, currentUri, source);
+      const hover = computeHover(source, {
+        line: 1,
+        character: source.split('\n')[1]!.indexOf('food/has_cuisine') + 2,
+      }, {
+        targetUri: currentUri,
+        workspaceIndex,
+      });
+
+      expect(hover?.contents).toContain('local/subject');
+      expect(hover?.contents).toContain('local/object');
+      expect(hover?.contents).not.toContain('workspace/subject');
+      expect(hover?.contents).not.toContain('workspace/object');
+    } finally {
+      await rm(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
+  it('returns null for unknown quoted strings with a workspace index', async () => {
+    const workspaceRoot = await createWorkspaceRoot();
+
+    try {
+      const currentUri = pathToFileURL(join(workspaceRoot, 'current.dl')).href;
+      const source = 'Edge("concept/unknown", "food/missing_predicate", "concept/missing").';
+
+      await writeWorkspaceFile(workspaceRoot, 'schema.dl', 'DefPred("food/known_predicate", "0", "liquid/node", "0", "liquid/node").');
+
+      const workspaceIndex = await createWorkspaceIndex(workspaceRoot, currentUri, source);
+
+      expect(computeHover(source, {
+        line: 0,
+        character: source.indexOf('food/missing_predicate') + 2,
+      }, {
+        targetUri: currentUri,
+        workspaceIndex,
+      })).toBeNull();
+    } finally {
+      await rm(workspaceRoot, { recursive: true, force: true });
+    }
+  });
+
   it('uses builtin docs only when no user-defined predicate resolves', () => {
     const source = 'Edge("concept/chickpea_bowl", "food/has_cuisine", "cuisine/mediterranean").';
     const hover = computeHover(source, {
@@ -154,4 +264,21 @@ async function writeWorkspaceFile(
 
   await mkdir(directoryPath, { recursive: true });
   await writeFile(filePath, source, 'utf8');
+}
+
+async function createWorkspaceIndex(
+  workspaceRoot: string,
+  currentUri: string,
+  source: string,
+): Promise<DatalogWorkspaceIndex> {
+  const workspaceIndex = new DatalogWorkspaceIndex({
+    documentStore: new DatalogDocumentStore(),
+  });
+  await workspaceIndex.setWorkspaceRootPath(workspaceRoot);
+  workspaceIndex.upsertOpenDocument({
+    uri: currentUri,
+    source,
+  });
+
+  return workspaceIndex;
 }

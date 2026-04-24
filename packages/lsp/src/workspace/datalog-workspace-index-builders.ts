@@ -7,7 +7,9 @@ import type {
 
 import type {
   DatalogWorkspaceDocument,
+  DatalogWorkspaceNodeSummaryTarget,
   DatalogWorkspacePredicateDefinition,
+  DatalogWorkspacePredicateSchemaTarget,
 } from './datalog-workspace-index.js';
 
 /** Check whether `filePath` is at or beneath `workspaceRootPath`, handling both POSIX and Windows separators. */
@@ -89,6 +91,65 @@ export function buildWorkspacePredicateIdentities(
 }
 
 /** Collect deduplicated, sorted graph node IDs across all workspace documents. */
+export function buildGraphPredicateIds(documents: readonly DatalogWorkspaceDocument[]): readonly string[] {
+  return [...new Set(
+    documents.flatMap((document) => document.parsedDocument.graphPredicateIds),
+  )].sort((left, right) => left.localeCompare(right));
+}
+
+/** Collect predicate schema definitions across documents, keyed by graph predicate ID. */
+export function buildPredicateSchemaTargets(
+  documents: readonly DatalogWorkspaceDocument[],
+): Map<string, readonly DatalogWorkspacePredicateSchemaTarget[]> {
+  const targetsByPredicateId = new Map<string, DatalogWorkspacePredicateSchemaTarget[]>();
+
+  for (const document of documents) {
+    for (const schema of document.parsedDocument.predicateSchemas.values()) {
+      const targets = targetsByPredicateId.get(schema.predicateId) ?? [];
+      targets.push({
+        uri: document.uri,
+        schema,
+        range: schema.range,
+      });
+      targetsByPredicateId.set(schema.predicateId, targets);
+    }
+  }
+
+  return new Map(
+    [...targetsByPredicateId.entries()].map(([predicateId, targets]) => [
+      predicateId,
+      targets.sort(comparePredicateSchemaTargets),
+    ]),
+  );
+}
+
+/** Collect graph node summaries across documents, keyed by graph node ID. */
+export function buildNodeSummaryTargets(
+  documents: readonly DatalogWorkspaceDocument[],
+): Map<string, readonly DatalogWorkspaceNodeSummaryTarget[]> {
+  const targetsByNodeId = new Map<string, DatalogWorkspaceNodeSummaryTarget[]>();
+
+  for (const document of documents) {
+    for (const summary of document.parsedDocument.nodeSummaries.values()) {
+      const targets = targetsByNodeId.get(summary.id) ?? [];
+      targets.push({
+        uri: document.uri,
+        summary,
+        range: summary.range,
+      });
+      targetsByNodeId.set(summary.id, targets);
+    }
+  }
+
+  return new Map(
+    [...targetsByNodeId.entries()].map(([nodeId, targets]) => [
+      nodeId,
+      targets.sort(compareNodeSummaryTargets),
+    ]),
+  );
+}
+
+/** Collect deduplicated, sorted graph node IDs across all workspace documents. */
 export function buildGraphNodeIds(documents: readonly DatalogWorkspaceDocument[]): readonly string[] {
   return [...new Set(
     documents.flatMap((document) => document.parsedDocument.datalogSymbols.graphNodes.map((graphNode) => graphNode.id)),
@@ -118,6 +179,20 @@ export function buildCompoundFieldNames(documents: readonly DatalogWorkspaceDocu
 function comparePredicateDefinitions(
   left: DatalogWorkspacePredicateDefinition,
   right: DatalogWorkspacePredicateDefinition,
+): number {
+  return left.uri.localeCompare(right.uri) || compareRanges(left.range, right.range);
+}
+
+function comparePredicateSchemaTargets(
+  left: DatalogWorkspacePredicateSchemaTarget,
+  right: DatalogWorkspacePredicateSchemaTarget,
+): number {
+  return left.uri.localeCompare(right.uri) || compareRanges(left.range, right.range);
+}
+
+function compareNodeSummaryTargets(
+  left: DatalogWorkspaceNodeSummaryTarget,
+  right: DatalogWorkspaceNodeSummaryTarget,
 ): number {
   return left.uri.localeCompare(right.uri) || compareRanges(left.range, right.range);
 }

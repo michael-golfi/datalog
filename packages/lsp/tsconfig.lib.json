@@ -6,6 +6,12 @@
       "@datalog/ast": [
         "../datalog-ast/src/index.ts"
       ],
+      "@datalog/datalog-migrate": [
+        "../datalog-migrate/src/index.ts"
+      ],
+      "@datalog/datalog-migrate/load-datalog-migration-project-files": [
+        "../datalog-migrate/src/load-datalog-migration-project-files.ts"
+      ],
       "@datalog/parser": [
         "../parser/src/index.ts"
       ]
@@ -21,6 +27,9 @@
   "references": [
     {
       "path": "../datalog-ast/tsconfig.lib.json"
+    },
+    {
+      "path": "../datalog-migrate/tsconfig.lib.json"
     },
     {
       "path": "../parser/tsconfig.lib.json"

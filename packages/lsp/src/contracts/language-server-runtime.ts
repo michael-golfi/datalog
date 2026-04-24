@@ -38,7 +38,13 @@ export interface LanguageServerRuntime {
       readonly workspaceIndex?: DatalogWorkspaceIndex;
     },
   ) => LanguageServerDefinition | null;
-  readonly computeDiagnostics: (source: string) => readonly LanguageServerDiagnostic[];
+  readonly computeDiagnostics: (
+    source: string,
+    context?: {
+      readonly targetUri?: string;
+      readonly workspaceIndex?: DatalogWorkspaceIndex;
+    },
+  ) => readonly LanguageServerDiagnostic[];
   readonly computeDocumentSymbols: (source: string) => readonly LanguageServerDocumentSymbol[];
   readonly computeFoldingRanges: (source: string) => readonly LanguageServerFoldingRange[];
   readonly computeSemanticTokens: (source: string) => readonly SemanticToken[];
