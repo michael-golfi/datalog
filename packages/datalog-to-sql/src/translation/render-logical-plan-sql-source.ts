@@ -84,7 +84,7 @@ function renderScanSource(node: LogicalScanNode, catalog: PredicateCatalog): str
   if (storage.kind !== 'postgres-table' && storage.kind !== 'postgres-view') {
     throw new GraphTranslationError(
       'UNSUPPORTED_GRAPH_PREDICATE',
-      `Unsupported storage binding ${storage.kind} for ${predicate.signature.name}/${predicate.signature.arity}.`,
+      `Unsupported storage binding ${storage.kind} for ${String(predicate.signature.name)}/${predicate.signature.arity}.`,
     );
   }
 
