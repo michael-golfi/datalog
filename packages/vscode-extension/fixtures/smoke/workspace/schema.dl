@@ -1,0 +1,3 @@
+% Sibling workspace rule used by smoke cross-file assertions.
+SchemaShared(left, right) :-
+  Shared(left, right).

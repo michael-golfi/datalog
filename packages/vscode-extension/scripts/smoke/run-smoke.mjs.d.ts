@@ -1,7 +1,7 @@
 export interface SmokeRunOptionsInput {
   brokenMode: boolean;
   stageRoot: string;
-  smokeFilePath: string;
+  currentFilePath: string;
   brokenSmokeMarkerPath: string;
 }
 
@@ -11,7 +11,7 @@ export interface SmokeRunOptions {
   extensionTestsEnv: {
     DATALOG_SMOKE_EXPECT_FAILURE: '0' | '1';
     DATALOG_SMOKE_EXTENSION_ID: string;
-    DATALOG_SMOKE_FILE_PATH: string;
+    DATALOG_SMOKE_CURRENT_FILE_PATH: string;
     DATALOG_SMOKE_BROKEN_MARKER_PATH: string;
   };
   launchArgs: string[];

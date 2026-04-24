@@ -1,0 +1,18 @@
+% Smoke fixture heading
+% Smoke fixture details
+Parent("alice", "bob").
+Parent("carol", "dave").
+
+Shared(left, right) :-
+  Parent(left, right).
+
+UsesShared(left, right) :-
+  Shared(left, right),
+  Edge(left, "food/instance_of", "class/Thing"),
+  Serving@(serv/id="serv/1", serv/subject=left).
+
+CrossFileWorkspace(left, right) :-
+  SchemaShared(left, right).
+
+CompletionProbe(left, right) :-
+  Sha.

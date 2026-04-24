@@ -3,7 +3,7 @@ export function wasExpectedBrokenFailure(message: string, brokenSmokeMarkerPath?
 export function createSmokeRunOptions(input: {
   brokenMode: boolean;
   stageRoot: string;
-  smokeFilePath: string;
+  currentFilePath: string;
   brokenSmokeMarkerPath: string;
 }): {
   extensionDevelopmentPath: string;
