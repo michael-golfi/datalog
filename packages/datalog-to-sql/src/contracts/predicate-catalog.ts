@@ -1,5 +1,8 @@
 import type { DatalogPredicateName, DatalogTypeName } from '@datalog/ast';
 import type { PredicateSignature } from './datalog-program.js';
+import type {
+  ExternalResolverDefinition,
+} from './external-resolver-definition.js';
 
 export interface RelationColumnBinding {
   readonly name: string;
@@ -83,15 +86,49 @@ export type PredicateStorageBinding =
   | WorkTableBinding
   | MemoryRelationBinding;
 
-export interface PredicateBinding {
+export interface ExternalPredicateExecutionBinding<TResolver extends ExternalResolverDefinition = ExternalResolverDefinition> {
+  readonly kind: 'external-resolver';
+  readonly resolver: TResolver;
+}
+
+export interface StoredPredicateBinding {
   readonly signature: PredicateSignature;
   readonly source: 'catalog' | 'program' | 'workspace';
   readonly storage: PredicateStorageBinding;
+  readonly columns?: readonly RelationColumnBinding[];
+  readonly execution?: undefined;
   readonly constraints: readonly PredicateConstraint[];
   readonly indexes: readonly PredicateIndex[];
   readonly statistics?: PredicateStatistics;
   readonly capabilities: PredicateCapabilities;
 }
+
+interface ExternalPredicateBindingBase {
+  readonly signature: PredicateSignature;
+  readonly source: 'catalog' | 'program' | 'workspace';
+  readonly constraints: readonly PredicateConstraint[];
+  readonly indexes: readonly PredicateIndex[];
+  readonly statistics?: PredicateStatistics;
+  readonly capabilities: PredicateCapabilities;
+}
+
+export interface SqlPushdownExternalPredicateBinding
+  extends ExternalPredicateBindingBase {
+  readonly storage: PostgresTableBinding | PostgresViewBinding;
+  readonly columns?: undefined;
+  readonly execution: ExternalPredicateExecutionBinding;
+}
+
+export interface DeferredExternalPredicateBinding
+  extends ExternalPredicateBindingBase {
+  readonly storage?: undefined;
+  readonly columns: readonly RelationColumnBinding[];
+  readonly execution: ExternalPredicateExecutionBinding;
+}
+
+export type ExternalPredicateBinding = SqlPushdownExternalPredicateBinding | DeferredExternalPredicateBinding;
+
+export type PredicateBinding = StoredPredicateBinding | ExternalPredicateBinding;
 
 export interface BuiltinPredicateBinding {
   readonly signature: PredicateSignature;
@@ -108,4 +145,13 @@ export interface PredicateCatalog {
 export interface PredicateCatalogLookup {
   readonly predicate: PredicateBinding;
   readonly aliasApplied?: DatalogPredicateName;
+}
+
+/** Resolve the column contract for stored and external predicates through one shared seam. */
+export function getPredicateColumns(predicate: PredicateBinding): readonly RelationColumnBinding[] {
+  if (predicate.columns !== undefined) {
+    return predicate.columns;
+  }
+
+  return predicate.storage.columns;
 }
