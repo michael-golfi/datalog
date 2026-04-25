@@ -8,6 +8,7 @@ import {
 } from '@datalog/ast';
 
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
 import type {
   InsertCompoundAssertionOperation,
   InsertFactsOperation,

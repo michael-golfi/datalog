@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import {
   atom,
   constantTerm,
@@ -7,7 +9,6 @@ import {
   namedTerm,
   variableTerm,
 } from '@datalog/ast';
-import { describe, expect, it } from 'vitest';
 
 import { translateCompoundAssertion } from './translate-compound-assertion.js';
 import { translateFactInsert } from './translate-fact-insert.js';
