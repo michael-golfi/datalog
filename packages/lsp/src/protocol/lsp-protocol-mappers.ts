@@ -20,7 +20,8 @@ import type {
 export function toLspDiagnostic(diagnostic: LanguageServerDiagnostic): Diagnostic {
   return {
     range: diagnostic.range,
-    severity: diagnostic.severity === 'error' ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
+    severity:
+      diagnostic.severity === 'error' ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning,
     source: diagnostic.source,
     message: diagnostic.message,
   };
@@ -46,7 +47,9 @@ export function toLspDocumentSymbol(symbol: LanguageServerDocumentSymbol): Docum
     range: symbol.range,
     selectionRange: symbol.selectionRange,
     ...(symbol.detail ? { detail: symbol.detail } : {}),
-    ...(symbol.children ? { children: symbol.children.map((child) => toLspDocumentSymbol(child)) } : {}),
+    ...(symbol.children
+      ? { children: symbol.children.map((child) => toLspDocumentSymbol(child)) }
+      : {}),
   };
 }
 
