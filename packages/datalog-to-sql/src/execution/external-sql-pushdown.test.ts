@@ -1,13 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { defineExternalResolverDefinition } from '../contracts/external-resolver-definition.js';
-import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
-import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
-import { DEFAULT_RECURSIVE_CLOSURE_BENCHMARK_CONTRACT } from '../benchmarks/recursive-closure-benchmark-contract.js';
 import { applyDatalogFacts } from './apply-datalog-facts.js';
-import { createQueryCountTracker } from './query-count-tracker.js';
 import { executePreparedSelectFacts } from './execute-prepared-select-facts.js';
 import { prepareSelectFactsExecution } from './prepare-select-facts-execution.js';
+import { createQueryCountTracker } from './query-count-tracker.js';
+import { DEFAULT_RECURSIVE_CLOSURE_BENCHMARK_CONTRACT } from '../benchmarks/recursive-closure-benchmark-contract.js';
+import { defineExternalResolverDefinition } from '../contracts/external-resolver-definition.js';
 import { createPostgresSqlClient, type PostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
 import {
   initializeGraphSchema,
@@ -15,6 +13,9 @@ import {
   waitForPostgres,
 } from '../runtime/recursive-closure-postgres-runtime.js';
 import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from '../translation/default-graph-predicate-catalog.js';
+
+import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
+import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 
 const EXTERNAL_ACCOUNT_TABLE = 'external_sql_pushdown_accounts';
 const EXTERNAL_ACCOUNT_VIEW = 'external_sql_pushdown_accounts_view';
@@ -59,6 +60,7 @@ describe('external SQL pushdown', () => {
       catalog: createSqlPushdownCatalog(),
       operation: {
         kind: 'select-facts',
+        predicateCatalog: createSqlPushdownCatalog(),
         match: [
           {
             kind: 'vertex',
@@ -147,6 +149,7 @@ describe('external SQL pushdown', () => {
         catalog: invalidCatalog,
         operation: {
           kind: 'select-facts',
+          predicateCatalog: invalidCatalog,
           match: [
             {
               kind: 'vertex',

@@ -1,6 +1,9 @@
-import { defPredSchema } from '@datalog/ast';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
+import { applyDatalogFacts } from './apply-datalog-facts.js';
+import { executePreparedSelectFacts } from './execute-prepared-select-facts.js';
+import { prepareSelectFactsExecution } from './prepare-select-facts-execution.js';
+import { DEFAULT_RECURSIVE_CLOSURE_BENCHMARK_CONTRACT } from '../benchmarks/recursive-closure-benchmark-contract.js';
 import {
   defineExternalResolverDefinition,
   type ExternalResolverHydrateRequest,
@@ -8,36 +11,15 @@ import {
   type HydrateRowsHandler,
   type MaterializeRowsHandler,
 } from '../contracts/external-resolver-definition.js';
-import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
-import { applyDatalogFacts } from './apply-datalog-facts.js';
 import { createPostgresSqlClient, type PostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
-import { executePreparedSelectFacts } from './execute-prepared-select-facts.js';
-import { prepareSelectFactsExecution } from './prepare-select-facts-execution.js';
-import { DEFAULT_RECURSIVE_CLOSURE_BENCHMARK_CONTRACT } from '../benchmarks/recursive-closure-benchmark-contract.js';
 import {
   initializeGraphSchema,
   startRecursiveClosurePostgresRuntime,
   waitForPostgres,
 } from '../runtime/recursive-closure-postgres-runtime.js';
 import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from '../translation/default-graph-predicate-catalog.js';
-import { buildPredicateCatalogFromSchema } from '../translation/build-predicate-catalog-from-schema.js';
 
-const GRAPH_PREDICATE_CATALOG = buildPredicateCatalogFromSchema([
-  defPredSchema({
-    predicateName: 'vertex',
-    subjectCardinality: '1',
-    subjectDomain: 'node',
-    objectCardinality: '0',
-    objectDomain: 'node',
-  }),
-  defPredSchema({
-    predicateName: 'edge',
-    subjectCardinality: '0',
-    subjectDomain: 'node',
-    objectCardinality: '0',
-    objectDomain: 'node',
-  }),
-]);
+import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 
 describe('postgres e2e validation', () => {
   let sql!: PostgresSqlClient;
@@ -78,6 +60,7 @@ describe('postgres e2e validation', () => {
       catalog: DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
       operation: {
         kind: 'select-facts',
+        predicateCatalog: DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
         match: [
           { kind: 'vertex', id: { kind: 'variable', name: 'person' } },
           {
@@ -137,6 +120,7 @@ describe('postgres e2e validation', () => {
       catalog: DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
       operation: {
         kind: 'select-facts',
+        predicateCatalog: DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
         match: [
           { kind: 'vertex', id: { kind: 'variable', name: 'person' } },
           {
@@ -179,6 +163,7 @@ describe('postgres e2e validation', () => {
       catalog: createSqlPushdownCatalog(),
       operation: {
         kind: 'select-facts',
+        predicateCatalog: createSqlPushdownCatalog(),
         match: [
           { kind: 'vertex', id: { kind: 'variable', name: 'person' } },
           {
@@ -233,6 +218,7 @@ describe('postgres e2e validation', () => {
       catalog: createMaterializationCatalog(materializeRows),
       operation: {
         kind: 'select-facts',
+        predicateCatalog: createMaterializationCatalog(materializeRows),
         match: [
           {
             kind: 'predicate',
@@ -293,6 +279,7 @@ describe('postgres e2e validation', () => {
       catalog: createHydrationCatalog(hydrateRows),
       operation: {
         kind: 'select-facts',
+        predicateCatalog: createHydrationCatalog(hydrateRows),
         match: [
           { kind: 'vertex', id: { kind: 'variable', name: 'person' } },
           {
