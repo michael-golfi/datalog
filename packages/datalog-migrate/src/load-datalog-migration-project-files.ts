@@ -1,8 +1,9 @@
 import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 
-import type { CommittedDatalogMigrationFile } from './read-committed-datalog-migration-file.js';
 import { readCommittedDatalogMigrationFile } from './read-committed-datalog-migration-file.js';
+
+import type { CommittedDatalogMigrationFile } from './read-committed-datalog-migration-file.js';
 
 interface LoadDatalogMigrationProjectFilesOptions {
   readonly workspaceRoot?: string;

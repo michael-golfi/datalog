@@ -3,12 +3,14 @@ import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { loadDatalogMigrationProjectFiles } from './load-datalog-migration-project-files.js';
+import { readAppliedMigrationStateFromDatabase } from './read-applied-migration-state.js';
+import { reconcileAppliedMigrations } from './reconcile-applied-migrations.js';
+
 import type {
   AppliedMigrationState,
   MigrationReconciliation,
 } from './reconcile-applied-migrations.js';
-import { reconcileAppliedMigrations } from './reconcile-applied-migrations.js';
-import { readAppliedMigrationStateFromDatabase } from './read-applied-migration-state.js';
+
 
 type DatalogMigrationStatusCode =
   | 'clean'

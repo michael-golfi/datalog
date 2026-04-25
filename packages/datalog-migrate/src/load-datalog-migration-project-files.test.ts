@@ -6,7 +6,6 @@ import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { createCommittedMigrationSource } from './commit-current-datalog-migration.js';
-
 import { loadDatalogMigrationProjectFiles } from './load-datalog-migration-project-files.js';
 
 const ontologyWorkspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../medical-ontology-e2e');
