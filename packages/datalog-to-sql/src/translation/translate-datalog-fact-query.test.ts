@@ -1,8 +1,9 @@
-import { defCompoundFieldSchema, defCompoundSchema, defPredSchema, queryStatement } from '@datalog/ast';
 import { describe, expect, it } from 'vitest';
 
-import { createSelectFactsOperationFromDatalogQuery } from './create-select-facts-operation-from-datalog-query.js';
+import { defCompoundFieldSchema, defCompoundSchema, defPredSchema, queryStatement } from '@datalog/ast';
+
 import { buildPredicateCatalogFromSchema } from './build-predicate-catalog-from-schema.js';
+import { createSelectFactsOperationFromDatalogQuery } from './create-select-facts-operation-from-datalog-query.js';
 import { translateDatalogFactQuery } from './translate-datalog-fact-query.js';
 
 const GRAPH_PREDICATE_CATALOG = buildPredicateCatalogFromSchema([

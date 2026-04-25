@@ -1,12 +1,13 @@
-import { queryStatement } from '@datalog/ast';
 import { describe, expect, it } from 'vitest';
 
-import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
-import { defineExternalResolverDefinition } from '../contracts/external-resolver-definition.js';
-import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
+import { queryStatement } from '@datalog/ast';
 
 import { createSelectFactsOperationFromDatalogQuery } from './create-select-facts-operation-from-datalog-query.js';
 import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from './default-graph-predicate-catalog.js';
+import { defineExternalResolverDefinition } from '../contracts/external-resolver-definition.js';
+
+import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
+import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 
 const SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE = {
   version: 1,
@@ -54,11 +55,6 @@ const SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE = {
     Node: 'vertex',
     Edge: 'edge',
   },
-} satisfies PredicateCatalog;
-
-const EMPTY_PREDICATE_CATALOG = {
-  version: 1,
-  predicates: [],
 } satisfies PredicateCatalog;
 
 describe('createSelectFactsOperationFromDatalogQuery', () => {
