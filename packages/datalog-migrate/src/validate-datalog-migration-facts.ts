@@ -11,6 +11,7 @@ import type {
 import { type ParsedClause, type parseDatalogProgram } from '@datalog/parser';
 
 import { DatalogMigrationSchemaError } from './extract-datalog-schema-from-migrations.js';
+
 import type { CompoundBacklinkExpander } from './apply-datalog-migrations.js';
 
 export interface DatalogMigrationSchemaMaps {

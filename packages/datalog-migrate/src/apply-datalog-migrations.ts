@@ -14,13 +14,13 @@ import {
 import { parseDatalogProgram, parseDocument, type ParsedClause } from '@datalog/parser';
 
 import { applyFactsAndRecordMigrations } from './apply-facts-to-database.js';
-import { loadDatalogMigrationProjectFiles } from './load-datalog-migration-project-files.js';
 import { extractStandardGraphFacts } from './extract-datalog-graph-facts.js';
 import {
   extractDatalogSchemaFromMigrations,
   getDefCompoundSchemasByCompoundName,
   getDefPredSchemasByPredicateName,
 } from './extract-datalog-schema-from-migrations.js';
+import { loadDatalogMigrationProjectFiles } from './load-datalog-migration-project-files.js';
 import {
   extractCompoundBacklinksFromClauses,
   validateDatalogMigrationFactStatements,
