@@ -8,7 +8,10 @@ export function isVariableTermPosition(argumentPrefix: string, tokenPrefix: stri
 }
 
 /** Collect previously declared variables from the current clause prefix. */
-export function collectClauseVariables(clausePrefix: string, currentTokenPrefix: string): readonly string[] {
+export function collectClauseVariables(
+  clausePrefix: string,
+  currentTokenPrefix: string,
+): readonly string[] {
   const variables = new Set<string>();
   const state = { inComment: false, inString: false };
 
@@ -26,7 +29,13 @@ function scanClauseVariable(options: {
   readonly currentTokenPrefix: string;
   readonly variables: Set<string>;
 }): number {
-  if (advanceQuotedOrCommentState({ source: options.clausePrefix, index: options.index, state: options.state })) {
+  if (
+    advanceQuotedOrCommentState({
+      source: options.clausePrefix,
+      index: options.index,
+      state: options.state,
+    })
+  ) {
     return options.index;
   }
 
@@ -83,7 +92,10 @@ function advanceQuotedOrCommentState(options: {
   return true;
 }
 
-function getVariableMatch(clausePrefix: string, startIndex: number): {
+function getVariableMatch(
+  clausePrefix: string,
+  startIndex: number,
+): {
   readonly name: string;
   readonly endIndex: number;
   readonly isTerm: boolean;
