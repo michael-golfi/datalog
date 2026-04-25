@@ -1,8 +1,8 @@
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
-import { createRequire } from 'node:module';
 
 import { resolveMedicalOntologyWorkspacePath } from './medical-ontology-workspace-path-support.js';
 

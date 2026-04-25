@@ -1,4 +1,5 @@
 import { loadDatalogMigrationProjectFiles } from '@datalog/datalog-migrate';
+
 import {
   extractOntologyFactsFromMigrations,
   type OntologyEdgeFact,

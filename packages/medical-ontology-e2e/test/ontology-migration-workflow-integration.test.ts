@@ -9,15 +9,15 @@ import {
 } from '@datalog/datalog-migrate';
 
 import { createLocalhostPostgresFixture } from './fixtures/localhost-postgres-fixture.js';
+import { resolveMedicalOntologyWorkspacePath } from './fixtures/medical-ontology-workspace-path-support.js';
 import {
   createConditionCrosswalkOperation,
   createMedicationCrosswalkOperation,
   createVertexLookupByPreferredLabelOperation,
 } from './fixtures/ontology-graph-query-fixture.js';
-import { resolveMedicalOntologyWorkspacePath } from './fixtures/medical-ontology-workspace-path-support.js';
 import { executeOntologyGraphQuery } from './fixtures/ontology-live-postgres-proof-fixture.js';
 
-const ontologyCompoundBacklinkExpander: CompoundBacklinkExpander = (clause): EdgeFact | null => {
+const ontologyCompoundBacklinkExpander: CompoundBacklinkExpander = ({ clause }): EdgeFact | null => {
   const fieldValues = new Map<string, string>();
 
   for (const [index, field] of clause.compoundFields.entries()) {

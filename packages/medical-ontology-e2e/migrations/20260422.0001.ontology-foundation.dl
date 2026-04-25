@@ -1,5 +1,5 @@
 % migration.previous: none
-% migration.sha256: fa5f2215f56109863d0bc89d88493124af49f711d88e3cb4234b5c70c174b318
+% migration.sha256: ecf7172ec9b7c7d17f8b4fcf15791e5b588e3feef99e1a32a730c9bb8ea9ceb1
 % === Clinical Ontology Foundation v2 ===
 % Binary predicates remain for stable taxonomy and scalar metadata.
 % Compounds represent n-ary clinical relations; metadata is attached to the compound cid.
@@ -44,6 +44,9 @@ DefPred("user/route", "1", "liquid/node", "0", "liquid/string").
 DefPred("user/frequency", "1", "liquid/node", "0", "liquid/string").
 DefPred("user/certainty", "1", "liquid/node", "0", "liquid/string").
 DefPred("user/adherence_status", "1", "liquid/node", "0", "liquid/string").
+
+% --- Shared compound metadata predicates ---
+DefPred("liquid/mutable", "1", "liquid/node", "0", "liquid/string").
 
 % --- Compound identity definitions ---
 % A mapping is identified by the local concept, external vocabulary, and external code.
