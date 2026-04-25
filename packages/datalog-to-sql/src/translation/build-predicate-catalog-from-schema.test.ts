@@ -1,9 +1,11 @@
-import { defCompoundFieldSchema, defCompoundSchema, defPredSchema } from '@datalog/ast';
 import { describe, expect, it } from 'vitest';
+
+import { defCompoundFieldSchema, defCompoundSchema, defPredSchema } from '@datalog/ast';
+
+import { buildPredicateCatalogFromSchema } from './build-predicate-catalog-from-schema.js';
 
 import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 
-import { buildPredicateCatalogFromSchema } from './build-predicate-catalog-from-schema.js';
 
 describe('buildPredicateCatalogFromSchema', () => {
   it('recreates the legacy graph catalog bindings from graph DefPred schemas', () => {
@@ -24,6 +26,11 @@ describe('buildPredicateCatalogFromSchema', () => {
       }),
     ])).toEqual({
       version: 1,
+      aliases: {
+        Vertex: 'vertex',
+        Node: 'vertex',
+        Edge: 'edge',
+      },
       predicates: [
         {
           signature: {

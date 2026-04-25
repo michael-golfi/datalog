@@ -8,6 +8,7 @@ import type {
 } from '@datalog/ast';
 
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
 import type {
   PredicateBinding,
   PredicateCapabilities,
@@ -30,6 +31,11 @@ export function buildPredicateCatalogFromSchema(schemas: readonly DatalogSchema[
   return {
     version: 1,
     predicates: schemas.map((schema) => buildPredicateBinding(schema)),
+    aliases: {
+      Vertex: 'vertex',
+      Node: 'vertex',
+      Edge: 'edge',
+    },
   };
 }
 
