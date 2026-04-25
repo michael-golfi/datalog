@@ -8,6 +8,7 @@ describe('compileSelectFactsLogicalPlan shape', () => {
     const plan = compileSelectFactsLogicalPlan(
       {
         kind: 'select-facts',
+        predicateCatalog: graphPredicateCatalog,
         match: [
           { kind: 'vertex', id: { kind: 'variable', name: 'person' } },
           {

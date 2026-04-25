@@ -11,6 +11,7 @@ describe('compileSelectFactsLogicalPlan errors', () => {
       compileSelectFactsLogicalPlan(
         {
           kind: 'select-facts',
+          predicateCatalog: createCatalogMissingVertexPredicate(),
           match: [{ kind: 'vertex', id: { kind: 'variable', name: 'person' } }],
         },
         createCatalogMissingVertexPredicate(),
