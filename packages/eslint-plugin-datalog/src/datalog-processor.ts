@@ -1,10 +1,10 @@
-import type { Linter } from 'eslint';
-
 import {
   createDatalogVirtualFilename,
   createVirtualDatalogSource,
   remapDatalogMessages,
 } from './datalog-source.js';
+
+import type { Linter } from 'eslint';
 
 export const datalogProcessor = {
   meta: {
