@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
-
 import { translateFactDelete } from './translate-fact-delete.js';
+
+import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 
 describe('translateFactDelete', () => {
   it('groups multiple vertex facts into a single delete CTE with stable placeholder ordering', () => {
@@ -49,7 +49,14 @@ describe('translateFactDelete', () => {
     ).toEqual({
       operation: 'delete',
       text: 'with deleted_edges as (delete from edges where (subject_id = $1 and predicate_id = $2 and object_id = $3) or (subject_id = $4 and predicate_id = $5 and object_id = $6) returning subject_id, predicate_id, object_id) select 1;',
-      values: ['vertex/alice', 'graph/likes', 'vertex/bob', 'vertex/bob', 'graph/likes', 'vertex/carol'],
+      values: [
+        'vertex/alice',
+        'graph/likes',
+        'vertex/bob',
+        'vertex/bob',
+        'graph/likes',
+        'vertex/carol',
+      ],
     });
   });
 

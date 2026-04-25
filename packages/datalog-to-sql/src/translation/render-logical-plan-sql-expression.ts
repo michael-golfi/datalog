@@ -1,4 +1,6 @@
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
+import type { RenderContext } from './render-logical-plan-sql-context.js';
 import type {
   BooleanExpression,
   ColumnReference,
@@ -8,31 +10,40 @@ import type {
   ScalarLiteral,
 } from '../contracts/logical-plan.js';
 
-import type { RenderContext } from './render-logical-plan-sql-context.js';
-
 /** Render one project binding into a SQL select-list entry. */
 export function renderProjection(
   projection: { readonly name: string; readonly expression: LogicalExpression },
   context: RenderContext,
 ): string {
-  return `${renderExpression(projection.expression, context)} as ${quoteIdentifier(projection.name)}`;
+  return `${renderExpression(projection.expression, context)} as ${quoteIdentifier(
+    projection.name,
+  )}`;
 }
 
 /** Render a logical join condition into SQL. */
 export function renderJoinCondition(condition: JoinCondition, context: RenderContext): string {
   if (condition.kind === 'equi') {
     if (condition.left !== undefined && condition.right !== undefined) {
-      return `${renderColumnReference(condition.left, context)} = ${renderColumnReference(condition.right, context)}`;
+      return `${renderColumnReference(condition.left, context)} = ${renderColumnReference(
+        condition.right,
+        context,
+      )}`;
     }
 
-    throw new GraphTranslationError('UNSUPPORTED_LOGICAL_PLAN_NODE', 'Join equi condition must include both sides.');
+    throw new GraphTranslationError(
+      'UNSUPPORTED_LOGICAL_PLAN_NODE',
+      'Join equi condition must include both sides.',
+    );
   }
 
   if (condition.predicate !== undefined) {
     return renderExpression(condition.predicate, context);
   }
 
-  throw new GraphTranslationError('UNSUPPORTED_LOGICAL_PLAN_NODE', 'Join predicate condition must include a predicate.');
+  throw new GraphTranslationError(
+    'UNSUPPORTED_LOGICAL_PLAN_NODE',
+    'Join predicate condition must include a predicate.',
+  );
 }
 
 /** Render a supported logical expression into SQL. */
@@ -43,7 +54,9 @@ export function renderExpression(expression: LogicalExpression, context: RenderC
     case 'literal':
       return renderLiteral(expression, context);
     case 'comparison':
-      return `${renderExpression(expression.left, context)} ${expression.operator} ${renderExpression(expression.right, context)}`;
+      return `${renderExpression(expression.left, context)} ${
+        expression.operator
+      } ${renderExpression(expression.right, context)}`;
     case 'boolean':
       return renderBooleanExpression(expression, context);
     case 'parameter':
@@ -61,7 +74,9 @@ function renderBooleanExpression(expression: BooleanExpression, context: RenderC
     return renderNotExpression(expression.args, context);
   }
 
-  return expression.args.map((argument) => `(${renderExpression(argument, context)})`).join(` ${expression.operator} `);
+  return expression.args
+    .map((argument) => `(${renderExpression(argument, context)})`)
+    .join(` ${expression.operator} `);
 }
 
 function renderNotExpression(args: readonly LogicalExpression[], context: RenderContext): string {
@@ -71,17 +86,25 @@ function renderNotExpression(args: readonly LogicalExpression[], context: Render
     return `not (${renderExpression(argument, context)})`;
   }
 
-  throw new GraphTranslationError('UNSUPPORTED_LOGICAL_PLAN_NODE', 'Boolean not requires an argument.');
+  throw new GraphTranslationError(
+    'UNSUPPORTED_LOGICAL_PLAN_NODE',
+    'Boolean not requires an argument.',
+  );
 }
 
 function renderParameterReference(reference: ParameterReference, context: RenderContext): string {
-  const parameterIndex = context.plan.parameters.findIndex((parameter) => parameter.id === reference.parameterId);
+  const parameterIndex = context.plan.parameters.findIndex(
+    (parameter) => parameter.id === reference.parameterId,
+  );
 
   if (parameterIndex >= 0) {
     return `$${parameterIndex + 1}`;
   }
 
-  throw new GraphTranslationError('UNSUPPORTED_LOGICAL_PLAN_NODE', `Missing parameter binding ${reference.parameterId}.`);
+  throw new GraphTranslationError(
+    'UNSUPPORTED_LOGICAL_PLAN_NODE',
+    `Missing parameter binding ${reference.parameterId}.`,
+  );
 }
 
 function renderLiteral(literal: ScalarLiteral, context: RenderContext): string {

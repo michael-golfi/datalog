@@ -1,4 +1,5 @@
 import type { DatalogPredicateName, DatalogTypeName } from '@datalog/ast';
+
 import type { PredicateSignature } from './datalog-program.js';
 import type {
   ExternalResolverDefinition,

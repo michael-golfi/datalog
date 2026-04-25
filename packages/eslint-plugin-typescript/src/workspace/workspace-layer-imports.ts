@@ -1,5 +1,4 @@
-import type { Rule } from 'eslint';
-
+import { getLayerName, getLayerPolicy, getRelativeInsideSourceRoot } from './layer-policies.js';
 import {
   createImportLikeVisitors,
   getImportSourceReportNode,
@@ -7,8 +6,9 @@ import {
   isTypeOnlyImportLike,
 } from '../shared/imports.js';
 import { hasCodeLikeExtension, resolveRelativeImport, type PathHelpers } from '../shared/paths.js';
+
 import type { WorkspaceLayerImportOptions, WorkspaceLayerPolicy } from './layer-policies.js';
-import { getLayerName, getLayerPolicy, getRelativeInsideSourceRoot } from './layer-policies.js';
+import type { Rule } from 'eslint';
 
 interface LayerContext {
   filename: string;
@@ -18,10 +18,7 @@ interface LayerContext {
   sourceLayer: string;
 }
 
-function getWorkspaceLayer(
-  relativeInsideWorkspace: string,
-  policy: WorkspaceLayerPolicy,
-): string {
+function getWorkspaceLayer(relativeInsideWorkspace: string, policy: WorkspaceLayerPolicy): string {
   return getLayerName(policy, getRelativeInsideSourceRoot(policy, relativeInsideWorkspace));
 }
 
@@ -39,7 +36,11 @@ function getTargetLayerContext(
     return null;
   }
 
-  const targetPolicy = getLayerPolicy(policies, targetWorkspace, targetWorkspace.relativeInsideWorkspace);
+  const targetPolicy = getLayerPolicy(
+    policies,
+    targetWorkspace,
+    targetWorkspace.relativeInsideWorkspace,
+  );
 
   if (!targetPolicy || targetPolicy !== layerContext.sourcePolicy) {
     return null;
@@ -139,13 +140,20 @@ function createLayerImportCheckNode(
   return (node): void => {
     const importSource = getStaticSourceValue(node);
 
-    if (isTypeOnlyImportLike(node) || !importSource?.startsWith('.') || !hasCodeLikeExtension(importSource)) {
+    if (
+      isTypeOnlyImportLike(node) ||
+      !importSource?.startsWith('.') ||
+      !hasCodeLikeExtension(importSource)
+    ) {
       return;
     }
 
     const targetLayerContext = getTargetLayerContext(importSource, layerContext, policies);
 
-    if (!targetLayerContext || targetLayerContext.allowedLayers.includes(targetLayerContext.targetLayer)) {
+    if (
+      !targetLayerContext ||
+      targetLayerContext.allowedLayers.includes(targetLayerContext.targetLayer)
+    ) {
       return;
     }
 
@@ -177,13 +185,19 @@ export function createWorkspaceLayerImports(pathHelpers: PathHelpers): Rule.Rule
       },
     },
     create(context) {
-      const layerContext = getSourceLayerContext(context.getFilename(), pathHelpers, getConfiguredPolicies(context));
+      const layerContext = getSourceLayerContext(
+        context.getFilename(),
+        pathHelpers,
+        getConfiguredPolicies(context),
+      );
 
       if (!layerContext) {
         return {};
       }
 
-      return createImportLikeVisitors(createLayerImportCheckNode(context, layerContext, getConfiguredPolicies(context)));
+      return createImportLikeVisitors(
+        createLayerImportCheckNode(context, layerContext, getConfiguredPolicies(context)),
+      );
     },
   };
 }

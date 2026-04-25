@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { computeLineStarts } from '../syntax/line-starts.js';
-
 import { parseDatalogAtom } from './parse-datalog-atom.js';
+import { computeLineStarts } from '../syntax/line-starts.js';
 
 function parseAtom(source: string) {
   return parseDatalogAtom({

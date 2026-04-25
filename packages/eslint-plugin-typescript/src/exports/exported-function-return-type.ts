@@ -1,6 +1,6 @@
-import type { Rule } from 'eslint';
-
 import { getExportedFunctionNode, getExportedFunctionReturnType } from '../shared/export-ast.js';
+
+import type { Rule } from 'eslint';
 
 interface DefaultExportedFunctionNode {
   type: 'FunctionDeclaration' | 'FunctionExpression';
@@ -39,7 +39,10 @@ export const exportedFunctionReturnType: Rule.RuleModule = {
       ExportDefaultDeclaration(node) {
         const declaration = node.declaration as DefaultExportedFunctionNode | undefined;
 
-        if (declaration?.type !== 'FunctionDeclaration' && declaration?.type !== 'FunctionExpression') {
+        if (
+          declaration?.type !== 'FunctionDeclaration' &&
+          declaration?.type !== 'FunctionExpression'
+        ) {
           return;
         }
 

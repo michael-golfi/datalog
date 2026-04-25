@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { compileSelectFactsLogicalPlan } from './compile-select-facts-logical-plan.js';
 import { graphPredicateCatalog } from './compile-select-facts-logical-plan.fixtures.js';
+import { compileSelectFactsLogicalPlan } from './compile-select-facts-logical-plan.js';
 
 describe('compileSelectFactsLogicalPlan rebinding', () => {
   it('rebinds variable references to wrapper nodes when filters feed joins', () => {
@@ -49,9 +49,21 @@ describe('compileSelectFactsLogicalPlan rebinding', () => {
       id: 'project_1',
       inputNodeId: 'join_1',
       projections: [
-        { name: 'person', expression: { kind: 'column', nodeId: 'join_1', columnId: 'scan_1.subject_id' }, type: 'text' },
-        { name: 'friend', expression: { kind: 'column', nodeId: 'join_1', columnId: 'scan_1.object_id' }, type: 'text' },
-        { name: 'colleague', expression: { kind: 'column', nodeId: 'join_1', columnId: 'scan_2.object_id' }, type: 'text' },
+        {
+          name: 'person',
+          expression: { kind: 'column', nodeId: 'join_1', columnId: 'scan_1.subject_id' },
+          type: 'text',
+        },
+        {
+          name: 'friend',
+          expression: { kind: 'column', nodeId: 'join_1', columnId: 'scan_1.object_id' },
+          type: 'text',
+        },
+        {
+          name: 'colleague',
+          expression: { kind: 'column', nodeId: 'join_1', columnId: 'scan_2.object_id' },
+          type: 'text',
+        },
       ],
     });
   });

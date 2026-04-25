@@ -1,12 +1,15 @@
-import type { Position, Range } from '../contracts/position.js';
-
 import { computeLineStarts } from './line-starts.js';
+
+import type { Position, Range } from '../contracts/position.js';
 
 /** Convert an absolute source offset to a line/character position. */
 export function offsetToPosition(lineStarts: readonly number[], offset: number): Position {
   let line = 0;
 
-  while (line + 1 < lineStarts.length && (lineStarts[line + 1] ?? Number.MAX_SAFE_INTEGER) <= offset) {
+  while (
+    line + 1 < lineStarts.length &&
+    (lineStarts[line + 1] ?? Number.MAX_SAFE_INTEGER) <= offset
+  ) {
     line += 1;
   }
 
@@ -24,10 +27,12 @@ export function positionToOffset(lineStarts: readonly number[], position: Positi
 
 /** Check whether a position falls within a source range, inclusive. */
 export function within(position: Position, range: Range): boolean {
-  const startsBefore = position.line > range.start.line
-    || (position.line === range.start.line && position.character >= range.start.character);
-  const endsAfter = position.line < range.end.line
-    || (position.line === range.end.line && position.character <= range.end.character);
+  const startsBefore =
+    position.line > range.start.line ||
+    (position.line === range.start.line && position.character >= range.start.character);
+  const endsAfter =
+    position.line < range.end.line ||
+    (position.line === range.end.line && position.character <= range.end.character);
 
   return startsBefore && endsAfter;
 }

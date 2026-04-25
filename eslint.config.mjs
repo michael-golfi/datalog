@@ -7,198 +7,33 @@ import jsdoc from 'eslint-plugin-jsdoc';
 import tseslint from 'typescript-eslint';
 
 import { createDatalogPlugin } from '@datalog/eslint-plugin-datalog';
+import { createTypeScriptWorkspacePlugin } from '@datalog/eslint-plugin-typescript';
+
+import { createConfigFragments } from './eslint/config-fragments.mjs';
 import {
-  createTypeScriptWorkspacePlugin,
-  findWorkspacePackageDirs,
-} from '@datalog/eslint-plugin-typescript';
+  repoPolicy,
+  restrictedHttpClientPaths,
+  workspaceLayerPolicies,
+} from './eslint/repo-policy.mjs';
 
 const tsconfigRootDir = path.dirname(fileURLToPath(import.meta.url));
 const { plugin: datalogPlugin } = createDatalogPlugin();
 const { plugin: typeScriptWorkspacePlugin } = createTypeScriptWorkspacePlugin(tsconfigRootDir);
-
-const sourceFileGlobs = ['packages/**/*.{ts,mts,cts,tsx,js,mjs,cjs,jsx}'];
-const typedSourceGlobs = ['packages/**/*.{ts,mts,cts,tsx}'];
-const maintainabilityFileGlobs = ['packages/*/src/**/*.{ts,tsx,js,mjs,cjs,jsx}'];
-const librarySourceGlobs = ['packages/{parser,datalog-to-sql,datalog-migrate,lsp,eslint-plugin-datalog,eslint-plugin-typescript}/src/**/*.{ts,tsx}'];
-const testFileGlobs = [
-  '**/*.test.{ts,tsx,js,jsx}',
-  '**/*.spec.{ts,tsx,js,jsx}',
-  '**/test/**/*.{ts,tsx,js,jsx}',
-  '**/tests/**/*.{ts,tsx,js,jsx}',
-];
-
-const workspacePackageDirs = findWorkspacePackageDirs(tsconfigRootDir);
-
-const importResolverProjects = [
-  path.join(tsconfigRootDir, 'tsconfig.json'),
-  path.join(tsconfigRootDir, 'packages/*/tsconfig.json'),
-];
-
-const crossWorkspaceRelativeImportPatterns = [
-  '../../packages/*',
-  '../../../packages/*',
-  '../../../../packages/*',
-];
-
-const workspaceLayerPolicies = [
-  {
-    workspaceRoot: 'packages/parser',
-    sourceRoot: 'src',
-    defaultLayer: 'internal',
-    layers: [
-      { name: 'public', files: ['index.ts', 'index.tsx'] },
-      { name: 'internal', prefixes: [''] },
-    ],
-    allow: {
-      public: ['public', 'internal'],
-      internal: ['internal'],
-    },
-  },
-  {
-    workspaceRoot: 'packages/lsp',
-    sourceRoot: 'src',
-    defaultLayer: 'internal',
-    layers: [
-      { name: 'public', files: ['index.ts', 'index.tsx'] },
-      { name: 'internal', prefixes: [''] },
-    ],
-    allow: {
-      public: ['public', 'internal'],
-      internal: ['internal'],
-    },
-  },
-  {
-    workspaceRoot: 'packages/datalog-to-sql',
-    sourceRoot: 'src',
-    defaultLayer: 'internal',
-    layers: [
-      { name: 'public', files: ['index.ts', 'index.tsx'] },
-      { name: 'internal', prefixes: [''] },
-    ],
-    allow: {
-      public: ['public', 'internal'],
-      internal: ['internal'],
-    },
-  },
-  {
-    workspaceRoot: 'packages/datalog-migrate',
-    sourceRoot: 'src',
-    defaultLayer: 'internal',
-    layers: [
-      { name: 'public', files: ['index.ts', 'index.tsx'] },
-      { name: 'internal', prefixes: [''] },
-    ],
-    allow: {
-      public: ['public', 'internal'],
-      internal: ['internal'],
-    },
-  },
-  {
-    workspaceRoot: 'packages/eslint-plugin-datalog',
-    sourceRoot: 'src',
-    defaultLayer: 'internal',
-    layers: [
-      { name: 'public', files: ['index.ts', 'index.tsx'] },
-      { name: 'internal', prefixes: [''] },
-    ],
-    allow: {
-      public: ['public', 'internal'],
-      internal: ['internal'],
-    },
-  },
-  {
-    workspaceRoot: 'packages/eslint-plugin-typescript',
-    sourceRoot: 'src',
-    defaultLayer: 'internal',
-    layers: [
-      { name: 'public', files: ['index.ts', 'index.tsx'] },
-      { name: 'internal', prefixes: [''] },
-    ],
-    allow: {
-      public: ['public', 'internal'],
-      internal: ['internal'],
-    },
-  },
-  {
-    workspaceRoot: 'packages/medical-ontology-e2e',
-    sourceRoot: 'src',
-    defaultLayer: 'internal',
-    layers: [
-      { name: 'public', files: ['index.ts', 'index.tsx'] },
-      { name: 'internal', prefixes: [''] },
-    ],
-    allow: {
-      public: ['public', 'internal'],
-      internal: ['internal'],
-    },
-  },
-  {
-    workspaceRoot: 'packages/vscode-extension',
-    sourceRoot: 'src',
-    defaultLayer: 'internal',
-    layers: [
-      { name: 'entry', files: ['index.ts', 'index.tsx', 'extension.ts', 'main.ts'] },
-      { name: 'internal', prefixes: [''] },
-    ],
-    allow: {
-      entry: ['entry', 'internal'],
-      internal: ['internal'],
-    },
-  },
-];
-
-const restrictedHttpClientPaths = [
-  {
-    name: 'axios',
-    message: 'Prefer shared fetch-based helpers exported from @datalog/* packages instead of axios.',
-  },
-  {
-    name: 'cross-fetch',
-    message: 'Prefer shared fetch-based helpers exported from @datalog/* packages.',
-  },
-  {
-    name: 'got',
-    message: 'Prefer shared fetch-based helpers exported from @datalog/* packages instead of got.',
-  },
-  { name: 'ky', message: 'Prefer shared fetch-based helpers exported from @datalog/* packages instead of ky.' },
-  {
-    name: 'needle',
-    message: 'Prefer shared fetch-based helpers exported from @datalog/* packages instead of needle.',
-  },
-  {
-    name: 'node-fetch',
-    message: 'Node already exposes fetch; prefer shared helpers from @datalog/* packages when abstraction is needed.',
-  },
-  {
-    name: 'request',
-    message: 'Prefer shared fetch-based helpers exported from @datalog/* packages instead of request.',
-  },
-  {
-    name: 'superagent',
-    message: 'Prefer shared fetch-based helpers exported from @datalog/* packages instead of superagent.',
-  },
-  {
-    name: 'undici',
-    message: 'Use runtime fetch directly or the shared fetch helpers exported from @datalog/* packages.',
-  },
-];
-
-const restrictedWorkspaceImportPatternMessages = [
-  {
-    group: crossWorkspaceRelativeImportPatterns,
-    message:
-      'Import other workspaces through their package exports rather than cross-package relative paths.',
-  },
-  {
-    group: ['@datalog/*/src/**', '@datalog/*/dist/**', '@datalog/*/build/**', '@datalog/*/internal/**'],
-    message: 'Do not deep-import another workspace implementation. Import the @datalog/* package surface instead.',
-  },
-  {
-    group: ['packages/**'],
-    message:
-      'Do not import repository paths as modules. Use @datalog/* package exports for workspace-to-workspace imports and relative paths within the current package.',
-  },
-];
+const {
+  declarationFileGlobs,
+  fixtureCommonJsGlobs,
+  exportOnlyEntryGlobs,
+  importResolverProjects,
+  libraryTestIgnoreGlobs,
+  librarySourceGlobs,
+  maintainabilityFileGlobs,
+  restrictedWorkspaceImportPatternMessages,
+  sourceFileGlobs,
+  testFileGlobs,
+  typedSourceGlobs,
+  vscodeExtensionScriptGlobs,
+  workspacePackageDirs,
+} = createConfigFragments({ rootDir: tsconfigRootDir, repoPolicy });
 
 export default tseslint.config(
   {
@@ -271,7 +106,10 @@ export default tseslint.config(
       'typescript-workspace/no-production-imports-from-tests': 'error',
       'typescript-workspace/no-internal-barrel-imports': 'error',
       'typescript-workspace/no-self-package-imports': 'error',
-      'typescript-workspace/workspace-layer-imports': ['error', { policies: workspaceLayerPolicies }],
+      'typescript-workspace/workspace-layer-imports': [
+        'error',
+        { policies: workspaceLayerPolicies },
+      ],
       'import/no-cycle': [
         'error',
         {
@@ -297,9 +135,31 @@ export default tseslint.config(
           peerDependencies: true,
         },
       ],
+      'import/first': 'error',
       'import/no-mutable-exports': 'error',
       'import/no-self-import': 'error',
       'import/no-useless-path-segments': ['error', { noUselessIndex: true }],
+      'import/newline-after-import': ['error', { count: 1, considerComments: true }],
+      'import/order': [
+        'error',
+        {
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            ['parent', 'sibling', 'index'],
+            'object',
+            'type',
+          ],
+          pathGroups: [{ pattern: '@datalog/**', group: 'internal', position: 'before' }],
+          pathGroupsExcludedImportTypes: ['builtin'],
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: false,
+          },
+          'newlines-between': 'always',
+        },
+      ],
       curly: ['error', 'all'],
       eqeqeq: ['error', 'always', { null: 'ignore' }],
       'logical-assignment-operators': ['error', 'always'],
@@ -336,6 +196,7 @@ export default tseslint.config(
       '@typescript-eslint/array-type': ['error', { default: 'array-simple' }],
       '@typescript-eslint/await-thenable': 'error',
       '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+      '@typescript-eslint/consistent-type-exports': 'error',
       '@typescript-eslint/consistent-type-imports': [
         'error',
         {
@@ -344,6 +205,7 @@ export default tseslint.config(
         },
       ],
       '@typescript-eslint/no-confusing-void-expression': ['error', { ignoreArrowShorthand: true }],
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': [
         'error',
@@ -355,7 +217,8 @@ export default tseslint.config(
           },
         },
       ],
-      '@typescript-eslint/no-unnecessary-condition': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'error',
+      '@typescript-eslint/no-unnecessary-condition': 'error',
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -364,9 +227,10 @@ export default tseslint.config(
           varsIgnorePattern: '^_',
         },
       ],
-      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
+      '@typescript-eslint/only-throw-error': 'error',
+      '@typescript-eslint/prefer-nullish-coalescing': 'error',
       '@typescript-eslint/prefer-optional-chain': 'error',
-      '@typescript-eslint/promise-function-async': 'warn',
+      '@typescript-eslint/promise-function-async': 'error',
       '@typescript-eslint/restrict-template-expressions': [
         'error',
         {
@@ -395,10 +259,10 @@ export default tseslint.config(
     files: maintainabilityFileGlobs,
     ignores: ['**/*.test.ts', '**/*.spec.ts', '**/test/**/*.ts'],
     rules: {
-      complexity: ['warn', 8],
-      'max-depth': ['warn', 2],
+      complexity: ['error', 8],
+      'max-depth': ['error', 2],
       'max-lines': [
-        'warn',
+        'error',
         {
           max: 220,
           skipBlankLines: true,
@@ -406,7 +270,7 @@ export default tseslint.config(
         },
       ],
       'max-lines-per-function': [
-        'warn',
+        'error',
         {
           max: 40,
           skipBlankLines: true,
@@ -414,12 +278,12 @@ export default tseslint.config(
           IIFEs: true,
         },
       ],
-      'max-params': ['warn', { max: 3 }],
-      'max-statements': ['warn', { max: 15 }],
+      'max-params': ['error', { max: 3 }],
+      'max-statements': ['error', { max: 15 }],
     },
   },
   {
-    files: ['packages/vscode-extension/scripts/**/*.mjs'],
+    files: vscodeExtensionScriptGlobs,
     languageOptions: {
       globals: {
         process: 'readonly',
@@ -441,7 +305,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['packages/vscode-extension/fixtures/**/*.cjs'],
+    files: fixtureCommonJsGlobs,
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'commonjs',
@@ -467,7 +331,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['packages/{parser,datalog-to-sql,datalog-migrate,lsp,eslint-plugin-datalog,eslint-plugin-typescript}/src/index.ts'],
+    files: exportOnlyEntryGlobs,
     rules: {
       'no-restricted-syntax': [
         'error',
@@ -486,7 +350,7 @@ export default tseslint.config(
   },
   {
     files: librarySourceGlobs,
-    ignores: ['packages/{parser,datalog-to-sql,datalog-migrate,lsp,eslint-plugin-datalog,eslint-plugin-typescript}/src/**/*.test.ts', 'packages/{parser,datalog-to-sql,datalog-migrate,lsp,eslint-plugin-datalog,eslint-plugin-typescript}/src/**/*.spec.ts', 'packages/**/*.d.ts'],
+    ignores: [...libraryTestIgnoreGlobs, ...declarationFileGlobs],
     plugins: {
       jsdoc,
     },
@@ -497,7 +361,7 @@ export default tseslint.config(
     },
     rules: {
       'jsdoc/require-jsdoc': [
-        'warn',
+        'error',
         {
           publicOnly: {
             cjs: false,

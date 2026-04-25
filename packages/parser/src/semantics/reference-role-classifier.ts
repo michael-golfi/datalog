@@ -1,6 +1,6 @@
-import type { ParsedReferenceRole } from '../contracts/parsed-document.js';
-
 import { GRAPH_META_NODE_IDS } from './graph-vocabulary.js';
+
+import type { ParsedReferenceRole } from '../contracts/parsed-document.js';
 
 /** Classify the semantic role of a quoted string reference inside a clause. */
 export function classifyReferenceRole(

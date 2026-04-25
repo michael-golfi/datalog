@@ -1,9 +1,5 @@
 import type { DatalogTerm } from '@datalog/ast';
 
-import { GraphTranslationError } from '../contracts/graph-translation-error.js';
-import type { LogicalExpression, LogicalNodeId } from '../contracts/logical-plan.js';
-import type { RelationColumnBinding } from '../contracts/predicate-catalog.js';
-
 import {
   createColumnReference,
   createEqualityExpression,
@@ -11,6 +7,10 @@ import {
   createScanColumnId,
   type VariableBinding,
 } from './select-facts-logical-plan-node-factory.js';
+import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
+import type { LogicalExpression, LogicalNodeId } from '../contracts/logical-plan.js';
+import type { RelationColumnBinding } from '../contracts/predicate-catalog.js';
 
 export interface PendingJoinCondition {
   readonly left: VariableBinding;
@@ -47,7 +47,10 @@ export function bindPatternTerm(input: {
     }
 
     input.localFilters.push(
-      createEqualityExpression(scanReference, createLiteral(input.binding.term.value, input.binding.column.type)),
+      createEqualityExpression(
+        scanReference,
+        createLiteral(input.binding.term.value, input.binding.column.type),
+      ),
     );
     return;
   }
@@ -77,7 +80,10 @@ function bindVariableTerm(input: {
   const localBinding = input.localBindings.get(input.term.name);
   if (localBinding !== undefined) {
     input.localFilters.push(
-      createEqualityExpression(input.scanReference, createColumnReference(localBinding.nodeId, localBinding.columnId)),
+      createEqualityExpression(
+        input.scanReference,
+        createColumnReference(localBinding.nodeId, localBinding.columnId),
+      ),
     );
     return;
   }

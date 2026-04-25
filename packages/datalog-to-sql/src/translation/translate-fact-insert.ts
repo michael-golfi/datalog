@@ -1,6 +1,7 @@
+import { validateDatalogFacts } from '../validation/validate-datalog-facts.js';
+
 import type { InsertFactsOperation } from '../contracts/postgres-graph-operation.js';
 import type { TranslatedSqlQuery } from '../contracts/translated-sql-query.js';
-import { validateDatalogFacts } from '../validation/validate-datalog-facts.js';
 
 /** Translate a fact-insertion operation into SQL over vertices and edges. */
 export function translateFactInsert(operation: InsertFactsOperation): TranslatedSqlQuery {
@@ -18,7 +19,9 @@ export function translateFactInsert(operation: InsertFactsOperation): Translated
     });
 
     ctes.push(
-      `inserted_vertices as (insert into vertices (id) values ${placeholders.join(', ')} on conflict do nothing returning id)`,
+      `inserted_vertices as (insert into vertices (id) values ${placeholders.join(
+        ', ',
+      )} on conflict do nothing returning id)`,
     );
   }
 
@@ -29,7 +32,9 @@ export function translateFactInsert(operation: InsertFactsOperation): Translated
     });
 
     ctes.push(
-      `inserted_edges as (insert into edges (subject_id, predicate_id, object_id) values ${placeholders.join(', ')} on conflict do nothing returning subject_id, predicate_id, object_id)`,
+      `inserted_edges as (insert into edges (subject_id, predicate_id, object_id) values ${placeholders.join(
+        ', ',
+      )} on conflict do nothing returning subject_id, predicate_id, object_id)`,
     );
   }
 

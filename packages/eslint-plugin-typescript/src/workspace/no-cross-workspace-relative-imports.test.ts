@@ -7,16 +7,23 @@ import { describe, expect, it } from 'vitest';
 
 import { createTypeScriptWorkspacePlugin } from '../plugin.js';
 
-function createLintFixture() {
+type WorkspaceConfig = string[] | { packages: string[] };
+
+function createLintFixture(options?: { workspaces?: WorkspaceConfig }) {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), 'standards-workspace-rule-'));
+  const workspaces = options?.workspaces ?? ['packages/*'];
 
   fs.writeFileSync(
     path.join(rootDir, 'package.json'),
-    JSON.stringify({ name: 'repo-root', workspaces: ['packages/*'] }, null, 2),
+    JSON.stringify({ name: 'repo-root', workspaces }, null, 2),
   );
 
   fs.mkdirSync(path.join(rootDir, 'packages', 'parser', 'src'), { recursive: true });
-  fs.mkdirSync(path.join(rootDir, 'packages', 'eslint-plugin-typescript', 'src'), { recursive: true });
+  fs.mkdirSync(path.join(rootDir, 'packages', 'eslint-plugin-typescript', 'src'), {
+    recursive: true,
+  });
+  fs.mkdirSync(path.join(rootDir, 'apps', 'query-studio', 'src'), { recursive: true });
+  fs.mkdirSync(path.join(rootDir, 'libs', 'query-kit', 'src'), { recursive: true });
 
   fs.writeFileSync(
     path.join(rootDir, 'packages', 'parser', 'package.json'),
@@ -26,7 +33,26 @@ function createLintFixture() {
     path.join(rootDir, 'packages', 'eslint-plugin-typescript', 'package.json'),
     JSON.stringify({ name: '@datalog/eslint-plugin-typescript' }, null, 2),
   );
-  fs.writeFileSync(path.join(rootDir, 'packages', 'parser', 'src', 'index.ts'), 'export const parser = true;\n');
+  fs.writeFileSync(
+    path.join(rootDir, 'packages', 'parser', 'src', 'index.ts'),
+    'export const parser = true;\n',
+  );
+  fs.writeFileSync(
+    path.join(rootDir, 'apps', 'query-studio', 'package.json'),
+    JSON.stringify({ name: '@datalog/query-studio' }, null, 2),
+  );
+  fs.writeFileSync(
+    path.join(rootDir, 'apps', 'query-studio', 'src', 'main.ts'),
+    'export const main = true;\n',
+  );
+  fs.writeFileSync(
+    path.join(rootDir, 'libs', 'query-kit', 'package.json'),
+    JSON.stringify({ name: '@datalog/query-kit' }, null, 2),
+  );
+  fs.writeFileSync(
+    path.join(rootDir, 'libs', 'query-kit', 'src', 'index.ts'),
+    'export const queryKit = true;\n',
+  );
 
   return { rootDir };
 }
@@ -73,8 +99,31 @@ describe('no-cross-workspace-relative-imports', () => {
       );
 
       expect(result.messages).toHaveLength(1);
-      expect(result.messages[0]?.ruleId).toBe('typescript-workspace/no-cross-workspace-relative-imports');
+      expect(result.messages[0]?.ruleId).toBe(
+        'typescript-workspace/no-cross-workspace-relative-imports',
+      );
       expect(result.messages[0]?.message).toContain('@datalog/parser');
+    } finally {
+      fs.rmSync(rootDir, { recursive: true, force: true });
+    }
+  });
+
+  it('reports mixed-layout relative imports using the target package name', async () => {
+    const { rootDir } = createLintFixture({ workspaces: ['apps/*', 'libs/*'] });
+
+    try {
+      const result = await lintFile(
+        rootDir,
+        path.join(rootDir, 'apps', 'query-studio', 'src', 'main.ts'),
+        "import { queryKit } from '../../../libs/query-kit/src/index';\nvoid queryKit;\n",
+      );
+
+      expect(result.messages).toHaveLength(1);
+      expect(result.messages[0]?.ruleId).toBe(
+        'typescript-workspace/no-cross-workspace-relative-imports',
+      );
+      expect(result.messages[0]?.message).toContain('@datalog/query-kit');
+      expect(result.messages[0]?.message).not.toContain('libs/query-kit');
     } finally {
       fs.rmSync(rootDir, { recursive: true, force: true });
     }

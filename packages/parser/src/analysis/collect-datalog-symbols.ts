@@ -1,3 +1,5 @@
+import { BUILTIN_PREDICATE_NAMES } from '../semantics/graph-vocabulary.js';
+
 import type {
   DatalogCompoundFieldSymbol,
   DatalogGraphNodeSymbol,
@@ -7,7 +9,6 @@ import type {
 } from '../contracts/datalog-symbol-identity.js';
 import type { ParsedClause } from '../contracts/parsed-document.js';
 import type { Range } from '../contracts/position.js';
-import { BUILTIN_PREDICATE_NAMES } from '../semantics/graph-vocabulary.js';
 
 interface PredicateSymbolState {
   readonly identity: DatalogPredicateSymbol['identity'];
@@ -125,7 +126,9 @@ function finalizePredicateSymbols(
   return [...predicateSymbols.values()]
     .map(({ identity, mutableOccurrences }) => ({
       identity,
-      occurrences: [...mutableOccurrences].sort((left, right) => compareRanges(left.range, right.range)),
+      occurrences: [...mutableOccurrences].sort((left, right) =>
+        compareRanges(left.range, right.range),
+      ),
     }))
     .sort((left, right) => left.identity.key.localeCompare(right.identity.key));
 }

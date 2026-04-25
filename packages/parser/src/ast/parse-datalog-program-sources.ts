@@ -1,9 +1,9 @@
 import { program, type DatalogProgram } from '@datalog/ast';
 
-import { parseDocument } from '../analysis/parse-document.js';
-import type { ParsedDocument } from '../contracts/parsed-document.js';
-
 import { parseDatalogProgram } from './parse-datalog-program.js';
+import { parseDocument } from '../analysis/parse-document.js';
+
+import type { ParsedDocument } from '../contracts/parsed-document.js';
 
 export interface DatalogProgramSource {
   readonly sourceId: string;

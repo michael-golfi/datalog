@@ -1,3 +1,5 @@
+import { isDatalogTerm } from './datalog-type-guards.js';
+
 import type {
   DatalogFact,
   DatalogFactPattern,
@@ -7,20 +9,18 @@ import type {
   VertexFactPattern,
 } from './datalog-graph.js';
 
-import { isDatalogTerm } from './datalog-type-guards.js';
-
 export function isVertexFactPattern(value: unknown): value is VertexFactPattern {
-  return isRecord(value)
-    && value.kind === 'vertex'
-    && isDatalogTerm(value.id);
+  return isRecord(value) && value.kind === 'vertex' && isDatalogTerm(value.id);
 }
 
 export function isEdgeFactPattern(value: unknown): value is EdgeFactPattern {
-  return isRecord(value)
-    && value.kind === 'edge'
-    && isDatalogTerm(value.subject)
-    && isDatalogTerm(value.predicate)
-    && isDatalogTerm(value.object);
+  return (
+    isRecord(value) &&
+    value.kind === 'edge' &&
+    isDatalogTerm(value.subject) &&
+    isDatalogTerm(value.predicate) &&
+    isDatalogTerm(value.object)
+  );
 }
 
 export function isDatalogFactPattern(value: unknown): value is DatalogFactPattern {
@@ -28,17 +28,17 @@ export function isDatalogFactPattern(value: unknown): value is DatalogFactPatter
 }
 
 export function isVertexFact(value: unknown): value is VertexFact {
-  return isRecord(value)
-    && value.kind === 'vertex'
-    && typeof value.id === 'string';
+  return isRecord(value) && value.kind === 'vertex' && typeof value.id === 'string';
 }
 
 export function isEdgeFact(value: unknown): value is EdgeFact {
-  return isRecord(value)
-    && value.kind === 'edge'
-    && typeof value.subjectId === 'string'
-    && typeof value.predicateId === 'string'
-    && typeof value.objectId === 'string';
+  return (
+    isRecord(value) &&
+    value.kind === 'edge' &&
+    typeof value.subjectId === 'string' &&
+    typeof value.predicateId === 'string' &&
+    typeof value.objectId === 'string'
+  );
 }
 
 export function isDatalogFact(value: unknown): value is DatalogFact {

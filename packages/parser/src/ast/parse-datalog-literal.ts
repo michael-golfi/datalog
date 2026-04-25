@@ -5,11 +5,12 @@ import {
   type DatalogLiteral,
 } from '@datalog/ast';
 
-import type { ParseContext, SourceSlice } from './parse-context.js';
 import { parseDatalogAtom } from './parse-datalog-atom.js';
 import { parseDatalogTerm } from './parse-datalog-term.js';
 import { createSourceLocation } from './source-location.js';
 import { findTopLevelComparisonOperator } from './top-level-scan.js';
+
+import type { ParseContext, SourceSlice } from './parse-context.js';
 
 const NEGATION_PREFIX = 'not ';
 

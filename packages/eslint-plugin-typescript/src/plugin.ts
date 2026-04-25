@@ -1,5 +1,3 @@
-import type { ESLint } from 'eslint';
-
 import { exportedFunctionReturnType } from './exports/exported-function-return-type.js';
 import { noBooleanFlagsOnExportedFunctions } from './exports/no-boolean-flags-on-exported-functions.js';
 import { noGenericFilenames } from './exports/no-generic-filenames.js';
@@ -20,6 +18,8 @@ import { noInternalBarrelImports } from './workspace/no-internal-barrel-imports.
 import { noProductionImportsFromTests } from './workspace/no-production-imports-from-tests.js';
 import { createNoSelfPackageImports } from './workspace/no-self-package-imports.js';
 import { createWorkspaceLayerImports } from './workspace/workspace-layer-imports.js';
+
+import type { ESLint } from 'eslint';
 
 /** Create the TypeScript/workspace ESLint plugin and shared path helpers. */
 export function createTypeScriptWorkspacePlugin(rootDir: string): {

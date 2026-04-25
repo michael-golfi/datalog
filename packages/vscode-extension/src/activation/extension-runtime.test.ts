@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import type { ExtensionContext } from 'vscode';
 
 const mocks = vi.hoisted(() => {
@@ -53,13 +54,22 @@ const mocks = vi.hoisted(() => {
   );
   const createFileSystemWatcher = vi.fn((globPattern: string) => ({ globPattern }));
   const resolveLanguageServerModule = vi.fn(() => '/tmp/datalog-lsp.js');
-  const createLanguageServerOptions = vi.fn((serverModule: string) => ({ serverModule, kind: 'server-options' }));
-  const readLanguageClientConfiguration = vi.fn((readSetting: (setting: string, defaultValue: string) => string) => ({
-    traceServer: readSetting('trace.server', 'off'),
-    revealOutputChannelOn: readSetting('server.revealOutputChannelOn', 'error'),
+  const createLanguageServerOptions = vi.fn((serverModule: string) => ({
+    serverModule,
+    kind: 'server-options',
   }));
+  const readLanguageClientConfiguration = vi.fn(
+    (readSetting: (setting: string, defaultValue: string) => string) => ({
+      traceServer: readSetting('trace.server', 'off'),
+      revealOutputChannelOn: readSetting('server.revealOutputChannelOn', 'error'),
+    }),
+  );
   const createLanguageClientOptions = vi.fn(
-    ({ createFileSystemWatcher: createWatcher, configuration, outputChannel: clientOutputChannel }) => ({
+    ({
+      createFileSystemWatcher: createWatcher,
+      configuration,
+      outputChannel: clientOutputChannel,
+    }) => ({
       configuration,
       kind: 'client-options',
       outputChannel: clientOutputChannel,
@@ -158,11 +168,15 @@ describe('activateExtension', () => {
     mocks.statusBarItem.command = undefined;
     mocks.statusBarItem.text = '';
     mocks.statusBarItem.tooltip = undefined;
-    mocks.getConfigurationValue.mockImplementation((setting: string, defaultValue: string) => defaultValue);
-    mocks.readLanguageClientConfiguration.mockImplementation((readSetting: (setting: string, defaultValue: string) => string) => ({
-      traceServer: readSetting('trace.server', 'off'),
-      revealOutputChannelOn: readSetting('server.revealOutputChannelOn', 'error'),
-    }));
+    mocks.getConfigurationValue.mockImplementation(
+      (setting: string, defaultValue: string) => defaultValue,
+    );
+    mocks.readLanguageClientConfiguration.mockImplementation(
+      (readSetting: (setting: string, defaultValue: string) => string) => ({
+        traceServer: readSetting('trace.server', 'off'),
+        revealOutputChannelOn: readSetting('server.revealOutputChannelOn', 'error'),
+      }),
+    );
   });
 
   it('registers status and lifecycle commands, then starts the client with the configured trace/output plumbing', async () => {
@@ -317,7 +331,10 @@ describe('activateExtension', () => {
     expect(context.subscriptions).toContain(mocks.outputChannel);
     expect(context.subscriptions).toContain(mocks.statusBarItem);
     expect(mocks.statusBarItem.text).toBe('Datalog LSP: Error');
-    expect(mocks.appendLine).toHaveBeenNthCalledWith(1, 'Failed to activate Datalog Language Server extension.');
+    expect(mocks.appendLine).toHaveBeenNthCalledWith(
+      1,
+      'Failed to activate Datalog Language Server extension.',
+    );
     expect(mocks.appendLine).toHaveBeenNthCalledWith(2, error.stack);
     expect(mocks.showErrorMessage).toHaveBeenCalledWith(
       'Failed to activate Datalog Language Server. See the "Datalog Language Server" output channel for details.',
@@ -359,7 +376,10 @@ describe('activateExtension', () => {
 
     expect(mocks.start).toHaveBeenCalledTimes(1);
     expect(mocks.statusBarItem.text).toBe('Datalog LSP: Error');
-    expect(mocks.appendLine).toHaveBeenNthCalledWith(1, 'Failed to activate Datalog Language Server extension.');
+    expect(mocks.appendLine).toHaveBeenNthCalledWith(
+      1,
+      'Failed to activate Datalog Language Server extension.',
+    );
     expect(mocks.appendLine).toHaveBeenNthCalledWith(2, error.stack);
     expect(mocks.showErrorMessage).toHaveBeenCalledWith(
       'Failed to activate Datalog Language Server. See the "Datalog Language Server" output channel for details.',
@@ -391,7 +411,9 @@ describe('activateExtension', () => {
 
   it('keeps the original startup error when stop rejects for a startFailed client and still allows retry', async () => {
     const startError = new Error('Language client failed to start');
-    const stopError = new Error("Client is not running and can't be stopped. It's current state is: startFailed");
+    const stopError = new Error(
+      "Client is not running and can't be stopped. It's current state is: startFailed",
+    );
     mocks.start.mockRejectedValueOnce(startError).mockResolvedValue(undefined);
     mocks.stop.mockRejectedValueOnce(stopError).mockResolvedValue(undefined);
 
@@ -401,7 +423,10 @@ describe('activateExtension', () => {
     await expect(activateExtension(firstContext)).rejects.toThrow(startError.message);
 
     expect(mocks.stop).toHaveBeenCalledTimes(1);
-    expect(mocks.appendLine).toHaveBeenNthCalledWith(1, 'Failed to activate Datalog Language Server extension.');
+    expect(mocks.appendLine).toHaveBeenNthCalledWith(
+      1,
+      'Failed to activate Datalog Language Server extension.',
+    );
     expect(mocks.appendLine).toHaveBeenNthCalledWith(2, startError.stack);
     expect(mocks.statusBarItem.text).toBe('Datalog LSP: Error');
 

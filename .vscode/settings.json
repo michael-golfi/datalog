@@ -7,9 +7,11 @@
   },
   "eslint.workingDirectories": [
     {
-      "mode": "auto"
+      "directory": ".",
+      "changeProcessCWD": false
     }
   ],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact", "datalog"],
   "prettier.configPath": ".prettierrc",
   "git.detectWorktrees": true,
   "git.autoRepositoryDetection": true,

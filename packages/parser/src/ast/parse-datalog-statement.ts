@@ -8,13 +8,13 @@ import {
   type DatalogStatement,
 } from '@datalog/ast';
 
-import type { Statement } from '../syntax/split-statements.js';
-
-import type { ParseContext, SourceSlice } from './parse-context.js';
 import { parseDatalogAtom } from './parse-datalog-atom.js';
 import { parseDatalogLiteral } from './parse-datalog-literal.js';
 import { createSourceLocation } from './source-location.js';
 import { findTopLevelRuleDivider, splitTopLevelConjunction } from './top-level-scan.js';
+
+import type { ParseContext, SourceSlice } from './parse-context.js';
+import type { Statement } from '../syntax/split-statements.js';
 
 const QUERY_PREFIX = '?-';
 
@@ -51,7 +51,10 @@ export function parseDatalogStatement(input: {
 }
 
 /** Parse a standalone Datalog query or fact-pattern string. */
-export function parseStandaloneQuery(source: string, lineStarts: readonly number[]): DatalogQueryStatement {
+export function parseStandaloneQuery(
+  source: string,
+  lineStarts: readonly number[],
+): DatalogQueryStatement {
   const startOffset = source.search(/\S|$/);
   const trimmed = source.trim();
   const content = stripTrailingPeriod(trimmed);
@@ -162,13 +165,15 @@ function parseLiteralConjunction(input: {
       throw new Error(`Unable to locate literal: ${part}`);
     }
 
-    literals.push(parseDatalogLiteral({
-      context: input.context,
-      slice: {
-        startOffset: input.slice.startOffset + relativeIndex,
-        endOffset: input.slice.startOffset + relativeIndex + part.length,
-      },
-    }));
+    literals.push(
+      parseDatalogLiteral({
+        context: input.context,
+        slice: {
+          startOffset: input.slice.startOffset + relativeIndex,
+          endOffset: input.slice.startOffset + relativeIndex + part.length,
+        },
+      }),
+    );
     searchFrom = relativeIndex + part.length;
   }
 

@@ -1,5 +1,6 @@
-import type { WorkspaceInfo } from '../shared/paths.js';
 import { startsWithPathPrefix } from '../shared/paths.js';
+
+import type { WorkspaceInfo } from '../shared/paths.js';
 
 export interface LayerDefinition {
   name: string;
@@ -63,7 +64,10 @@ export function getRelativeInsideSourceRoot(
 }
 
 /** Resolve the policy layer name for a path within a source root. */
-export function getLayerName(policy: WorkspaceLayerPolicy, relativeInsideSourceRoot: string): string {
+export function getLayerName(
+  policy: WorkspaceLayerPolicy,
+  relativeInsideSourceRoot: string,
+): string {
   for (const layer of policy.layers) {
     if (layer.files?.some((layerFile) => matchesLayerFile(layerFile, relativeInsideSourceRoot))) {
       return layer.name;

@@ -1,7 +1,11 @@
-import type { Rule } from 'eslint';
-
-import { createImportLikeVisitors, getImportSourceReportNode, getStaticSourceValue } from '../shared/imports.js';
+import {
+  createImportLikeVisitors,
+  getImportSourceReportNode,
+  getStaticSourceValue,
+} from '../shared/imports.js';
 import { hasCodeLikeExtension, resolveRelativeImport, type PathHelpers } from '../shared/paths.js';
+
+import type { Rule } from 'eslint';
 
 function getCrossWorkspaceTarget(
   filename: string,
@@ -10,7 +14,9 @@ function getCrossWorkspaceTarget(
 ): string | null {
   const sourceWorkspace = pathHelpers.getWorkspaceInfoFromAbsolutePath(filename);
   const resolvedPath = resolveRelativeImport(filename, importSource);
-  const targetWorkspace = resolvedPath ? pathHelpers.getWorkspaceInfoFromAbsolutePath(resolvedPath) : null;
+  const targetWorkspace = resolvedPath
+    ? pathHelpers.getWorkspaceInfoFromAbsolutePath(resolvedPath)
+    : null;
 
   if (!sourceWorkspace || !targetWorkspace || sourceWorkspace.root === targetWorkspace.root) {
     return null;
@@ -34,7 +40,12 @@ export function createNoCrossWorkspaceRelativeImports(pathHelpers: PathHelpers):
       },
     },
     create(context) {
-      function checkNode(node: { type: string; source?: unknown; callee?: unknown; arguments?: unknown[] }): void {
+      function checkNode(node: {
+        type: string;
+        source?: unknown;
+        callee?: unknown;
+        arguments?: unknown[];
+      }): void {
         const importSource = getStaticSourceValue(node);
 
         if (!importSource?.startsWith('.') || !hasCodeLikeExtension(importSource)) {

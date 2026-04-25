@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { compileSelectFactsLogicalPlan } from './compile-select-facts-logical-plan.js';
 import { graphPredicateCatalog } from './compile-select-facts-logical-plan.fixtures.js';
+import { compileSelectFactsLogicalPlan } from './compile-select-facts-logical-plan.js';
 
 describe('compileSelectFactsLogicalPlan shape', () => {
   it('compiles the likes query into the shared logical-plan node graph', () => {
@@ -37,7 +37,12 @@ describe('compileSelectFactsLogicalPlan shape', () => {
     });
 
     expect(plan.nodes).toMatchObject({
-      scan_1: { kind: 'scan', id: 'scan_1', predicate: 'vertex', output: [{ id: 'scan_1.id', name: 'id', type: 'text' }] },
+      scan_1: {
+        kind: 'scan',
+        id: 'scan_1',
+        predicate: 'vertex',
+        output: [{ id: 'scan_1.id', name: 'id', type: 'text' }],
+      },
       scan_2: {
         kind: 'scan',
         id: 'scan_2',
@@ -82,8 +87,16 @@ describe('compileSelectFactsLogicalPlan shape', () => {
           { id: 'friend', name: 'friend', type: 'text' },
         ],
         projections: [
-          { name: 'person', expression: { kind: 'column', nodeId: 'join_1', columnId: 'scan_1.id' }, type: 'text' },
-          { name: 'friend', expression: { kind: 'column', nodeId: 'join_1', columnId: 'scan_2.object_id' }, type: 'text' },
+          {
+            name: 'person',
+            expression: { kind: 'column', nodeId: 'join_1', columnId: 'scan_1.id' },
+            type: 'text',
+          },
+          {
+            name: 'friend',
+            expression: { kind: 'column', nodeId: 'join_1', columnId: 'scan_2.object_id' },
+            type: 'text',
+          },
         ],
       },
     });

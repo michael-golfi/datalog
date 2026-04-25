@@ -1,7 +1,7 @@
-import type { ParsedReference, ParsedReferenceRole } from '../contracts/parsed-document.js';
-
 import { offsetToPosition } from './position-tools.js';
+
 import type { Statement } from './split-statements.js';
+import type { ParsedReference, ParsedReferenceRole } from '../contracts/parsed-document.js';
 
 export type ReferenceRoleClassifier = (
   predicate: string,
@@ -17,7 +17,9 @@ interface ExtractStringReferencesOptions {
 }
 
 /** Extract quoted string references from a parsed statement. */
-export function extractStringReferences(options: ExtractStringReferencesOptions): ParsedReference[] {
+export function extractStringReferences(
+  options: ExtractStringReferencesOptions,
+): ParsedReference[] {
   const { statement, lineStarts, predicate, classifyReferenceRole } = options;
   const references: ParsedReference[] = [];
   const stringPattern = /"((?:[^"\\]|\\.)*)"/g;

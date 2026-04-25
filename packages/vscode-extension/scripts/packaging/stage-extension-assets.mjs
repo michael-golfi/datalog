@@ -1,9 +1,9 @@
 import { cp, mkdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { compiledExtensionRelativeRoot, extensionRoot } from './extension-package-paths.mjs';
 import { createLanguageServerModuleResolverSource } from './create-language-server-module-resolver-source.mjs';
 import { createStageExtensionManifest } from './create-stage-extension-manifest.mjs';
+import { compiledExtensionRelativeRoot, extensionRoot } from './extension-package-paths.mjs';
 
 export async function copyStageAsset(stageRoot, relativePath, options = {}) {
   const { allowMissing = false } = options;
@@ -36,7 +36,12 @@ export async function writeStageExtensionManifest(stageRoot, extensionManifest) 
 }
 
 export async function writeStageLanguageServerModuleResolver(stageRoot, languageServerModuleId) {
-  const resolverModulePath = path.join(stageRoot, compiledExtensionRelativeRoot, 'runtime', 'resolve-language-server-module.js');
+  const resolverModulePath = path.join(
+    stageRoot,
+    compiledExtensionRelativeRoot,
+    'runtime',
+    'resolve-language-server-module.js',
+  );
   const resolverModuleSource = createLanguageServerModuleResolverSource(languageServerModuleId);
 
   await mkdir(path.dirname(resolverModulePath), { recursive: true });

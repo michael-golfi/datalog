@@ -1,9 +1,12 @@
-import type { ParsedPredicateOccurrence } from '../contracts/parsed-document.js';
-
 import { offsetToPosition } from './position-tools.js';
-import { findMatchingStructuralCloseParen, forEachTopLevelStructuralCharacter } from './scan-structural-text.js';
+import {
+  findMatchingStructuralCloseParen,
+  forEachTopLevelStructuralCharacter,
+} from './scan-structural-text.js';
 import { splitTopLevelArgs } from './split-top-level-args.js';
+
 import type { Statement } from './split-statements.js';
+import type { ParsedPredicateOccurrence } from '../contracts/parsed-document.js';
 
 interface PredicateOccurrenceInput {
   readonly name: string;
@@ -44,12 +47,14 @@ export function extractPredicateOccurrences(
     return occurrences;
   }
 
-  return occurrences.concat(scanTopLevelPredicateOccurrences({
-    text: statement.text.slice(divider + 2),
-    startOffset: statement.startOffset + divider + 2,
-    lineStarts,
-    kind: 'body',
-  }));
+  return occurrences.concat(
+    scanTopLevelPredicateOccurrences({
+      text: statement.text.slice(divider + 2),
+      startOffset: statement.startOffset + divider + 2,
+      lineStarts,
+      kind: 'body',
+    }),
+  );
 }
 
 function scanTopLevelPredicateOccurrences(

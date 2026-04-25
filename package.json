@@ -6,6 +6,10 @@
     "packages/*"
   ],
   "scripts": {
+    "format": "prettier --write",
+    "lint:fix": "eslint --fix --max-warnings=0",
+    "lint:print-config": "eslint --print-config",
+    "lint:debug": "eslint --debug",
     "lint": "yarn workspaces foreach -Apt run lint",
     "typecheck": "yarn workspaces foreach -Apt run typecheck",
     "test": "yarn workspaces foreach -Apt run test",
@@ -24,6 +28,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsdoc": "^61.1.7",
     "ovsx": "^0.10.11",
+    "prettier": "^2.8.8",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3"
   }

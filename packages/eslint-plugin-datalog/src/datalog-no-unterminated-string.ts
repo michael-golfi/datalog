@@ -1,6 +1,6 @@
-import type { Rule } from 'eslint';
-
 import { extractDatalogSource, toVirtualLoc } from './datalog-source.js';
+
+import type { Rule } from 'eslint';
 
 export const datalogNoUnterminatedString: Rule.RuleModule = {
   meta: {

@@ -1,10 +1,6 @@
-import type { Rule } from 'eslint';
+import { findJsxAttribute, getJsxName, getStaticAttributeValue } from '../shared/ast.js';
 
-import {
-  findJsxAttribute,
-  getJsxName,
-  getStaticAttributeValue,
-} from '../shared/ast.js';
+import type { Rule } from 'eslint';
 
 interface RuleOption {
   shellComponents?: string[];
@@ -34,7 +30,12 @@ function matchesHeadingLevel(openingElement: JsxOpeningElementLike): boolean {
   return asValue === 'h1' || levelValue === 1 || levelValue === '1';
 }
 
-function reportMissingPageStructure({ context, node, state, shellComponents }: MissingPageStructureReport): void {
+function reportMissingPageStructure({
+  context,
+  node,
+  state,
+  shellComponents,
+}: MissingPageStructureReport): void {
   if (!state.hasShell) {
     context.report({
       node: node as never,
@@ -80,8 +81,10 @@ export const requirePageStructure: Rule.RuleModule = {
       },
     ],
     messages: {
-      missingShell: 'Route files must render through an approved page shell. Use one of: {{components}}.',
-      missingH1: 'Route files must expose a clear page heading. Use <h1> or a configured heading primitive.',
+      missingShell:
+        'Route files must render through an approved page shell. Use one of: {{components}}.',
+      missingH1:
+        'Route files must expose a clear page heading. Use <h1> or a configured heading primitive.',
     },
   },
   create(context) {

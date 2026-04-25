@@ -3,7 +3,10 @@ import type { DatalogFact } from '@datalog/ast';
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
 
 /** Validate that fact insert/delete operations contain only non-empty identifiers. */
-export function validateDatalogFacts(facts: readonly DatalogFact[], mode: 'insert' | 'delete'): void {
+export function validateDatalogFacts(
+  facts: readonly DatalogFact[],
+  mode: 'insert' | 'delete',
+): void {
   if (facts.length === 0) {
     throw new GraphTranslationError(
       `datalog-to-sql.${mode}.invalid-fact`,
@@ -35,5 +38,5 @@ function assertIdentifier(value: string, mode: 'insert' | 'delete'): void {
 }
 
 function capitalize(value: string): string {
-  return `${value[0]!.toUpperCase()}${value.slice(1)}`;
+  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
 }
