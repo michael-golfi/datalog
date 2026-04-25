@@ -1,10 +1,11 @@
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
+import type { PredicateSignature } from '../contracts/datalog-program.js';
 import type {
   ExternalResolverHydrateRequest,
   ExternalResolverResult,
   ExternalResolverRow,
 } from '../contracts/external-resolver-definition.js';
-import type { PredicateSignature } from '../contracts/datalog-program.js';
 import type { SqlParameterValue } from '../contracts/physical-plan.js';
 import type { PreparedSelectFactsHydrationInstruction } from '../contracts/prepared-select-facts-execution.js';
 
@@ -219,7 +220,13 @@ function createHydratedPayload(
   const payloadColumns = instruction.columns.filter((column) => !instruction.keyColumns.includes(column.name));
   if (payloadColumns.length === 0) { throwRowShapeMismatch(instruction, 'expected at least one non-key payload column'); }
   if (payloadColumns.length === 1) {
-    return row.valuesByColumn[payloadColumns[0]!.name] ?? null;
+    const payloadColumn = payloadColumns[0];
+
+    if (payloadColumn === undefined) {
+      throwRowShapeMismatch(instruction, 'expected exactly one payload column.');
+    }
+
+    return row.valuesByColumn[payloadColumn.name] ?? null;
   }
   return Object.fromEntries(
     payloadColumns.map((column) => [column.name, row.valuesByColumn[column.name] ?? null]),

@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { hydrateExternalSelectFactsRows } from './hydrate-external-select-facts-rows.js';
 import { defineExternalResolverDefinition } from '../contracts/external-resolver-definition.js';
+
 import type {
   ExternalResolverHydrateRequest,
   ExternalResolverResult,
@@ -9,7 +11,6 @@ import type {
 } from '../contracts/external-resolver-definition.js';
 import type { PreparedSelectFactsHydrationInstruction } from '../contracts/prepared-select-facts-execution.js';
 
-import { hydrateExternalSelectFactsRows } from './hydrate-external-select-facts-rows.js';
 
 describe('hydrateExternalSelectFactsRows', () => {
   it('preserves row count and ordering while deduping projected hydration keys', async () => {
