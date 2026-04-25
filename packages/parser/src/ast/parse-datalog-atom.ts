@@ -1,11 +1,11 @@
 import { atom, namedTerm, type DatalogAtom, type DatalogAtomArgument } from '@datalog/ast';
 
-import { splitTopLevelArgs } from '../syntax/split-top-level-args.js';
-
-import type { ParseContext, SourceSlice } from './parse-context.js';
 import { parseDatalogTerm } from './parse-datalog-term.js';
 import { createSourceLocation } from './source-location.js';
 import { findTopLevelAssignment } from './top-level-scan.js';
+import { splitTopLevelArgs } from '../syntax/split-top-level-args.js';
+
+import type { ParseContext, SourceSlice } from './parse-context.js';
 
 const ATOM_PATTERN = /^([A-Za-z_][A-Za-z0-9_]*)(@)?\s*\((.*)\)$/s;
 
@@ -63,11 +63,13 @@ function parseArguments(input: {
 
     const absoluteStart = input.argsStart + relativeIndex;
     const absoluteEnd = absoluteStart + arg.length;
-    terms.push(parseArgument({
-      context: input.context,
-      slice: { startOffset: absoluteStart, endOffset: absoluteEnd },
-      isCompound: input.isCompound,
-    }));
+    terms.push(
+      parseArgument({
+        context: input.context,
+        slice: { startOffset: absoluteStart, endOffset: absoluteEnd },
+        isCompound: input.isCompound,
+      }),
+    );
     searchFrom = relativeIndex + arg.length;
   }
 

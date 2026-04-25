@@ -1,7 +1,8 @@
 import { constantTerm, variableTerm, wildcardTerm, type DatalogTerm } from '@datalog/ast';
 
-import type { ParseContext, SourceSlice } from './parse-context.js';
 import { createSourceLocation } from './source-location.js';
+
+import type { ParseContext, SourceSlice } from './parse-context.js';
 
 /** Parse a Datalog term from an absolute source slice. */
 export function parseDatalogTerm(input: {

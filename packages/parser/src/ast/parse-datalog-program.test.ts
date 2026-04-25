@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseDocument } from '../analysis/parse-document.js';
-
 import { parseDatalogFacts } from './parse-datalog-facts.js';
-import { parseDatalogProgram } from './parse-datalog-program.js';
 import { parseDatalogProgramSources } from './parse-datalog-program-sources.js';
+import { parseDatalogProgram } from './parse-datalog-program.js';
 import { parseDatalogQuery } from './parse-datalog-query.js';
+import { parseDocument } from '../analysis/parse-document.js';
 
 describe('parseDatalogProgram', () => {
   it('parses facts, compound facts, and rules into shared AST statements', () => {
@@ -120,27 +119,27 @@ describe('parseDatalogProgram', () => {
     const program = parseDatalogProgram(source);
 
     expect(program.statements).toHaveLength(document.clauses.length);
-    expect(program.statements.map((statement) => {
-      if (statement.kind === 'fact') {
-        return statement.atom.predicate;
-      }
+    expect(
+      program.statements.map((statement) => {
+        if (statement.kind === 'fact') {
+          return statement.atom.predicate;
+        }
 
-      if (statement.kind === 'rule') {
-        return statement.head.predicate;
-      }
+        if (statement.kind === 'rule') {
+          return statement.head.predicate;
+        }
 
-      return statement.kind;
-    })).toEqual(document.clauses.map((clause) => clause.predicate));
-    expect(program.statements.map((statement) => statement.location?.range)).toEqual(document.clauses.map((clause) => clause.range));
+        return statement.kind;
+      }),
+    ).toEqual(document.clauses.map((clause) => clause.predicate));
+    expect(program.statements.map((statement) => statement.location?.range)).toEqual(
+      document.clauses.map((clause) => clause.range),
+    );
   });
 
   it('parses inline query statements inside a source document without leaking the query prefix into the body', () => {
     const querySource = '?- Edge(node_a, "graph/likes", _), not Edge(_, "graph/blocked", node_a).';
-    const source = [
-      'Edge("node/alice", "graph/likes", "node/bob").',
-      querySource,
-      '',
-    ].join('\n');
+    const source = ['Edge("node/alice", "graph/likes", "node/bob").', querySource, ''].join('\n');
 
     const parsed = parseDatalogProgram(source);
     const query = parsed.statements[1];
@@ -185,10 +184,7 @@ describe('parseDatalogProgram', () => {
       },
       {
         sourceId: 'current.dl',
-        source: [
-          'Current(node_b).',
-          'Derived(node_b) :- Current(node_b).',
-        ].join('\n'),
+        source: ['Current(node_b).', 'Derived(node_b) :- Current(node_b).'].join('\n'),
       },
     ]);
 
@@ -196,28 +192,35 @@ describe('parseDatalogProgram', () => {
       'migrations/20260422.0001.foundation.dl',
       'current.dl',
     ]);
-    expect(parsed.sources.map((source) => source.parsedDocument.clauses.map((clause) => clause.predicate))).toEqual([
-      ['Foundation'],
-      ['Current', 'Derived'],
-    ]);
-    expect(parsed.program.statements.map((statement) => {
-      if (statement.kind === 'fact') {
-        return statement.atom.predicate;
-      }
+    expect(
+      parsed.sources.map((source) =>
+        source.parsedDocument.clauses.map((clause) => clause.predicate),
+      ),
+    ).toEqual([['Foundation'], ['Current', 'Derived']]);
+    expect(
+      parsed.program.statements.map((statement) => {
+        if (statement.kind === 'fact') {
+          return statement.atom.predicate;
+        }
 
-      if (statement.kind === 'rule') {
-        return statement.head.predicate;
-      }
+        if (statement.kind === 'rule') {
+          return statement.head.predicate;
+        }
 
-      return statement.kind;
-    })).toEqual(['Foundation', 'Current', 'Derived']);
+        return statement.kind;
+      }),
+    ).toEqual(['Foundation', 'Current', 'Derived']);
   });
 });
 
 describe('parseDatalogQuery', () => {
   it('parses explicit query strings and plain fact-pattern conjunctions into query AST bodies', () => {
-    const explicitQuery = parseDatalogQuery('?- Edge(node_a, "graph/likes", _), not Edge(_, "graph/blocked", node_a).');
-    const factPatternQuery = parseDatalogQuery('Edge(node_a, "graph/likes", node_b), Edge(node_b, "graph/likes", _).');
+    const explicitQuery = parseDatalogQuery(
+      '?- Edge(node_a, "graph/likes", _), not Edge(_, "graph/blocked", node_a).',
+    );
+    const factPatternQuery = parseDatalogQuery(
+      'Edge(node_a, "graph/likes", node_b), Edge(node_b, "graph/likes", _).',
+    );
 
     expect(explicitQuery).toMatchObject({
       kind: 'query',

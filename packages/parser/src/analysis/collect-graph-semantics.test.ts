@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
+import { collectGraphSemantics } from './collect-graph-semantics.js';
 import { classifyReferenceRole } from '../semantics/reference-role-classifier.js';
 import { computeLineStarts } from '../syntax/line-starts.js';
 import { parseClause } from '../syntax/parse-clause.js';
 import { splitStatements } from '../syntax/split-statements.js';
-
-import { collectGraphSemantics } from './collect-graph-semantics.js';
 
 describe('collectGraphSemantics', () => {
   it('collects graph vocab-derived summaries and ids from parsed clauses', () => {

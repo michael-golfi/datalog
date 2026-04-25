@@ -1,5 +1,3 @@
-import type { ParsedClause } from '../contracts/parsed-document.js';
-
 import {
   extractCompoundFieldOccurrences,
   extractCompoundFields,
@@ -11,7 +9,9 @@ import {
 } from './extract-string-references.js';
 import { offsetToPosition } from './position-tools.js';
 import { splitTopLevelArgs } from './split-top-level-args.js';
+
 import type { Statement } from './split-statements.js';
+import type { ParsedClause } from '../contracts/parsed-document.js';
 
 const CLAUSE_HEAD_PATTERN = /^([A-Za-z_][A-Za-z0-9_]*)(@)?\s*\(/;
 
@@ -114,7 +114,11 @@ function isUnescapedQuote(text: string, index: number): boolean {
   return text[index] === '"' && text[index - 1] !== '\\';
 }
 
-function getHeadArguments(text: string, firstParenOffset: number, closeParenOffset: number): string {
+function getHeadArguments(
+  text: string,
+  firstParenOffset: number,
+  closeParenOffset: number,
+): string {
   if (firstParenOffset < 0 || closeParenOffset <= firstParenOffset) {
     return '';
   }
@@ -137,7 +141,10 @@ function createParsedClause(input: ParsedClauseInput): ParsedClause {
     compoundFieldOccurrences,
     range: {
       start: offsetToPosition(input.lineStarts, input.statement.startOffset),
-      end: offsetToPosition(input.lineStarts, input.statement.startOffset + input.statement.text.length),
+      end: offsetToPosition(
+        input.lineStarts,
+        input.statement.startOffset + input.statement.text.length,
+      ),
     },
     predicateRange: {
       start: offsetToPosition(input.lineStarts, input.predicateStart),

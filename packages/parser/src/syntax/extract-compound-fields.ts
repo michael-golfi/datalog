@@ -1,8 +1,11 @@
-import type { ParsedCompoundFieldOccurrence } from '../contracts/parsed-document.js';
-
 import { offsetToPosition } from './position-tools.js';
-import { findMatchingStructuralCloseParen, forEachTopLevelStructuralCharacter } from './scan-structural-text.js';
+import {
+  findMatchingStructuralCloseParen,
+  forEachTopLevelStructuralCharacter,
+} from './scan-structural-text.js';
+
 import type { Statement } from './split-statements.js';
+import type { ParsedCompoundFieldOccurrence } from '../contracts/parsed-document.js';
 
 const FIELD_PATTERN = /([a-z][a-z0-9_/-]*)=/g;
 
@@ -58,7 +61,9 @@ export function extractCompoundFieldOccurrences(
   return occurrences;
 }
 
-function collectFieldMatches(text: string): Array<{ readonly name: string; readonly index: number }> {
+function collectFieldMatches(
+  text: string,
+): Array<{ readonly name: string; readonly index: number }> {
   const matches: Array<{ readonly name: string; readonly index: number }> = [];
 
   forEachTopLevelStructuralCharacter(text, (index) => {

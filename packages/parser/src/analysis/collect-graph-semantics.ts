@@ -1,16 +1,16 @@
-import type {
-  NodeSummary,
-  ParsedClause,
-  ParsedDocument,
-  PredicateSchema,
-} from '../contracts/parsed-document.js';
+import { createGraphClassNodeSummaryInput, createNodeSummary } from './node-summary.js';
 import {
   BUILTIN_PREDICATE_NAMES,
   GRAPH_CLASS_PREDICATE_NAMES,
   GRAPH_LABEL_PREDICATE,
 } from '../semantics/graph-vocabulary.js';
 
-import { createGraphClassNodeSummaryInput, createNodeSummary } from './node-summary.js';
+import type {
+  NodeSummary,
+  ParsedClause,
+  ParsedDocument,
+  PredicateSchema,
+} from '../contracts/parsed-document.js';
 
 type CollectedGraphSemantics = Omit<ParsedDocument, 'clauses' | 'datalogSymbols' | 'lineStarts'>;
 
@@ -123,11 +123,11 @@ function collectPredicateSchema(
   const objectType = clause.references[4];
 
   if (
-    predicateId === undefined
-    || subjectCardinality === undefined
-    || subjectType === undefined
-    || objectCardinality === undefined
-    || objectType === undefined
+    predicateId === undefined ||
+    subjectCardinality === undefined ||
+    subjectType === undefined ||
+    objectCardinality === undefined ||
+    objectType === undefined
   ) {
     return;
   }
@@ -207,12 +207,14 @@ function collectGraphClassEdge(
   classes.add(edgeReferences.objectId.value);
   nodeSummaries.set(
     edgeReferences.subjectId.value,
-    createNodeSummary(createGraphClassNodeSummaryInput({
-      id: edgeReferences.subjectId.value,
-      range: edgeReferences.subjectId.range,
-      classes: [...classes],
-      ...(current?.label === undefined ? {} : { label: current.label }),
-    })),
+    createNodeSummary(
+      createGraphClassNodeSummaryInput({
+        id: edgeReferences.subjectId.value,
+        range: edgeReferences.subjectId.range,
+        classes: [...classes],
+        ...(current?.label === undefined ? {} : { label: current.label }),
+      }),
+    ),
   );
 }
 

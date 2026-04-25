@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { computeLineStarts } from '../syntax/line-starts.js';
-
 import { parseDatalogLiteral } from './parse-datalog-literal.js';
 import { parseStandaloneQuery } from './parse-datalog-statement.js';
+import { computeLineStarts } from '../syntax/line-starts.js';
 
 function parseLiteral(source: string) {
   return parseDatalogLiteral({
@@ -44,7 +43,10 @@ describe('parseDatalogLiteral', () => {
   });
 
   it('parses multi-literal conjunctions through the standalone query surface', () => {
-    const parsed = parseStandaloneQuery('Edge(X, "graph/likes", Y), not Blocked(Y), X != _.', computeLineStarts('Edge(X, "graph/likes", Y), not Blocked(Y), X != _.'));
+    const parsed = parseStandaloneQuery(
+      'Edge(X, "graph/likes", Y), not Blocked(Y), X != _.',
+      computeLineStarts('Edge(X, "graph/likes", Y), not Blocked(Y), X != _.'),
+    );
 
     expect(parsed.body).toMatchObject([
       { kind: 'atom', predicate: 'Edge' },
