@@ -8,7 +8,7 @@ import {
   createPreferredLabelOperation,
   createSyntheticUserTagFacts,
   createUserTagConnectivityOperation,
-  createVertexByIdOperation,
+  createVertexLookupByPreferredLabelOperation,
 } from './fixtures/ontology-graph-query-fixture.js';
 import {
   createOntologyLivePostgresProofFixture,
@@ -27,7 +27,10 @@ describe('ontology graph query behavior', () => {
       });
 
       const [vertexLookupResult, preferredLabelResult, medicationCrosswalkResult, conditionCrosswalkResult, drugClassResult, userTagConnectivityResult] = await Promise.all([
-        executeOntologyGraphQuery<{ id: string }>(fixture.sql, createVertexByIdOperation('medication/metformin')),
+        executeOntologyGraphQuery<{ id: string }>(
+          fixture.sql,
+          createVertexLookupByPreferredLabelOperation('Metformin'),
+        ),
         executeOntologyGraphQuery<{ label: string }>(fixture.sql, createPreferredLabelOperation('condition/type_2_diabetes')),
         executeOntologyGraphQuery<{
           medication_label: string;

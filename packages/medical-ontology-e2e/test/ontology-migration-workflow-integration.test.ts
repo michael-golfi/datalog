@@ -12,7 +12,7 @@ import { createLocalhostPostgresFixture } from './fixtures/localhost-postgres-fi
 import {
   createConditionCrosswalkOperation,
   createMedicationCrosswalkOperation,
-  createVertexByIdOperation,
+  createVertexLookupByPreferredLabelOperation,
 } from './fixtures/ontology-graph-query-fixture.js';
 import { resolveMedicalOntologyWorkspacePath } from './fixtures/medical-ontology-workspace-path-support.js';
 import { executeOntologyGraphQuery } from './fixtures/ontology-live-postgres-proof-fixture.js';
@@ -86,7 +86,10 @@ describe('ontology migration workflow integration', () => {
       expect(status.pendingCommittedMigrations).toBe(false);
 
       const [vertexLookupResult, medicationCrosswalkResult, conditionCrosswalkResult] = await Promise.all([
-        executeOntologyGraphQuery<{ id: string }>(fixture.sql, createVertexByIdOperation('medication/metformin')),
+        executeOntologyGraphQuery<{ id: string }>(
+          fixture.sql,
+          createVertexLookupByPreferredLabelOperation('Metformin'),
+        ),
         executeOntologyGraphQuery<{
           medication_label: string;
           rxnorm_label: string;
