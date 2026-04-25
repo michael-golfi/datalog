@@ -3,26 +3,18 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@datalog/ast": [
-        "../datalog-ast/src/index.ts"
-      ],
-      "@datalog/datalog-migrate": [
-        "../datalog-migrate/src/index.ts"
-      ],
+      "@datalog/ast": ["../datalog-ast/src/index.ts"],
+      "@datalog/datalog-migrate": ["../datalog-migrate/src/index.ts"],
       "@datalog/datalog-migrate/load-datalog-migration-project-files": [
         "../datalog-migrate/src/load-datalog-migration-project-files.ts"
       ],
-      "@datalog/parser": [
-        "../parser/src/index.ts"
-      ]
+      "@datalog/parser": ["../parser/src/index.ts"]
     },
     "rootDir": "src",
     "outDir": "dist",
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "emitDeclarationOnly": false,
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
   "references": [
     {
@@ -35,12 +27,6 @@
       "path": "../parser/tsconfig.lib.json"
     }
   ],
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "vitest.config.ts",
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["vitest.config.ts", "src/**/*.test.ts", "src/**/*.spec.ts"]
 }

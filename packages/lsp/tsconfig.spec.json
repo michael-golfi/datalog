@@ -4,26 +4,14 @@
     "baseUrl": ".",
     "outDir": "./out-tsc/vitest",
     "paths": {
-      "@datalog/ast": [
-        "../datalog-ast/src/index.ts"
-      ],
-      "@datalog/datalog-migrate": [
-        "../datalog-migrate/src/index.ts"
-      ],
+      "@datalog/ast": ["../datalog-ast/src/index.ts"],
+      "@datalog/datalog-migrate": ["../datalog-migrate/src/index.ts"],
       "@datalog/datalog-migrate/load-datalog-migration-project-files": [
         "../datalog-migrate/src/load-datalog-migration-project-files.ts"
       ],
-      "@datalog/parser": [
-        "../parser/src/index.ts"
-      ]
+      "@datalog/parser": ["../parser/src/index.ts"]
     },
-    "types": [
-      "vitest/globals",
-      "vitest/importMeta",
-      "vite/client",
-      "node",
-      "vitest"
-    ]
+    "types": ["vitest/globals", "vitest/importMeta", "vite/client", "node", "vitest"]
   },
   "references": [
     {
