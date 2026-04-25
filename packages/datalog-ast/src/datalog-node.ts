@@ -1,10 +1,5 @@
-import type {
-  DatalogLanguageNode,
-} from './datalog-language.js';
-import type {
-  DatalogFact,
-  DatalogFactPattern,
-} from './datalog-graph.js';
+import type { DatalogFact, DatalogFactPattern } from './datalog-graph.js';
+import type { DatalogLanguageNode } from './datalog-language.js';
 
 export type DatalogNode = DatalogLanguageNode | DatalogFact | DatalogFactPattern;
 

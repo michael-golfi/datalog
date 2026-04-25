@@ -1,4 +1,3 @@
-import type { DatalogTerm } from './datalog-language.js';
 import type {
   DatalogFactPatternMatch,
   DatalogFactSet,
@@ -7,6 +6,7 @@ import type {
   VertexFact,
   VertexFactPattern,
 } from './datalog-graph.js';
+import type { DatalogTerm } from './datalog-language.js';
 
 export function vertexFact(id: string): VertexFact {
   return { kind: 'vertex', id };
