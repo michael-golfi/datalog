@@ -1,5 +1,6 @@
-import { parseDocument } from '@datalog/parser';
 import { describe, expect, it } from 'vitest';
+
+import { parseDocument } from '@datalog/parser';
 
 import { collectDuplicateSchemaClauses } from './diagnostic-duplicate-defpred-schemas.js';
 
@@ -10,15 +11,19 @@ describe('collectDuplicateSchemaClauses', () => {
       sources: [
         {
           sourceId: '001-foundation.dl',
-          parsedDocument: parseDocument('DefPred("graph/shared", "0", "class/Entity", "0", "class/Target").'),
+          parsedDocument: parseDocument(
+            'DefPred("graph/shared", "0", "class/Entity", "0", "class/Target").',
+          ),
         },
         {
           sourceId: 'current.dl',
-          parsedDocument: parseDocument([
-            'DefPred("graph/shared", "0", "class/Entity", "0", "class/Target").',
-            'DefPred("graph/unique", "0", "class/Entity", "0", "class/Target").',
-            'DefPred("graph/shared", "0", "class/Entity", "0", "class/Target").',
-          ].join('\n')),
+          parsedDocument: parseDocument(
+            [
+              'DefPred("graph/shared", "0", "class/Entity", "0", "class/Target").',
+              'DefPred("graph/unique", "0", "class/Entity", "0", "class/Target").',
+              'DefPred("graph/shared", "0", "class/Entity", "0", "class/Target").',
+            ].join('\n'),
+          ),
         },
       ],
     });
@@ -35,14 +40,18 @@ describe('collectDuplicateSchemaClauses', () => {
       sources: [
         {
           sourceId: '001-foundation.dl',
-          parsedDocument: parseDocument('DefPred("graph/foundation", "0", "class/Entity", "0", "class/Target").'),
+          parsedDocument: parseDocument(
+            'DefPred("graph/foundation", "0", "class/Entity", "0", "class/Target").',
+          ),
         },
         {
           sourceId: 'current.dl',
-          parsedDocument: parseDocument([
-            'DefPred("graph/current", "0", "class/Entity", "0", "class/Target").',
-            'Edge("concept/a", "graph/current", "concept/b").',
-          ].join('\n')),
+          parsedDocument: parseDocument(
+            [
+              'DefPred("graph/current", "0", "class/Entity", "0", "class/Target").',
+              'Edge("concept/a", "graph/current", "concept/b").',
+            ].join('\n'),
+          ),
         },
       ],
     });
