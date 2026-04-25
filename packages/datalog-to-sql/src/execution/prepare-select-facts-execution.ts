@@ -1,13 +1,14 @@
 import type { DatalogQueryStatement } from '@datalog/ast';
 
+import {
+  linkHydrationInstructions,
+  type PendingPreparedSelectFactsHydrationInstruction,
+} from './prepare-select-facts-hydration-support.js';
+import {
+  appendPreparedPattern,
+  createPreparedPatternState,
+} from './prepare-select-facts-pattern-support.js';
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
-import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
-import type { PredicateBinding, PredicateCatalog } from '../contracts/predicate-catalog.js';
-import type {
-  PreparedSelectFactsExecution,
-  PreparedSelectFactsMaterializationStep,
-} from '../contracts/prepared-select-facts-execution.js';
-
 import { compileSelectFactsLogicalPlan } from '../translation/compile-select-facts-logical-plan.js';
 import { createSelectFactsOperationFromDatalogQuery } from '../translation/create-select-facts-operation-from-datalog-query.js';
 import { renderLogicalPlanToSql } from '../translation/render-logical-plan-to-sql.js';
@@ -15,14 +16,13 @@ import {
   validateExternalSelectFactsExecution,
   validateExternalSelectFactsQueryContext,
 } from '../validation/validate-external-select-facts-execution.js';
-import {
-  appendPreparedPattern,
-  createPreparedPatternState,
-} from './prepare-select-facts-pattern-support.js';
-import {
-  linkHydrationInstructions,
-  type PendingPreparedSelectFactsHydrationInstruction,
-} from './prepare-select-facts-hydration-support.js';
+
+import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
+import type { PredicateBinding, PredicateCatalog } from '../contracts/predicate-catalog.js';
+import type {
+  PreparedSelectFactsExecution,
+  PreparedSelectFactsMaterializationStep,
+} from '../contracts/prepared-select-facts-execution.js';
 
 /** Prepare unified select-facts execution by separating pre-SQL work, final SQL, and optional hydration metadata. */
 export function prepareSelectFactsExecution(input: {
@@ -94,6 +94,7 @@ function prepareSelectFactsPatterns(operation: SelectFactsOperation, catalog: Pr
   return {
     operation: {
       kind: 'select-facts',
+      predicateCatalog: catalog,
       match: asNonEmptyMatch(state.sqlMatch),
     },
     catalog: createPreparedCatalog(catalog, Array.from(state.predicateByNameAndArity.values())),

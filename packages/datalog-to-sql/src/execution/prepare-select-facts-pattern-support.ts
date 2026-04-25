@@ -2,6 +2,14 @@ import type { DatalogTerm } from '@datalog/ast';
 
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
 import { getPredicateColumns } from '../contracts/predicate-catalog.js';
+import { getSelectFactsPredicateBinding } from '../translation/select-facts-logical-plan-pattern-predicate.js';
+
+import type { PendingPreparedSelectFactsHydrationInstruction } from './prepare-select-facts-hydration-support.js';
+import type {
+  MaterializeBeforeSqlExternalResolverDefinition,
+  PostQueryHydrateExternalResolverDefinition,
+} from '../contracts/external-resolver-definition.js';
+import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
 import type {
   ExternalPredicateBinding,
   PredicateBinding,
@@ -9,14 +17,10 @@ import type {
   SqlPushdownExternalPredicateBinding,
   StoredPredicateBinding,
 } from '../contracts/predicate-catalog.js';
-import type {
-  MaterializeBeforeSqlExternalResolverDefinition,
-  PostQueryHydrateExternalResolverDefinition,
-} from '../contracts/external-resolver-definition.js';
 import type { PreparedSelectFactsMaterializationStep } from '../contracts/prepared-select-facts-execution.js';
-import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
-import { getSelectFactsPredicateBinding } from '../translation/select-facts-logical-plan-pattern-predicate.js';
-import type { PendingPreparedSelectFactsHydrationInstruction } from './prepare-select-facts-hydration-support.js';
+
+
+
 export interface PreparedPatternState {
   readonly materializationSteps: PreparedSelectFactsMaterializationStep[];
   readonly hydrationInstructions: PendingPreparedSelectFactsHydrationInstruction[];

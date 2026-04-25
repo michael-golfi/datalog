@@ -2,12 +2,13 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { queryStatement } from '@datalog/ast';
 
-import { defineExternalResolverDefinition } from '../contracts/external-resolver-definition.js';
-import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
-import type { PostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
-import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from '../translation/default-graph-predicate-catalog.js';
 import { executeTranslatedSql } from './execute-translated-sql.js';
 import { prepareSelectFactsExecution } from './prepare-select-facts-execution.js';
+import { defineExternalResolverDefinition } from '../contracts/external-resolver-definition.js';
+import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from '../translation/default-graph-predicate-catalog.js';
+
+import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
+import type { PostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
 
 const PREPARED_EXECUTION_TEST_CATALOG = {
   version: 1,
@@ -151,6 +152,7 @@ describe('prepareSelectFactsExecution', () => {
     const preparedExecution = prepareSelectFactsExecution({
       operation: {
         kind: 'select-facts',
+        predicateCatalog: DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
         match: [
           {
             kind: 'vertex',
