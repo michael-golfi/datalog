@@ -11,7 +11,7 @@ import type {
   ProjectionBinding,
   ScalarLiteral,
 } from '../contracts/logical-plan.js';
-import type { PredicateBinding, RelationColumnBinding } from '../contracts/predicate-catalog.js';
+import { getPredicateColumns, type PredicateBinding, type RelationColumnBinding } from '../contracts/predicate-catalog.js';
 
 export interface VariableBinding {
   readonly nodeId: LogicalNodeId;
@@ -27,7 +27,7 @@ export function createScanNode(index: number, predicate: PredicateBinding): Logi
     kind: 'scan',
     id,
     predicate: predicate.signature.name,
-    output: predicate.storage.columns.map((column) => createOutputColumn(id, column)),
+    output: getPredicateColumns(predicate).map((column) => createOutputColumn(id, column)),
   };
 }
 

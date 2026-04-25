@@ -1,6 +1,6 @@
 import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
 import type { LogicalExpression, LogicalJoinNode, LogicalPlanNode, LogicalNodeId, OutputColumn } from '../contracts/logical-plan.js';
-import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
+import { getPredicateColumns, type PredicateCatalog } from '../contracts/predicate-catalog.js';
 
 import {
   bindPatternTerm,
@@ -32,14 +32,14 @@ export interface CompiledPattern {
 
 /** Compile one select-facts pattern into scan/filter nodes plus pending join metadata. */
 export function compileSelectFactsPattern(input: CompiledPatternInput): CompiledPattern {
-  const predicate = getSelectFactsPredicateBinding(input.pattern.kind, input.catalog);
+  const predicate = getSelectFactsPredicateBinding(input.pattern, input.catalog);
   const scanNode = createScanNode(input.index, predicate);
   const localBindings = new Map<string, VariableBinding>();
   const localFilters: LogicalExpression[] = [];
   const pendingJoinConditions: PendingJoinCondition[] = [];
   const pendingVariables: Array<readonly [string, VariableBinding]> = [];
 
-  for (const binding of getPatternBindings(input.pattern, predicate.storage.columns)) {
+  for (const binding of getPatternBindings(input.pattern, getPredicateColumns(predicate))) {
     bindPatternTerm({
       scanNodeId: scanNode.id,
       binding,

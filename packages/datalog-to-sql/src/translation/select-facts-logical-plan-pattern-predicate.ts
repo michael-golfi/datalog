@@ -6,20 +6,24 @@ import type { PatternTermBinding } from './select-facts-logical-plan-pattern-bin
 
 /** Resolve the predicate binding for one select-facts pattern kind. */
 export function getSelectFactsPredicateBinding(
-  kind: SelectFactsOperation['match'][number]['kind'],
+  pattern: SelectFactsOperation['match'][number],
   catalog: PredicateCatalog,
 ): PredicateBinding {
-  const predicateName = catalog.aliases?.[kind] ?? kind;
-  const arity = kind === 'vertex' ? 1 : 3;
+  const predicateName = getSelectFactsPatternPredicateName(pattern);
+  const arity = getSelectFactsPatternTerms(pattern).length;
+  const aliasedPredicateName = catalog.aliases?.[predicateName] ?? predicateName;
   const predicate = catalog.predicates.find((candidate) => {
-    return candidate.signature.name === predicateName && candidate.signature.arity === arity;
+    return candidate.signature.name === aliasedPredicateName && candidate.signature.arity === arity;
   });
 
   if (predicate !== undefined) {
     return predicate;
   }
 
-  throw new GraphTranslationError('UNSUPPORTED_GRAPH_PREDICATE', `Unsupported graph predicate ${predicateName}/${arity}.`);
+  throw new GraphTranslationError(
+    'UNSUPPORTED_GRAPH_PREDICATE',
+    `Unsupported graph predicate ${aliasedPredicateName}/${arity}.`,
+  );
 }
 
 /** Pair a select-facts pattern's terms with the bound relation columns by ordinal. */
@@ -27,29 +31,30 @@ export function getPatternBindings(
   pattern: SelectFactsOperation['match'][number],
   columns: readonly RelationColumnBinding[],
 ): readonly PatternTermBinding[] {
-  if (pattern.kind === 'vertex') {
-    return [
-      {
-        term: pattern.id,
-        column: getColumnByOrdinal(columns, 0, pattern.kind),
-      },
-    ];
+  return getSelectFactsPatternTerms(pattern).map((term, ordinal) => ({
+    term,
+    column: getColumnByOrdinal(columns, ordinal, getSelectFactsPatternPredicateName(pattern)),
+  }));
+}
+
+function getSelectFactsPatternPredicateName(pattern: SelectFactsOperation['match'][number]): string {
+  if (pattern.kind === 'predicate') {
+    return pattern.predicate;
   }
 
-  return [
-    {
-      term: pattern.subject,
-      column: getColumnByOrdinal(columns, 0, pattern.kind),
-    },
-    {
-      term: pattern.predicate,
-      column: getColumnByOrdinal(columns, 1, pattern.kind),
-    },
-    {
-      term: pattern.object,
-      column: getColumnByOrdinal(columns, 2, pattern.kind),
-    },
-  ];
+  return pattern.kind;
+}
+
+function getSelectFactsPatternTerms(pattern: SelectFactsOperation['match'][number]) {
+  if (pattern.kind === 'predicate') {
+    return pattern.terms;
+  }
+
+  if (pattern.kind === 'vertex') {
+    return [pattern.id] as const;
+  }
+
+  return [pattern.subject, pattern.predicate, pattern.object] as const;
 }
 
 function getColumnByOrdinal(

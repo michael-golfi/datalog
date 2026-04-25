@@ -1,7 +1,7 @@
 import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 
-/** Package-local graph catalog used by the legacy select-facts adapter path. */
-export const DEFAULT_GRAPH_PREDICATE_CATALOG = {
+/** Default graph-backed catalog for the unified select-facts translation path. */
+export const DEFAULT_SELECT_FACTS_PREDICATE_CATALOG = {
   version: 1,
   predicates: [
     {
@@ -77,4 +77,9 @@ export const DEFAULT_GRAPH_PREDICATE_CATALOG = {
       },
     },
   ],
+  aliases: {
+    Vertex: 'vertex',
+    Node: 'vertex',
+    Edge: 'edge',
+  },
 } satisfies PredicateCatalog;
