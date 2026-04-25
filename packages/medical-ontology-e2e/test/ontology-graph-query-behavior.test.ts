@@ -1,5 +1,6 @@
-import { applyDatalogFacts } from '@datalog/datalog-to-sql';
 import { describe, expect, it } from 'vitest';
+
+import { applyDatalogFacts } from '@datalog/datalog-to-sql';
 
 import {
   createConditionCrosswalkOperation,
