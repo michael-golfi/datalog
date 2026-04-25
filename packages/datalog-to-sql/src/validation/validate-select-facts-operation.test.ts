@@ -2,14 +2,21 @@ import type { DatalogFactPattern } from '@datalog/ast';
 import { describe, expect, it } from 'vitest';
 
 import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
+import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 
 import { validateSelectFactsOperation } from './validate-select-facts-operation.js';
+
+const EMPTY_PREDICATE_CATALOG = {
+  version: 1,
+  predicates: [],
+} satisfies PredicateCatalog;
 
 describe('validateSelectFactsOperation', () => {
   it('throws a structured error for blank variable names', () => {
     expect(() =>
       validateSelectFactsOperation({
         kind: 'select-facts',
+        predicateCatalog: EMPTY_PREDICATE_CATALOG,
         match: [
           {
             kind: 'vertex',
@@ -33,6 +40,7 @@ describe('validateSelectFactsOperation', () => {
     expect(() =>
       validateSelectFactsOperation({
         kind: 'select-facts',
+        predicateCatalog: EMPTY_PREDICATE_CATALOG,
         match: [
           {
             kind: 'edge',
@@ -60,6 +68,7 @@ describe('validateSelectFactsOperation', () => {
     expect(() =>
       validateSelectFactsOperation({
         kind: 'select-facts',
+        predicateCatalog: EMPTY_PREDICATE_CATALOG,
         match: [
           {
             kind: 'edge',
@@ -91,6 +100,7 @@ describe('validateSelectFactsOperation', () => {
     expect(() =>
       validateSelectFactsOperation({
         kind: 'select-facts',
+        predicateCatalog: EMPTY_PREDICATE_CATALOG,
         match: [
           {
             kind: 'vertex',
@@ -112,6 +122,30 @@ describe('validateSelectFactsOperation', () => {
             object: {
               kind: 'wildcard',
             },
+          },
+        ],
+      }),
+    ).not.toThrow();
+  });
+
+  it('accepts generic predicate patterns when all terms are valid', () => {
+    expect(() =>
+      validateSelectFactsOperation({
+        kind: 'select-facts',
+        predicateCatalog: EMPTY_PREDICATE_CATALOG,
+        match: [
+          {
+            kind: 'predicate',
+            predicate: 'Indication',
+            terms: [
+              {
+                kind: 'variable',
+                name: 'medication',
+              },
+              {
+                kind: 'wildcard',
+              },
+            ],
           },
         ],
       }),

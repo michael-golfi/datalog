@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
+import { atom, constantTerm, defCompoundFieldSchema, defCompoundSchema, factStatement, namedTerm, variableTerm } from '@datalog/ast';
 import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 import type { PostgresGraphOperation } from '../contracts/postgres-graph-operation.js';
+import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 
 import { validateGraphOperation } from './validate-graph-operation.js';
+
+const EMPTY_PREDICATE_CATALOG = {
+  version: 1,
+  predicates: [],
+} satisfies PredicateCatalog;
 
 describe('validateGraphOperation', () => {
   it('throws a structured error for unsupported operation kinds', () => {
@@ -20,8 +27,9 @@ describe('validateGraphOperation', () => {
 
   it.each([
     { kind: 'select-vertex-by-id' },
-    { kind: 'select-facts' },
+    { kind: 'select-facts', match: [] },
     { kind: 'insert-facts' },
+    { kind: 'insert-compound-assertion' },
     { kind: 'delete-facts' },
     { kind: 'select-recursive-closure-count', rootVertexId: 'vertex/root' },
     { kind: 'select-recursive-closure-count', predicateId: 'graph/reachable' },
@@ -50,6 +58,7 @@ describe('validateGraphOperation', () => {
     },
     {
       kind: 'select-facts',
+      predicateCatalog: EMPTY_PREDICATE_CATALOG,
       match: [
         {
           kind: 'vertex',
@@ -68,6 +77,19 @@ describe('validateGraphOperation', () => {
           id: 'vertex/alice',
         },
       ],
+    },
+    {
+      kind: 'insert-compound-assertion',
+      schema: defCompoundSchema({
+        compoundName: 'Indication',
+        fields: [
+          defCompoundFieldSchema({ fieldName: 'clinical/code', cardinality: '1', domain: 'text' }),
+        ],
+      }),
+      assertion: factStatement(atom('Indication', [
+        namedTerm('cid', variableTerm('Cid')),
+        namedTerm('clinical/code', constantTerm('rxnorm:123')),
+      ])),
     },
     {
       kind: 'delete-facts',
