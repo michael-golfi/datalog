@@ -6,28 +6,36 @@ import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { DatalogDocumentStore } from './datalog-document-store.js';
-import { DatalogWorkspaceIndex } from './datalog-workspace-index.js';
 import { listDatalogWorkspaceFiles } from './datalog-workspace-files.js';
+import { DatalogWorkspaceIndex } from './datalog-workspace-index.js';
 
-type WorkspaceReadFile = NonNullable<ConstructorParameters<typeof DatalogWorkspaceIndex>[0]['readFile']>;
+type WorkspaceReadFile = NonNullable<
+  ConstructorParameters<typeof DatalogWorkspaceIndex>[0]['readFile']
+>;
 
 describe('DatalogWorkspaceIndex', () => {
   it('indexes workspace .dl files, keeps duplicate definitions sorted, separates arities, and prefers open buffers over disk', async () => {
     const workspaceRoot = await createWorkspaceRoot();
 
     try {
-      await writeWorkspaceFile(workspaceRoot, 'schema.dl', [
-        'Parent(child, parent).',
-        'Shared(child, parent) :- Parent(child, parent).',
-      ].join('\n'));
-      await writeWorkspaceFile(workspaceRoot, 'migrations/001-init.dl', [
-        'Shared(left, right) :- Parent(left, right).',
-        'Shared(left, middle, right) :- Parent(left, middle), Parent(middle, right).',
-      ].join('\n'));
-      await writeWorkspaceFile(workspaceRoot, 'current.dl', [
-        'DiskOnly(value).',
-        'Parent(current_child, current_parent).',
-      ].join('\n'));
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'schema.dl',
+        ['Parent(child, parent).', 'Shared(child, parent) :- Parent(child, parent).'].join('\n'),
+      );
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'migrations/001-init.dl',
+        [
+          'Shared(left, right) :- Parent(left, right).',
+          'Shared(left, middle, right) :- Parent(left, middle), Parent(middle, right).',
+        ].join('\n'),
+      );
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'current.dl',
+        ['DiskOnly(value).', 'Parent(current_child, current_parent).'].join('\n'),
+      );
 
       const currentUri = pathToFileURL(join(workspaceRoot, 'current.dl')).href;
       const workspaceIndex = new DatalogWorkspaceIndex({
@@ -37,10 +45,7 @@ describe('DatalogWorkspaceIndex', () => {
       await workspaceIndex.setWorkspaceRootPath(workspaceRoot);
       workspaceIndex.upsertOpenDocument({
         uri: currentUri,
-        source: [
-          'UnsavedOnly(value).',
-          'Parent(current_child, current_parent).',
-        ].join('\n'),
+        source: ['UnsavedOnly(value).', 'Parent(current_child, current_parent).'].join('\n'),
       });
 
       expect(workspaceIndex.getIndexedDocumentUris()).toEqual([
@@ -49,9 +54,13 @@ describe('DatalogWorkspaceIndex', () => {
         pathToFileURL(join(workspaceRoot, 'schema.dl')).href,
       ]);
       expect(workspaceIndex.getPredicateDefinitions('user-predicate:DiskOnly/1')).toEqual([]);
-      expect(workspaceIndex.getPredicateDefinitions('user-predicate:UnsavedOnly/1')).toHaveLength(1);
+      expect(workspaceIndex.getPredicateDefinitions('user-predicate:UnsavedOnly/1')).toHaveLength(
+        1,
+      );
       expect(workspaceIndex.getPredicateDefinitions('user-predicate:Parent/2')).toHaveLength(2);
-      expect(workspaceIndex.getPredicateDefinitions('user-predicate:Shared/2').map((entry) => entry.uri)).toEqual([
+      expect(
+        workspaceIndex.getPredicateDefinitions('user-predicate:Shared/2').map((entry) => entry.uri),
+      ).toEqual([
         pathToFileURL(join(workspaceRoot, 'migrations/001-init.dl')).href,
         pathToFileURL(join(workspaceRoot, 'schema.dl')).href,
       ]);
@@ -121,18 +130,14 @@ describe('DatalogWorkspaceIndex', () => {
       newerListing.resolve([newerFilePath]);
       await newerRefresh;
 
-      expect(workspaceIndex.getIndexedDocumentUris()).toEqual([
-        pathToFileURL(newerFilePath).href,
-      ]);
+      expect(workspaceIndex.getIndexedDocumentUris()).toEqual([pathToFileURL(newerFilePath).href]);
       expect(workspaceIndex.getPredicateDefinitions('user-predicate:NewerFact/1')).toHaveLength(1);
       expect(workspaceIndex.getPredicateDefinitions('user-predicate:StaleFact/1')).toEqual([]);
 
       olderListing.resolve([staleFilePath]);
       await olderRefresh;
 
-      expect(workspaceIndex.getIndexedDocumentUris()).toEqual([
-        pathToFileURL(newerFilePath).href,
-      ]);
+      expect(workspaceIndex.getIndexedDocumentUris()).toEqual([pathToFileURL(newerFilePath).href]);
       expect(workspaceIndex.getPredicateDefinitions('user-predicate:NewerFact/1')).toHaveLength(1);
       expect(workspaceIndex.getPredicateDefinitions('user-predicate:StaleFact/1')).toEqual([]);
     } finally {
@@ -144,22 +149,34 @@ describe('DatalogWorkspaceIndex', () => {
     const workspaceRoot = await createWorkspaceRoot();
 
     try {
-      await writeWorkspaceFile(workspaceRoot, 'schema-b.dl', [
-        'DefPred("graph/shared", "0", "liquid/node", "0", "liquid/node").',
-        'DefPred("graph/b-only", "0", "liquid/node", "0", "liquid/node").',
-        'Edge("node/shared", "food/preferred_label", "Shared B").',
-        'Edge("node/b", "food/instance_of", "class/B").',
-      ].join('\n'));
-      await writeWorkspaceFile(workspaceRoot, 'schema-a.dl', [
-        'DefPred("graph/shared", "0", "liquid/node", "0", "liquid/node").',
-        'DefPred("graph/a-only", "0", "liquid/node", "0", "liquid/node").',
-        'Edge("node/shared", "food/preferred_label", "Shared A").',
-        'Edge("node/a", "food/instance_of", "class/A").',
-      ].join('\n'));
-      await writeWorkspaceFile(workspaceRoot, 'current.dl', [
-        'DefPred("graph/disk-only", "0", "liquid/node", "0", "liquid/node").',
-        'Edge("node/disk", "food/preferred_label", "Disk node").',
-      ].join('\n'));
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'schema-b.dl',
+        [
+          'DefPred("graph/shared", "0", "liquid/node", "0", "liquid/node").',
+          'DefPred("graph/b-only", "0", "liquid/node", "0", "liquid/node").',
+          'Edge("node/shared", "food/preferred_label", "Shared B").',
+          'Edge("node/b", "food/instance_of", "class/B").',
+        ].join('\n'),
+      );
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'schema-a.dl',
+        [
+          'DefPred("graph/shared", "0", "liquid/node", "0", "liquid/node").',
+          'DefPred("graph/a-only", "0", "liquid/node", "0", "liquid/node").',
+          'Edge("node/shared", "food/preferred_label", "Shared A").',
+          'Edge("node/a", "food/instance_of", "class/A").',
+        ].join('\n'),
+      );
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'current.dl',
+        [
+          'DefPred("graph/disk-only", "0", "liquid/node", "0", "liquid/node").',
+          'Edge("node/disk", "food/preferred_label", "Disk node").',
+        ].join('\n'),
+      );
 
       const workspaceIndex = new DatalogWorkspaceIndex({
         documentStore: new DatalogDocumentStore(),
@@ -184,31 +201,38 @@ describe('DatalogWorkspaceIndex', () => {
         'graph/shared',
       ]);
       expect(workspaceIndex.getPredicateSchemaTargets('graph/disk-only')).toEqual([]);
-      expect(workspaceIndex.getPredicateSchemaTargets('graph/open-only').map((target) => target.uri)).toEqual([
-        currentUri,
-      ]);
-      expect(workspaceIndex.getPredicateSchemaTargets('graph/shared').map((target) => target.uri)).toEqual([
+      expect(
+        workspaceIndex.getPredicateSchemaTargets('graph/open-only').map((target) => target.uri),
+      ).toEqual([currentUri]);
+      expect(
+        workspaceIndex.getPredicateSchemaTargets('graph/shared').map((target) => target.uri),
+      ).toEqual([
         pathToFileURL(join(workspaceRoot, 'schema-a.dl')).href,
         pathToFileURL(join(workspaceRoot, 'schema-b.dl')).href,
       ]);
-      expect(workspaceIndex.getPredicateSchemaTargets('graph/shared').map((target) => target.schema.subjectDomain)).toEqual([
-        'node',
-        'node',
-      ]);
+      expect(
+        workspaceIndex
+          .getPredicateSchemaTargets('graph/shared')
+          .map((target) => target.schema.subjectDomain),
+      ).toEqual(['node', 'node']);
       expect(workspaceIndex.getNodeSummaryTargets('node/disk')).toEqual([]);
-      expect(workspaceIndex.getNodeSummaryTargets('node/open').map((target) => ({
-        label: target.summary.label,
-        uri: target.uri,
-      }))).toEqual([
+      expect(
+        workspaceIndex.getNodeSummaryTargets('node/open').map((target) => ({
+          label: target.summary.label,
+          uri: target.uri,
+        })),
+      ).toEqual([
         {
           label: 'Open node',
           uri: currentUri,
         },
       ]);
-      expect(workspaceIndex.getNodeSummaryTargets('node/shared').map((target) => ({
-        label: target.summary.label,
-        uri: target.uri,
-      }))).toEqual([
+      expect(
+        workspaceIndex.getNodeSummaryTargets('node/shared').map((target) => ({
+          label: target.summary.label,
+          uri: target.uri,
+        })),
+      ).toEqual([
         {
           label: 'Shared A',
           uri: pathToFileURL(join(workspaceRoot, 'schema-a.dl')).href,
@@ -218,7 +242,9 @@ describe('DatalogWorkspaceIndex', () => {
           uri: pathToFileURL(join(workspaceRoot, 'schema-b.dl')).href,
         },
       ]);
-      expect(workspaceIndex.getNodeSummaryTargets('node/a')[0]?.summary.classes).toEqual(['class/A']);
+      expect(workspaceIndex.getNodeSummaryTargets('node/a')[0]?.summary.classes).toEqual([
+        'class/A',
+      ]);
     } finally {
       await rm(workspaceRoot, { recursive: true, force: true });
     }
@@ -301,8 +327,16 @@ describe('DatalogWorkspaceIndex', () => {
       const foundationMigrationPath = join(workspaceRoot, 'migrations/20260422.0001.foundation.dl');
       const currentMigrationPath = join(workspaceRoot, 'current.dl');
       const currentUri = pathToFileURL(currentMigrationPath).href;
-      await writeWorkspaceFile(workspaceRoot, 'migrations/20260422.0002.second.dl', 'SecondMigration(value).');
-      await writeWorkspaceFile(workspaceRoot, 'migrations/20260422.0001.foundation.dl', 'FoundationMigration(value).');
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'migrations/20260422.0002.second.dl',
+        'SecondMigration(value).',
+      );
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'migrations/20260422.0001.foundation.dl',
+        'FoundationMigration(value).',
+      );
       await writeWorkspaceFile(workspaceRoot, 'current.dl', 'DiskCurrent(value).');
 
       const workspaceIndex = new DatalogWorkspaceIndex({
@@ -326,21 +360,19 @@ describe('DatalogWorkspaceIndex', () => {
         pathToFileURL(committedMigrationPath).href,
         currentUri,
       ]);
-      expect(workspaceIndex.getProgram()?.program.statements.map((statement) => {
-        if (statement.kind === 'fact') {
-          return statement.atom.predicate;
-        }
+      expect(
+        workspaceIndex.getProgram()?.program.statements.map((statement) => {
+          if (statement.kind === 'fact') {
+            return statement.atom.predicate;
+          }
 
-        if (statement.kind === 'rule') {
-          return statement.head.predicate;
-        }
+          if (statement.kind === 'rule') {
+            return statement.head.predicate;
+          }
 
-        return statement.kind;
-      })).toEqual([
-        'FoundationMigration',
-        'SecondMigration',
-        'OpenCurrent',
-      ]);
+          return statement.kind;
+        }),
+      ).toEqual(['FoundationMigration', 'SecondMigration', 'OpenCurrent']);
     } finally {
       await rm(workspaceRoot, { recursive: true, force: true });
     }
@@ -353,7 +385,11 @@ describe('DatalogWorkspaceIndex', () => {
       const committedMigrationPath = join(workspaceRoot, 'migrations/20260422.0001.foundation.dl');
       const currentMigrationPath = join(workspaceRoot, 'current.dl');
       const currentUri = pathToFileURL(currentMigrationPath).href;
-      await writeWorkspaceFile(workspaceRoot, 'migrations/20260422.0001.foundation.dl', 'FoundationMigration(value).');
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'migrations/20260422.0001.foundation.dl',
+        'FoundationMigration(value).',
+      );
       await writeWorkspaceFile(workspaceRoot, 'current.dl', 'DiskCurrent(value).');
 
       const workspaceIndex = new DatalogWorkspaceIndex({
@@ -369,10 +405,7 @@ describe('DatalogWorkspaceIndex', () => {
       await workspaceIndex.setWorkspaceRootPath(workspaceRoot);
       workspaceIndex.upsertOpenDocument({
         uri: currentUri,
-        source: [
-          'CompletionProbe(left, right) :-',
-          '  Sha.',
-        ].join('\n'),
+        source: ['CompletionProbe(left, right) :-', '  Sha.'].join('\n'),
       });
 
       expect(workspaceIndex.getProgram()).toBeNull();
@@ -380,8 +413,12 @@ describe('DatalogWorkspaceIndex', () => {
         currentUri,
         pathToFileURL(committedMigrationPath).href,
       ]);
-      expect(workspaceIndex.getPredicateDefinitions('user-predicate:CompletionProbe/2')).toHaveLength(1);
-      expect(workspaceIndex.getPredicateDefinitions('user-predicate:FoundationMigration/1')).toHaveLength(1);
+      expect(
+        workspaceIndex.getPredicateDefinitions('user-predicate:CompletionProbe/2'),
+      ).toHaveLength(1);
+      expect(
+        workspaceIndex.getPredicateDefinitions('user-predicate:FoundationMigration/1'),
+      ).toHaveLength(1);
     } finally {
       await rm(workspaceRoot, { recursive: true, force: true });
     }
@@ -392,14 +429,22 @@ describe('DatalogWorkspaceIndex', () => {
 
     try {
       await writeWorkspaceFile(workspaceRoot, 'current.dl', 'Included(value).');
-      await writeWorkspaceFile(workspaceRoot, 'node_modules/ignored.dl', 'IgnoredNodeModules(value).');
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'node_modules/ignored.dl',
+        'IgnoredNodeModules(value).',
+      );
       await writeWorkspaceFile(workspaceRoot, '.worktrees/ignored.dl', 'IgnoredWorktrees(value).');
       await writeWorkspaceFile(workspaceRoot, '.yarn/ignored.dl', 'IgnoredYarn(value).');
       await writeWorkspaceFile(workspaceRoot, '.git/ignored.dl', 'IgnoredGit(value).');
       await writeWorkspaceFile(workspaceRoot, 'dist/ignored.dl', 'IgnoredDist(value).');
       await writeWorkspaceFile(workspaceRoot, 'coverage/ignored.dl', 'IgnoredCoverage(value).');
       await writeWorkspaceFile(workspaceRoot, '.sisyphus/plans/ignored.dl', 'IgnoredPlans(value).');
-      await writeWorkspaceFile(workspaceRoot, '.sisyphus/evidence/ignored.dl', 'IgnoredEvidence(value).');
+      await writeWorkspaceFile(
+        workspaceRoot,
+        '.sisyphus/evidence/ignored.dl',
+        'IgnoredEvidence(value).',
+      );
 
       const workspaceIndex = new DatalogWorkspaceIndex({
         documentStore: new DatalogDocumentStore(),
@@ -411,14 +456,22 @@ describe('DatalogWorkspaceIndex', () => {
         pathToFileURL(join(workspaceRoot, 'current.dl')).href,
       ]);
       expect(workspaceIndex.getPredicateDefinitions('user-predicate:Included/1')).toHaveLength(1);
-      expect(workspaceIndex.getPredicateDefinitions('user-predicate:IgnoredNodeModules/1')).toEqual([]);
-      expect(workspaceIndex.getPredicateDefinitions('user-predicate:IgnoredWorktrees/1')).toEqual([]);
+      expect(workspaceIndex.getPredicateDefinitions('user-predicate:IgnoredNodeModules/1')).toEqual(
+        [],
+      );
+      expect(workspaceIndex.getPredicateDefinitions('user-predicate:IgnoredWorktrees/1')).toEqual(
+        [],
+      );
       expect(workspaceIndex.getPredicateDefinitions('user-predicate:IgnoredYarn/1')).toEqual([]);
       expect(workspaceIndex.getPredicateDefinitions('user-predicate:IgnoredGit/1')).toEqual([]);
       expect(workspaceIndex.getPredicateDefinitions('user-predicate:IgnoredDist/1')).toEqual([]);
-      expect(workspaceIndex.getPredicateDefinitions('user-predicate:IgnoredCoverage/1')).toEqual([]);
+      expect(workspaceIndex.getPredicateDefinitions('user-predicate:IgnoredCoverage/1')).toEqual(
+        [],
+      );
       expect(workspaceIndex.getPredicateDefinitions('user-predicate:IgnoredPlans/1')).toEqual([]);
-      expect(workspaceIndex.getPredicateDefinitions('user-predicate:IgnoredEvidence/1')).toEqual([]);
+      expect(workspaceIndex.getPredicateDefinitions('user-predicate:IgnoredEvidence/1')).toEqual(
+        [],
+      );
     } finally {
       await rm(workspaceRoot, { recursive: true, force: true });
     }
@@ -459,7 +512,10 @@ async function writeWorkspaceFile(
   source: string,
 ): Promise<void> {
   const filePath = join(workspaceRoot, relativePath);
-  const directoryPath = filePath.slice(0, Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\')));
+  const directoryPath = filePath.slice(
+    0,
+    Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\')),
+  );
 
   await mkdir(directoryPath, { recursive: true });
   await writeFile(filePath, source, 'utf8');

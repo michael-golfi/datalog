@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 import type { DefCompoundFieldSchema } from '@datalog/ast';
+import { loadDatalogMigrationProjectFiles } from '@datalog/datalog-migrate/load-datalog-migration-project-files';
 import {
   parseDocument,
   type DatalogPredicateSymbolIdentity,
@@ -9,18 +10,19 @@ import {
   type ParsedDatalogProgramSources,
   type Range,
 } from '@datalog/parser';
+
+import { buildDatalogWorkspaceIndexState } from './build-datalog-workspace-index-state.js';
+import { listDatalogWorkspaceFiles } from './datalog-workspace-files.js';
+import { isPathInsideWorkspaceRoot } from './datalog-workspace-index-builders.js';
 import {
-  loadDatalogMigrationProjectFiles,
-} from '@datalog/datalog-migrate/load-datalog-migration-project-files';
+  loadDatalogWorkspaceDocuments,
+  type DatalogWorkspaceDocument,
+} from './load-datalog-workspace-documents.js';
 
 import type {
   DatalogDocumentStore,
   DatalogTextDocumentSnapshot,
 } from './datalog-document-store.js';
-import { buildDatalogWorkspaceIndexState } from './build-datalog-workspace-index-state.js';
-import { listDatalogWorkspaceFiles } from './datalog-workspace-files.js';
-import { isPathInsideWorkspaceRoot } from './datalog-workspace-index-builders.js';
-import { loadDatalogWorkspaceDocuments, type DatalogWorkspaceDocument } from './load-datalog-workspace-documents.js';
 import type {
   DatalogWorkspaceCompoundSchemaTarget,
   DatalogWorkspacePredicateSchemaTarget,
@@ -50,7 +52,10 @@ export class DatalogWorkspaceIndex {
   #diskDocumentsByUri = new Map<string, DatalogWorkspaceDocument>();
   #indexedDocumentsByUri = new Map<string, DatalogWorkspaceDocument>();
   #workspaceProgram: ParsedDatalogProgramSources | null = null;
-  #predicateDefinitionsByIdentity = new Map<string, readonly DatalogWorkspacePredicateDefinition[]>();
+  #predicateDefinitionsByIdentity = new Map<
+    string,
+    readonly DatalogWorkspacePredicateDefinition[]
+  >();
   #workspacePredicateIdentities = new Map<string, DatalogPredicateSymbolIdentity>();
   #graphPredicateIds: readonly string[] = [];
   #predicateSchemaTargetsById = new Map<string, readonly DatalogWorkspacePredicateSchemaTarget[]>();
@@ -72,7 +77,8 @@ export class DatalogWorkspaceIndex {
     this.#parseDocument = options.parseDocument ?? parseDocument;
     this.#listWorkspaceFiles = options.listWorkspaceFiles ?? listDatalogWorkspaceFiles;
     this.#readFile = options.readFile ?? readFile;
-    this.#loadMigrationProjectFiles = options.loadMigrationProjectFiles ?? loadDatalogMigrationProjectFiles;
+    this.#loadMigrationProjectFiles =
+      options.loadMigrationProjectFiles ?? loadDatalogMigrationProjectFiles;
   }
 
   async setWorkspaceRootPath(workspaceRootPath: string | null): Promise<void> {
@@ -124,7 +130,9 @@ export class DatalogWorkspaceIndex {
   }
 
   getWorkspacePredicateIdentities(): readonly DatalogPredicateSymbolIdentity[] {
-    return [...this.#workspacePredicateIdentities.values()].sort((left, right) => left.key.localeCompare(right.key));
+    return [...this.#workspacePredicateIdentities.values()].sort((left, right) =>
+      left.key.localeCompare(right.key),
+    );
   }
 
   getGraphPredicateIds(): readonly string[] {
@@ -166,7 +174,9 @@ export class DatalogWorkspaceIndex {
       });
     }
 
-    const documents = [...documentsByUri.values()].sort((left, right) => left.uri.localeCompare(right.uri));
+    const documents = [...documentsByUri.values()].sort((left, right) =>
+      left.uri.localeCompare(right.uri),
+    );
     const nextState = buildDatalogWorkspaceIndexState({
       documents,
       workspaceRootPath: this.#workspaceRootPath,
@@ -191,7 +201,9 @@ export class DatalogWorkspaceIndex {
   }
 
   #getOpenWorkspaceDocuments(): readonly DatalogTextDocumentSnapshot[] {
-    return this.#documentStore.getDocuments().filter((document) => this.#isWorkspaceFileUri(document.uri));
+    return this.#documentStore
+      .getDocuments()
+      .filter((document) => this.#isWorkspaceFileUri(document.uri));
   }
 
   #isWorkspaceFileUri(uri: string): boolean {
