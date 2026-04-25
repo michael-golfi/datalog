@@ -6,11 +6,11 @@ import type { PatternTermBinding } from './select-facts-logical-plan-pattern-bin
 
 /** Resolve the predicate binding for one select-facts pattern kind. */
 export function getSelectFactsPredicateBinding(
-  kind: SelectFactsOperation['match'][number]['kind'],
+  pattern: SelectFactsOperation['match'][number],
   catalog: PredicateCatalog,
 ): PredicateBinding {
-  const predicateName = catalog.aliases?.[kind] ?? kind;
-  const arity = kind === 'vertex' ? 1 : 3;
+  const predicateName = catalog.aliases?.[getPatternPredicateName(pattern)] ?? getPatternPredicateName(pattern);
+  const arity = getPatternArity(pattern);
   const predicate = catalog.predicates.find((candidate) => {
     return candidate.signature.name === predicateName && candidate.signature.arity === arity;
   });
@@ -36,6 +36,13 @@ export function getPatternBindings(
     ];
   }
 
+  if (pattern.kind === 'predicate') {
+    return pattern.terms.map((term, index) => ({
+      term,
+      column: getColumnByOrdinal(columns, index, pattern.predicate),
+    }));
+  }
+
   return [
     {
       term: pattern.subject,
@@ -50,6 +57,26 @@ export function getPatternBindings(
       column: getColumnByOrdinal(columns, 2, pattern.kind),
     },
   ];
+}
+
+function getPatternPredicateName(pattern: SelectFactsOperation['match'][number]): string {
+  if (pattern.kind === 'vertex' || pattern.kind === 'edge') {
+    return pattern.kind;
+  }
+
+  return pattern.predicate;
+}
+
+function getPatternArity(pattern: SelectFactsOperation['match'][number]): number {
+  if (pattern.kind === 'vertex') {
+    return 1;
+  }
+
+  if (pattern.kind === 'edge') {
+    return 3;
+  }
+
+  return pattern.terms.length;
 }
 
 function getColumnByOrdinal(

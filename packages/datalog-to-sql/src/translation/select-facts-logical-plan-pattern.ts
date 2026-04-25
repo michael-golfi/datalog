@@ -32,7 +32,7 @@ export interface CompiledPattern {
 
 /** Compile one select-facts pattern into scan/filter nodes plus pending join metadata. */
 export function compileSelectFactsPattern(input: CompiledPatternInput): CompiledPattern {
-  const predicate = getSelectFactsPredicateBinding(input.pattern.kind, input.catalog);
+  const predicate = getSelectFactsPredicateBinding(input.pattern, input.catalog);
   const scanNode = createScanNode(input.index, predicate);
   const localBindings = new Map<string, VariableBinding>();
   const localFilters: LogicalExpression[] = [];
