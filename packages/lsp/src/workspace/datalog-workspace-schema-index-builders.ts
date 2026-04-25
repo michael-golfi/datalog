@@ -1,10 +1,10 @@
 import type { DefCompoundFieldSchema } from '@datalog/ast';
 
-import type { DatalogWorkspaceDocument } from './load-datalog-workspace-documents.js';
 import type {
   DatalogWorkspaceCompoundSchemaTarget,
   DatalogWorkspacePredicateSchemaTarget,
 } from './datalog-workspace-schema-targets.js';
+import type { DatalogWorkspaceDocument } from './load-datalog-workspace-documents.js';
 
 /** Collect predicate schema definitions across documents, keyed by graph predicate ID. */
 export function buildPredicateSchemaTargets(
@@ -37,7 +37,9 @@ export function buildCompoundSchemaTargets(
 }
 
 /** Index compound field names by their parent predicate, deduplicated and sorted. */
-export function buildCompoundFieldNames(documents: readonly DatalogWorkspaceDocument[]): Map<string, readonly string[]> {
+export function buildCompoundFieldNames(
+  documents: readonly DatalogWorkspaceDocument[],
+): Map<string, readonly string[]> {
   return new Map(
     [...buildCompoundFieldSchemas(documents).entries()].map(([predicateName, fields]) => [
       predicateName,
@@ -53,7 +55,9 @@ export function buildCompoundFieldSchemas(
   const fieldSchemasByPredicate = new Map<string, Map<string, DefCompoundFieldSchema>>();
 
   for (const declaration of getCompoundSchemaEntries(documents)) {
-    const fieldSchemas = fieldSchemasByPredicate.get(declaration.schema.compoundName) ?? new Map<string, DefCompoundFieldSchema>();
+    const fieldSchemas =
+      fieldSchemasByPredicate.get(declaration.schema.compoundName) ??
+      new Map<string, DefCompoundFieldSchema>();
     addMissingFieldSchemas(fieldSchemas, declaration.schema.fields);
     fieldSchemasByPredicate.set(declaration.schema.compoundName, fieldSchemas);
   }
@@ -69,21 +73,25 @@ export function buildCompoundFieldSchemas(
 function getPredicateSchemaEntries(
   documents: readonly DatalogWorkspaceDocument[],
 ): readonly DatalogWorkspacePredicateSchemaTarget[] {
-  return documents.flatMap((document) => document.parsedDocument.schemaDeclarations.flatMap((schemaDeclaration) => (
-    schemaDeclaration.schema.kind === 'predicate-schema'
-      ? [{ uri: document.uri, schema: schemaDeclaration.schema, range: schemaDeclaration.range }]
-      : []
-  )));
+  return documents.flatMap((document) =>
+    document.parsedDocument.schemaDeclarations.flatMap((schemaDeclaration) =>
+      schemaDeclaration.schema.kind === 'predicate-schema'
+        ? [{ uri: document.uri, schema: schemaDeclaration.schema, range: schemaDeclaration.range }]
+        : [],
+    ),
+  );
 }
 
 function getCompoundSchemaEntries(
   documents: readonly DatalogWorkspaceDocument[],
 ): readonly DatalogWorkspaceCompoundSchemaTarget[] {
-  return documents.flatMap((document) => document.parsedDocument.schemaDeclarations.flatMap((schemaDeclaration) => (
-    schemaDeclaration.schema.kind === 'compound-schema'
-      ? [{ uri: document.uri, schema: schemaDeclaration.schema, range: schemaDeclaration.range }]
-      : []
-  )));
+  return documents.flatMap((document) =>
+    document.parsedDocument.schemaDeclarations.flatMap((schemaDeclaration) =>
+      schemaDeclaration.schema.kind === 'compound-schema'
+        ? [{ uri: document.uri, schema: schemaDeclaration.schema, range: schemaDeclaration.range }]
+        : [],
+    ),
+  );
 }
 
 function addMissingFieldSchemas(
@@ -99,9 +107,12 @@ function addMissingFieldSchemas(
   }
 }
 
-function sortTargetEntries<TTarget extends { readonly uri: string; readonly range: DatalogWorkspacePredicateSchemaTarget['range'] }>(
-  targetsById: Map<string, TTarget[]>,
-): Map<string, readonly TTarget[]> {
+function sortTargetEntries<
+  TTarget extends {
+    readonly uri: string;
+    readonly range: DatalogWorkspacePredicateSchemaTarget['range'];
+  },
+>(targetsById: Map<string, TTarget[]>): Map<string, readonly TTarget[]> {
   return new Map(
     [...targetsById.entries()].map(([id, targets]) => [id, targets.sort(compareTargets)]),
   );

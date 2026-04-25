@@ -1,12 +1,12 @@
 import { posix, win32 } from 'node:path';
 
-import type {
-  DatalogPredicateSymbolIdentity,
-  Range,
-} from '@datalog/parser';
+import type { DatalogPredicateSymbolIdentity, Range } from '@datalog/parser';
 
+import type {
+  DatalogWorkspaceNodeSummaryTarget,
+  DatalogWorkspacePredicateDefinition,
+} from './datalog-workspace-index.js';
 import type { DatalogWorkspaceDocument } from './load-datalog-workspace-documents.js';
-import type { DatalogWorkspaceNodeSummaryTarget, DatalogWorkspacePredicateDefinition } from './datalog-workspace-index.js';
 
 /** Check whether `filePath` is at or beneath `workspaceRootPath`, handling both POSIX and Windows separators. */
 export function isPathInsideWorkspaceRoot(options: {
@@ -17,11 +17,11 @@ export function isPathInsideWorkspaceRoot(options: {
     return true;
   }
 
-  const pathModule = usesWindowsPathSemantics(options)
-    ? win32
-    : posix;
+  const pathModule = usesWindowsPathSemantics(options) ? win32 : posix;
   const relativePath = pathModule.relative(options.workspaceRootPath, options.filePath);
-  return relativePath !== '' && !relativePath.startsWith('..') && !relativePath.startsWith(`..${'\\'}`);
+  return (
+    relativePath !== '' && !relativePath.startsWith('..') && !relativePath.startsWith(`..${'\\'}`)
+  );
 }
 
 function usesWindowsPathSemantics(options: {
@@ -63,7 +63,9 @@ function getDocumentPredicateDefinitions(
       continue;
     }
 
-    for (const occurrence of predicate.occurrences.filter((candidate: typeof predicate.occurrences[number]) => candidate.kind === 'head')) {
+    for (const occurrence of predicate.occurrences.filter(
+      (candidate: (typeof predicate.occurrences)[number]) => candidate.kind === 'head',
+    )) {
       definitions.push({
         uri: document.uri,
         identity: predicate.identity,
@@ -77,20 +79,27 @@ function getDocumentPredicateDefinitions(
 
 /** Derive a deduplicated map of predicate identities from their grouped definitions. */
 export function buildWorkspacePredicateIdentities(
-  predicateDefinitionsByIdentity: ReadonlyMap<string, readonly DatalogWorkspacePredicateDefinition[]>,
+  predicateDefinitionsByIdentity: ReadonlyMap<
+    string,
+    readonly DatalogWorkspacePredicateDefinition[]
+  >,
 ): Map<string, DatalogPredicateSymbolIdentity> {
   return new Map(
     [...predicateDefinitionsByIdentity.entries()]
-      .filter(([, definitions]) => definitions.length > 0)
-      .map(([identityKey, definitions]) => [identityKey, definitions[0]!.identity] as const),
+      .flatMap(([identityKey, definitions]) => {
+        const [firstDefinition] = definitions;
+        return firstDefinition ? [[identityKey, firstDefinition.identity] as const] : [];
+      }),
   );
 }
 
 /** Collect deduplicated, sorted graph node IDs across all workspace documents. */
-export function buildGraphPredicateIds(documents: readonly DatalogWorkspaceDocument[]): readonly string[] {
-  return [...new Set(
-    documents.flatMap((document) => document.parsedDocument.graphPredicateIds),
-  )].sort((left, right) => left.localeCompare(right));
+export function buildGraphPredicateIds(
+  documents: readonly DatalogWorkspaceDocument[],
+): readonly string[] {
+  return [
+    ...new Set(documents.flatMap((document) => document.parsedDocument.graphPredicateIds)),
+  ].sort((left, right) => left.localeCompare(right));
 }
 
 /** Collect graph node summaries across documents, keyed by graph node ID. */
@@ -120,10 +129,19 @@ export function buildNodeSummaryTargets(
 }
 
 /** Collect deduplicated, sorted graph node IDs across all workspace documents. */
-export function buildGraphNodeIds(documents: readonly DatalogWorkspaceDocument[]): readonly string[] {
-  return [...new Set(
-    documents.flatMap((document) => document.parsedDocument.datalogSymbols.graphNodes.map((graphNode: typeof document.parsedDocument.datalogSymbols.graphNodes[number]) => graphNode.id)),
-  )].sort((left, right) => left.localeCompare(right));
+export function buildGraphNodeIds(
+  documents: readonly DatalogWorkspaceDocument[],
+): readonly string[] {
+  return [
+    ...new Set(
+      documents.flatMap((document) =>
+        document.parsedDocument.datalogSymbols.graphNodes.map(
+          (graphNode: (typeof document.parsedDocument.datalogSymbols.graphNodes)[number]) =>
+            graphNode.id,
+        ),
+      ),
+    ),
+  ].sort((left, right) => left.localeCompare(right));
 }
 
 function comparePredicateDefinitions(
