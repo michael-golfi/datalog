@@ -1,3 +1,5 @@
+import { getPredicateColumns, type PredicateBinding, type RelationColumnBinding } from '../contracts/predicate-catalog.js';
+
 import type {
   ColumnReference,
   LogicalDistinctNode,
@@ -11,7 +13,6 @@ import type {
   ProjectionBinding,
   ScalarLiteral,
 } from '../contracts/logical-plan.js';
-import { getPredicateColumns, type PredicateBinding, type RelationColumnBinding } from '../contracts/predicate-catalog.js';
 
 export interface VariableBinding {
   readonly nodeId: LogicalNodeId;

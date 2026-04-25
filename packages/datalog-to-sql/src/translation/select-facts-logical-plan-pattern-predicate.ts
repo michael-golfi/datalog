@@ -1,8 +1,9 @@
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
+import type { PatternTermBinding } from './select-facts-logical-plan-pattern-binding.js';
 import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
 import type { PredicateBinding, PredicateCatalog, RelationColumnBinding } from '../contracts/predicate-catalog.js';
 
-import type { PatternTermBinding } from './select-facts-logical-plan-pattern-binding.js';
 
 /** Resolve the predicate binding for one select-facts pattern kind. */
 export function getSelectFactsPredicateBinding(
