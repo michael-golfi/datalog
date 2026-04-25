@@ -77,4 +77,53 @@ describe('reconcileAppliedMigrations', () => {
       }).pendingMigrationFileNames,
     ).toEqual(['20260502.0001.bootstrap.dl', '20260504.0001.patch.dl']);
   });
+
+  it('ignores extra applied entries and still reports pending committed migrations', () => {
+    expect(
+      reconcileAppliedMigrations({
+        committedMigrationFileNames: ['20260502.0001.bootstrap.dl', '20260503.0001.seed.dl'],
+        appliedMigrationState: {
+          appliedMigrationFileNames: ['20260501.0001.legacy.dl', '20260502.0001.bootstrap.dl'],
+        },
+      }),
+    ).toEqual({
+      appliedMigrationFileNames: ['20260502.0001.bootstrap.dl'],
+      pendingMigrationFileNames: ['20260503.0001.seed.dl'],
+      allApplied: false,
+    });
+  });
+
+  it('reports missing earlier committed migrations as pending when applied state is out of order', () => {
+    expect(
+      reconcileAppliedMigrations({
+        committedMigrationFileNames: [
+          '20260502.0001.bootstrap.dl',
+          '20260503.0001.seed.dl',
+          '20260504.0001.patch.dl',
+        ],
+        appliedMigrationState: {
+          appliedMigrationFileNames: ['20260504.0001.patch.dl'],
+        },
+      }),
+    ).toEqual({
+      appliedMigrationFileNames: ['20260504.0001.patch.dl'],
+      pendingMigrationFileNames: ['20260502.0001.bootstrap.dl', '20260503.0001.seed.dl'],
+      allApplied: false,
+    });
+  });
+
+  it('returns a clean empty reconciliation when both committed and applied states are empty', () => {
+    expect(
+      reconcileAppliedMigrations({
+        committedMigrationFileNames: [],
+        appliedMigrationState: {
+          appliedMigrationFileNames: [],
+        },
+      }),
+    ).toEqual({
+      appliedMigrationFileNames: [],
+      pendingMigrationFileNames: [],
+      allApplied: true,
+    });
+  });
 });

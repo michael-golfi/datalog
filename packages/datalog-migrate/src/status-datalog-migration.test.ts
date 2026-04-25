@@ -183,6 +183,51 @@ describe('readMigrationStatus', () => {
       },
     });
   });
+
+  it('treats a missing migrations directory as an empty committed set', () => {
+    const workspaceRoot = mkdtempSync(path.join(os.tmpdir(), 'datalog-migration-status-missing-migrations-'));
+    temporaryRoots.push(workspaceRoot);
+    writeFileSync(path.join(workspaceRoot, 'current.dl'), '% Current mutable ontology working area.\n', 'utf8');
+
+    expect(readMigrationStatus({ workspaceRoot })).toEqual({
+      committedMigrationCount: 0,
+      hasCurrentChanges: false,
+      latestCommittedMigrationFileName: null,
+      canDeterminePendingCommittedMigrations: false,
+      pendingCommittedMigrations: false,
+      statusCode: 'clean',
+      statusFlags: {
+        currentUncommitted: false,
+        committedPresent: false,
+        pendingCommittedUnknown: false,
+      },
+    });
+  });
+
+  it('treats a missing current.dl as having no current changes when committed files exist', () => {
+    const workspaceRoot = mkdtempSync(path.join(os.tmpdir(), 'datalog-migration-status-missing-current-'));
+    temporaryRoots.push(workspaceRoot);
+    mkdirSync(path.join(workspaceRoot, 'migrations'), { recursive: true });
+    writeCommittedMigration(
+      workspaceRoot,
+      '20260502.0001.bootstrap.dl',
+      createCommittedMigrationSource('Edge("concept/seed", "graph/preferred_label", "Seed").\n', null),
+    );
+
+    expect(readMigrationStatus({ workspaceRoot })).toEqual({
+      committedMigrationCount: 1,
+      hasCurrentChanges: false,
+      latestCommittedMigrationFileName: '20260502.0001.bootstrap.dl',
+      canDeterminePendingCommittedMigrations: false,
+      pendingCommittedMigrations: null,
+      statusCode: 'committed-pending-unknown',
+      statusFlags: {
+        currentUncommitted: false,
+        committedPresent: true,
+        pendingCommittedUnknown: true,
+      },
+    });
+  });
 });
 
 function createWorkspaceFixture(): string {
