@@ -1,6 +1,16 @@
-import type { Cardinality, DefCompoundFieldSchema, DefCompoundSchema, DatalogTerm, ScalarDomain } from '@datalog/ast';
+import type {
+  Cardinality,
+  DefCompoundFieldSchema,
+  DefCompoundSchema,
+  DatalogTerm,
+} from '@datalog/ast';
 import { getCompoundSchemaDeclaration } from '@datalog/parser';
 import type { parseDocument } from '@datalog/parser';
+
+import {
+  describeTermDomain,
+  isTermCompatibleWithDomain,
+} from './diagnostic-compound-schema-domains.js';
 
 import type { LanguageServerDiagnostic } from '../contracts/language-feature-types.js';
 import type { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
@@ -10,11 +20,20 @@ type ParsedClause = ReturnType<typeof parseDocument>['clauses'][number];
 /** Create compound fact diagnostics from parser-backed schema declarations. */
 export function createCompoundSchemaDiagnostics(options: {
   readonly clause: ParsedClause;
-  readonly statement: { readonly kind: string; readonly atom?: { readonly predicate: string; readonly terms: readonly unknown[] } } | undefined;
+  readonly statement:
+    | {
+        readonly kind: string;
+        readonly atom?: { readonly predicate: string; readonly terms: readonly unknown[] };
+      }
+    | undefined;
   readonly parsedDocument: ReturnType<typeof parseDocument>;
   readonly workspaceIndex?: DatalogWorkspaceIndex;
 }): LanguageServerDiagnostic[] {
-  if (!options.clause.isCompound || options.statement?.kind !== 'fact' || options.statement.atom?.predicate !== options.clause.predicate) {
+  if (
+    !options.clause.isCompound ||
+    options.statement?.kind !== 'fact' ||
+    options.statement.atom?.predicate !== options.clause.predicate
+  ) {
     return [];
   }
 
@@ -27,7 +46,10 @@ export function createCompoundSchemaDiagnostics(options: {
     return [];
   }
 
-  const termOccurrencesByField = collectFieldTermOccurrences(options.clause, options.statement.atom.terms);
+  const termOccurrencesByField = collectFieldTermOccurrences(
+    options.clause,
+    options.statement.atom.terms,
+  );
 
   return [
     ...createFieldDomainDiagnostics(options.clause, schema, termOccurrencesByField),
@@ -40,7 +62,10 @@ function resolveCompoundSchema(options: {
   readonly workspaceIndex?: DatalogWorkspaceIndex;
   readonly compoundName: string;
 }): DefCompoundSchema | undefined {
-  const localSchema = getCompoundSchemaDeclaration(options.parsedDocument.schemaDeclarations, options.compoundName)?.schema;
+  const localSchema = getCompoundSchemaDeclaration(
+    options.parsedDocument.schemaDeclarations,
+    options.compoundName,
+  )?.schema;
   if (localSchema?.kind === 'compound-schema') {
     return localSchema;
   }
@@ -52,7 +77,10 @@ function collectFieldTermOccurrences(
   clause: ParsedClause,
   terms: readonly unknown[],
 ): Map<string, Array<{ readonly range: ParsedClause['range']; readonly term: DatalogTerm }>> {
-  const occurrencesByField = new Map<string, Array<{ readonly range: ParsedClause['range']; readonly term: DatalogTerm }>>();
+  const occurrencesByField = new Map<
+    string,
+    Array<{ readonly range: ParsedClause['range']; readonly term: DatalogTerm }>
+  >();
 
   for (const candidate of terms) {
     if (!isNamedTerm(candidate)) {
@@ -73,56 +101,81 @@ function collectFieldTermOccurrences(
 function createFieldDomainDiagnostics(
   clause: ParsedClause,
   schema: DefCompoundSchema,
-  termOccurrencesByField: ReadonlyMap<string, ReadonlyArray<{ readonly range: ParsedClause['range']; readonly term: DatalogTerm }>>,
+  termOccurrencesByField: ReadonlyMap<
+    string,
+    ReadonlyArray<{ readonly range: ParsedClause['range']; readonly term: DatalogTerm }>
+  >,
 ): LanguageServerDiagnostic[] {
-  return schema.fields.flatMap((fieldSchema) => createSingleFieldDomainDiagnostics({
-    predicateName: clause.predicate,
-    fieldSchema,
-    occurrences: termOccurrencesByField.get(fieldSchema.fieldName) ?? [],
-  }));
+  return schema.fields.flatMap((fieldSchema) =>
+    createSingleFieldDomainDiagnostics({
+      predicateName: clause.predicate,
+      fieldSchema,
+      occurrences: termOccurrencesByField.get(fieldSchema.fieldName) ?? [],
+    }),
+  );
 }
 
 function createSingleFieldDomainDiagnostics(options: {
   readonly predicateName: string;
   readonly fieldSchema: DefCompoundFieldSchema;
-  readonly occurrences: ReadonlyArray<{ readonly range: ParsedClause['range']; readonly term: DatalogTerm }>;
+  readonly occurrences: ReadonlyArray<{
+    readonly range: ParsedClause['range'];
+    readonly term: DatalogTerm;
+  }>;
 }): LanguageServerDiagnostic[] {
   return options.occurrences
-    .filter((occurrence) => !isTermCompatibleWithDomain(occurrence.term, options.fieldSchema.domain))
+    .filter(
+      (occurrence) => !isTermCompatibleWithDomain(occurrence.term, options.fieldSchema.domain),
+    )
     .map((occurrence) => ({
       range: occurrence.range,
       severity: 'error' as const,
       source: 'datalog',
-      message: `${options.predicateName}@ field ${options.fieldSchema.fieldName} expects domain \`${options.fieldSchema.domain}\`, found \`${describeTermDomain(occurrence.term)}\`.`,
+      message: `${options.predicateName}@ field ${options.fieldSchema.fieldName} expects domain \`${
+        options.fieldSchema.domain
+      }\`, found \`${describeTermDomain(occurrence.term)}\`.`,
     }));
 }
 
 function createAllFieldCardinalityDiagnostics(
   clause: ParsedClause,
   schema: DefCompoundSchema,
-  termOccurrencesByField: ReadonlyMap<string, ReadonlyArray<{ readonly range: ParsedClause['range']; readonly term: DatalogTerm }>>,
+  termOccurrencesByField: ReadonlyMap<
+    string,
+    ReadonlyArray<{ readonly range: ParsedClause['range']; readonly term: DatalogTerm }>
+  >,
 ): LanguageServerDiagnostic[] {
-  return schema.fields.flatMap((fieldSchema) => createFieldCardinalityDiagnostics({
-    predicateName: clause.predicate,
-    clauseRange: clause.predicateRange,
-    fieldSchema,
-    occurrences: termOccurrencesByField.get(fieldSchema.fieldName) ?? [],
-  }));
+  return schema.fields.flatMap((fieldSchema) =>
+    createFieldCardinalityDiagnostics({
+      predicateName: clause.predicate,
+      clauseRange: clause.predicateRange,
+      fieldSchema,
+      occurrences: termOccurrencesByField.get(fieldSchema.fieldName) ?? [],
+    }),
+  );
 }
 
 function createFieldCardinalityDiagnostics(options: {
   readonly predicateName: string;
   readonly clauseRange: ParsedClause['predicateRange'];
   readonly fieldSchema: DefCompoundFieldSchema;
-  readonly occurrences: ReadonlyArray<{ readonly range: ParsedClause['range']; readonly term: DatalogTerm }>;
+  readonly occurrences: ReadonlyArray<{
+    readonly range: ParsedClause['range'];
+    readonly term: DatalogTerm;
+  }>;
 }): LanguageServerDiagnostic[] {
-  if (requiresAtLeastOneValue(options.fieldSchema.cardinality) && options.occurrences.length === 0) {
-    return [{
-      range: options.clauseRange,
-      severity: 'error',
-      source: 'datalog',
-      message: `${options.predicateName}@ field ${options.fieldSchema.fieldName} requires at least one value (cardinality \`${options.fieldSchema.cardinality}\`).`,
-    }];
+  if (
+    requiresAtLeastOneValue(options.fieldSchema.cardinality) &&
+    options.occurrences.length === 0
+  ) {
+    return [
+      {
+        range: options.clauseRange,
+        severity: 'error',
+        source: 'datalog',
+        message: `${options.predicateName}@ field ${options.fieldSchema.fieldName} requires at least one value (cardinality \`${options.fieldSchema.cardinality}\`).`,
+      },
+    ];
   }
 
   if (allowsMultipleValues(options.fieldSchema.cardinality) || options.occurrences.length <= 1) {
@@ -145,68 +198,6 @@ function allowsMultipleValues(cardinality: Cardinality): boolean {
   return cardinality === '0' || cardinality === '+' || cardinality === '*';
 }
 
-function isTermCompatibleWithDomain(term: DatalogTerm, domain: ScalarDomain): boolean {
-  if (term.kind === 'variable' || term.kind === 'wildcard') {
-    return true;
-  }
-
-  const valueKind = getConstantValueKind(term.value);
-  if (valueKind === 'string') {
-    return acceptsStringDomain(domain);
-  }
-
-  if (valueKind === 'number') {
-    return domain === 'numeric' || (domain === 'int8' && Number.isInteger(term.value));
-  }
-
-  return valueKind === 'boolean' && domain === 'bool';
-}
-
-function acceptsStringDomain(domain: ScalarDomain): boolean {
-  return domain === 'node'
-    || domain === 'text'
-    || domain === 'jsonb'
-    || domain === 'date'
-    || domain === 'timestamp';
-}
-
-function getConstantValueKind(value: string | number | boolean | null): 'string' | 'number' | 'boolean' | 'null' {
-  if (value === null) {
-    return 'null';
-  }
-
-  if (typeof value === 'string') {
-    return 'string';
-  }
-
-  if (typeof value === 'number') {
-    return 'number';
-  }
-
-  return 'boolean';
-}
-
-function describeTermDomain(term: DatalogTerm): string {
-  if (term.kind === 'variable') {
-    return 'variable';
-  }
-
-  if (term.kind === 'wildcard') {
-    return 'wildcard';
-  }
-
-  const valueKind = getConstantValueKind(term.value);
-  if (valueKind === 'string') {
-    return 'text';
-  }
-
-  if (valueKind === 'number') {
-    return Number.isInteger(term.value) ? 'int8' : 'numeric';
-  }
-
-  return valueKind === 'boolean' ? 'bool' : 'null';
-}
-
 function isNamedTerm(value: unknown): value is {
   readonly kind: 'named';
   readonly name: string;
@@ -217,5 +208,11 @@ function isNamedTerm(value: unknown): value is {
     return false;
   }
 
-  return 'kind' in value && value.kind === 'named' && 'name' in value && typeof value.name === 'string' && 'term' in value;
+  return (
+    'kind' in value &&
+    value.kind === 'named' &&
+    'name' in value &&
+    typeof value.name === 'string' &&
+    'term' in value
+  );
 }
