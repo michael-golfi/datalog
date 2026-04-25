@@ -1,25 +1,25 @@
-export { createPostgresGraphTranslator } from './runtime/create-postgres-graph-translator.js';
 export { createPostgresSqlClient } from './runtime/create-postgres-sql-client.js';
 export { initializeGraphSchema, startRecursiveClosurePostgresRuntime, waitForPostgres } from './runtime/recursive-closure-postgres-runtime.js';
 export { applyDatalogFacts } from './execution/apply-datalog-facts.js';
 export { executeTranslatedSql } from './execution/execute-translated-sql.js';
+export { executePreparedSelectFacts } from './execution/execute-prepared-select-facts.js';
+export { prepareSelectFactsExecution } from './execution/prepare-select-facts-execution.js';
 export { createSelectFactsOperationFromDatalogQuery } from './translation/create-select-facts-operation-from-datalog-query.js';
-export { translateGraphOperation } from './translation/translate-graph-operation.js';
+export { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from './translation/default-graph-predicate-catalog.js';
 export type {
   DeleteFactsOperation,
   InsertFactsOperation,
-  PostgresGraphOperation,
   SelectFactsOperation,
-  SelectRecursiveClosureCountOperation,
-  SelectEdgesOperation,
-  SelectVertexByIdOperation,
 } from './contracts/postgres-graph-operation.js';
 export { GraphTranslationError } from './contracts/graph-translation-error.js';
 export type { GraphTranslationResult } from './contracts/graph-translation-result.js';
-export type { PostgresGraphTarget } from './contracts/postgres-graph-target.js';
-export type { PostgresGraphTranslator } from './contracts/postgres-graph-translator.js';
 export type { PostgresSqlClient } from './runtime/create-postgres-sql-client.js';
 export type { TranslatedSqlQuery } from './contracts/translated-sql-query.js';
+export type {
+  PreparedSelectFactsExecution,
+  PreparedSelectFactsHydrationInstruction,
+  PreparedSelectFactsMaterializationStep,
+} from './contracts/prepared-select-facts-execution.js';
 export type {
   NormalizedAtom,
   NormalizedFact,
@@ -32,7 +32,34 @@ export type {
   PredicateSignature,
 } from './contracts/datalog-program.js';
 export type {
+  ExternalResolverCapabilitySet,
+  ExternalResolverDefinition,
+  ExternalResolverDefinitionErrorCode,
+  ExternalResolverFailure,
+  ExternalResolverHydrateRequest,
+  ExternalResolverKey,
+  ExternalResolverLookupRequest,
+  ExternalResolverMode,
+  ExternalResolverRequestContext,
+  ExternalResolverResult,
+  ExternalResolverRow,
+  ExternalResolverRuntimeErrorCode,
+  ExternalResolverSuccess,
+  HydrateRowsHandler,
+  MaterializeBeforeSqlExternalResolverDefinition,
+  MaterializeRowsHandler,
+  PostQueryHydrateExternalResolverDefinition,
+  SqlPushdownExternalResolverDefinition,
+} from './contracts/external-resolver-definition.js';
+export {
+  EXTERNAL_RESOLVER_CAPABILITY_MATRIX,
+  ExternalResolverDefinitionError,
+  defineExternalResolverDefinition,
+} from './contracts/external-resolver-definition.js';
+export type {
   BuiltinPredicateBinding,
+  ExternalPredicateBinding,
+  ExternalPredicateExecutionBinding,
   MemoryRelationBinding,
   PostgresTableBinding,
   PostgresViewBinding,
@@ -45,8 +72,10 @@ export type {
   PredicateStatistics,
   PredicateStorageBinding,
   RelationColumnBinding,
+  StoredPredicateBinding,
   WorkTableBinding,
 } from './contracts/predicate-catalog.js';
+export { getPredicateColumns } from './contracts/predicate-catalog.js';
 export type {
   AggregateBinding,
   BooleanExpression,

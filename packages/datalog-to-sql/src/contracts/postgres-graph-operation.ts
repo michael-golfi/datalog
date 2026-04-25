@@ -1,26 +1,17 @@
-import type {
-  DatalogFactPatternMatch,
-  DatalogFactSet,
-} from '@datalog/ast';
-
-export interface SelectVertexByIdOperation {
-  readonly kind: 'select-vertex-by-id';
-  readonly vertexId: string;
-}
-
-export interface SelectEdgesOperation {
-  readonly kind: 'select-edges';
-  readonly where?: {
-    readonly subjectId?: string;
-    readonly predicateId?: string;
-    readonly objectId?: string;
-  };
-}
+import type { DatalogPredicateName, DatalogFactPatternMatch, DatalogFactSet, DatalogTerm } from '@datalog/ast';
 
 export interface SelectFactsOperation {
   readonly kind: 'select-facts';
-  readonly match: DatalogFactPatternMatch;
+  readonly match: readonly [SelectFactsPattern, ...SelectFactsPattern[]];
 }
+
+export interface SelectFactsPredicatePattern {
+  readonly kind: 'predicate';
+  readonly predicate: DatalogPredicateName;
+  readonly terms: readonly DatalogTerm[];
+}
+
+export type SelectFactsPattern = DatalogFactPatternMatch[number] | SelectFactsPredicatePattern;
 
 export interface InsertFactsOperation {
   readonly kind: 'insert-facts';
@@ -37,11 +28,3 @@ export interface SelectRecursiveClosureCountOperation {
   readonly rootVertexId: string;
   readonly predicateId: string;
 }
-
-export type PostgresGraphOperation =
-  | SelectVertexByIdOperation
-  | SelectEdgesOperation
-  | SelectFactsOperation
-  | InsertFactsOperation
-  | DeleteFactsOperation
-  | SelectRecursiveClosureCountOperation;
