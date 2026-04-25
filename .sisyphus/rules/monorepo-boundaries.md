@@ -10,12 +10,16 @@ This repo is a Yarn 4 monorepo with workspaces under `packages/*`. Workspace bou
 
 ## Dependency Direction
 
-**`packages/vscode-extension` may depend on `packages/lsp`. `packages/lsp` may depend on `packages/parser`. Shared package code must not depend back on higher-level editor surfaces.**
+**Dependency direction flows from shared language contracts toward editor integration. Shared package code must not depend back on higher-level editor, LSP, migration, ontology, or SQL surfaces.**
 
 ```
+packages/datalog-ast ──→ no workspace dependencies
+packages/parser ──→ packages/datalog-ast
+packages/datalog-to-sql ──→ packages/parser, packages/datalog-ast
+packages/datalog-migrate ──→ packages/datalog-to-sql, packages/parser, packages/datalog-ast
+packages/lsp ──→ packages/parser, packages/datalog-ast, packages/datalog-migrate
 packages/vscode-extension ──→ packages/lsp
-packages/lsp ──→ packages/parser
-packages/parser ──→ no higher-level package
+packages/medical-ontology-e2e ──→ public package surfaces only
 ```
 
 - If you find extension-only code imported by the parser or language server, the dependency is inverted. Move shared logic to the lowest package that can own it.
@@ -25,9 +29,15 @@ packages/parser ──→ no higher-level package
 
 The package roles are:
 
-1. `packages/parser` owns parsing, tokens, diagnostics primitives, and language data structures.
-2. `packages/lsp` owns language-server orchestration and protocol behavior.
-3. `packages/vscode-extension` owns editor activation, commands, and VS Code wiring.
+1. `packages/datalog-ast` owns shared Datalog AST contracts, graph fact primitives, builders, guards, and visitor keys.
+2. `packages/parser` owns syntax parsing, document analysis, symbol collection, and parser-facing semantics.
+3. `packages/datalog-to-sql` owns generic SQL translation, validation, runtime helpers, execution helpers, and benchmarks over graph facts.
+4. `packages/datalog-migrate` owns generic migration workflow tooling and CLI command behavior.
+5. `packages/lsp` owns language-server orchestration, workspace indexing, protocol mapping, and editor-facing language features.
+6. `packages/vscode-extension` owns editor activation, commands, packaging, smoke tests, and VS Code wiring.
+7. `packages/medical-ontology-e2e` owns canonical ontology fixtures, migrations, mappings, and ontology e2e assertions.
+8. `packages/eslint-plugin-datalog` owns Datalog-specific ESLint processor and rule behavior.
+9. `packages/eslint-plugin-typescript` owns generic TypeScript/workspace/runtime/export/UI lint rule behavior.
 
 **`packages/vscode-extension` must not contain:**
 - Parser internals that belong in `packages/parser`.
@@ -42,9 +52,13 @@ Use package seams instead of reaching across boundaries:
 
 | Concern | Own It Here | Avoid |
 |---------|-------------|-------|
+| Shared AST contracts and graph facts | `packages/datalog-ast` | Redefining AST or graph fact shapes in parser, SQL, LSP, or tests |
 | Parsing and syntax primitives | `packages/parser` | Re-implementing parser logic in LSP or extension code |
+| SQL translation and graph runtime helpers | `packages/datalog-to-sql` | Ontology-specific assertions or editor concerns in SQL helpers |
+| Migration workflow commands | `packages/datalog-migrate` | Ontology domain modeling or production SQL runtime ownership |
 | Language-server protocol behavior | `packages/lsp` | VS Code specific behavior in parser code |
 | Editor activation and commands | `packages/vscode-extension` | Embedding VS Code APIs in parser or LSP internals |
+| Canonical ontology fixture behavior | `packages/medical-ontology-e2e` | Generic SQL/runtime or migration tooling ownership |
 
 Bypassing a package seam is a boundary violation even if the code works. The seam exists so package contracts can evolve independently.
 
@@ -82,6 +96,7 @@ When creating a new package under `packages/*`:
 3. State what belongs and what does not belong in the workspace.
 4. Ensure `src/index.ts` is an export-only surface (no runtime logic, no interface definitions).
 5. Verify the package does not depend on a higher-level package.
+6. Add the package to this dependency-direction rule if it creates a new architectural layer.
 
 ## How to Detect Violations
 
