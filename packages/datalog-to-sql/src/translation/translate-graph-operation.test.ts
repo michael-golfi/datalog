@@ -1,6 +1,25 @@
 import { describe, expect, it } from 'vitest';
+import { atom, constantTerm, defCompoundFieldSchema, defCompoundSchema, defPredSchema, factStatement, namedTerm, variableTerm } from '@datalog/ast';
 
+import { buildPredicateCatalogFromSchema } from './build-predicate-catalog-from-schema.js';
 import { translateGraphOperation } from './translate-graph-operation.js';
+
+const GRAPH_PREDICATE_CATALOG = buildPredicateCatalogFromSchema([
+  defPredSchema({
+    predicateName: 'vertex',
+    subjectCardinality: '1',
+    subjectDomain: 'node',
+    objectCardinality: '0',
+    objectDomain: 'node',
+  }),
+  defPredSchema({
+    predicateName: 'edge',
+    subjectCardinality: '0',
+    subjectDomain: 'node',
+    objectCardinality: '0',
+    objectDomain: 'node',
+  }),
+]);
 
 describe('translateGraphOperation', () => {
   it('translates a vertex lookup onto the vertices table', () => {
@@ -58,6 +77,7 @@ describe('translateGraphOperation', () => {
     expect(
       translateGraphOperation({
         kind: 'select-facts',
+        predicateCatalog: GRAPH_PREDICATE_CATALOG,
         match: [
           {
             kind: 'vertex',
@@ -160,6 +180,41 @@ describe('translateGraphOperation', () => {
         operation: 'insert',
         text: 'with inserted_edges as (insert into edges (subject_id, predicate_id, object_id) values ($1, $2, $3) on conflict do nothing returning subject_id, predicate_id, object_id) select 1;',
         values: ['vertex/alice', 'graph/likes', 'vertex/bob'],
+      },
+    });
+  });
+
+  it('routes compound assertions through the shared graph insert translation path', () => {
+    expect(
+      translateGraphOperation({
+        kind: 'insert-compound-assertion',
+        schema: defCompoundSchema({
+          compoundName: 'Indication',
+          fields: [
+            defCompoundFieldSchema({ fieldName: 'clinical/medication', cardinality: '1', domain: 'node' }),
+            defCompoundFieldSchema({ fieldName: 'clinical/code', cardinality: '?', domain: 'text' }),
+          ],
+        }),
+        assertion: factStatement(atom('Indication', [
+          namedTerm('clinical/code', constantTerm('rxnorm:123')),
+          namedTerm('cid', variableTerm('Cid')),
+          namedTerm('clinical/medication', constantTerm('drug/metformin')),
+        ])),
+      }),
+    ).toEqual({
+      ok: true,
+      value: {
+        operation: 'insert',
+        text: 'with inserted_vertices as (insert into vertices (id) values ($1) on conflict do nothing returning id), inserted_edges as (insert into edges (subject_id, predicate_id, object_id) values ($2, $3, $4), ($5, $6, $7) on conflict do nothing returning subject_id, predicate_id, object_id) select 1;',
+        values: [
+          'Indication:clinical/code=rxnorm%3A123,clinical/medication=drug/metformin',
+          'Indication:clinical/code=rxnorm%3A123,clinical/medication=drug/metformin',
+          'clinical/medication',
+          'drug/metformin',
+          'Indication:clinical/code=rxnorm%3A123,clinical/medication=drug/metformin',
+          'clinical/code',
+          'rxnorm:123',
+        ],
       },
     });
   });
@@ -351,6 +406,7 @@ describe('translateGraphOperation', () => {
     expect(
       translateGraphOperation({
         kind: 'select-facts',
+        predicateCatalog: GRAPH_PREDICATE_CATALOG,
         match: [
           {
             kind: 'vertex',

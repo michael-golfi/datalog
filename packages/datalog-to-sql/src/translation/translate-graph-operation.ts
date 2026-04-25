@@ -3,6 +3,7 @@ import type { GraphTranslationResult } from '../contracts/graph-translation-resu
 import type { PostgresGraphOperation } from '../contracts/postgres-graph-operation.js';
 import type { TranslatedSqlQuery } from '../contracts/translated-sql-query.js';
 import { translateDatalogFactQuery } from './translate-datalog-fact-query.js';
+import { translateCompoundAssertion } from './translate-compound-assertion.js';
 import { translateFactDelete } from './translate-fact-delete.js';
 import { translateFactInsert } from './translate-fact-insert.js';
 import { validateGraphOperation } from '../validation/validate-graph-operation.js';
@@ -41,6 +42,10 @@ function translateKnownOperation(operation: PostgresGraphOperation): GraphTransl
 
   if (operation.kind === 'insert-facts') {
     return { ok: true, value: translateFactInsert(operation) };
+  }
+
+  if (operation.kind === 'insert-compound-assertion') {
+    return { ok: true, value: translateFactInsert(translateCompoundAssertion(operation)) };
   }
 
   if (operation.kind === 'select-recursive-closure-count') {
