@@ -1,6 +1,13 @@
 import { mkdir, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
+import { collectExportTargets } from './collect-export-targets.mjs';
+import { createConsumerPackageManifest } from './create-consumer-package-manifest.mjs';
+import { createLanguageServerModuleResolverSource } from './create-language-server-module-resolver-source.mjs';
+import {
+  stagedExtensionId,
+  createStageExtensionManifest,
+} from './create-stage-extension-manifest.mjs';
 import {
   compiledExtensionRelativeRoot,
   defaultLanguageServerModuleId,
@@ -8,13 +15,13 @@ import {
   extensionRoot,
 } from './extension-package-paths.mjs';
 import { readJson } from './package-stage-file-ops.mjs';
-import { stagedExtensionId, createStageExtensionManifest } from './create-stage-extension-manifest.mjs';
-import { createLanguageServerModuleResolverSource } from './create-language-server-module-resolver-source.mjs';
-import { createConsumerPackageManifest } from './create-consumer-package-manifest.mjs';
-import { collectExportTargets } from './collect-export-targets.mjs';
-import { writeStageExtensionManifest, copyStageAsset, writeStageLanguageServerModuleResolver } from './stage-extension-assets.mjs';
-import { stageWorkspacePackage } from './stage-workspace-packages.mjs';
+import {
+  writeStageExtensionManifest,
+  copyStageAsset,
+  writeStageLanguageServerModuleResolver,
+} from './stage-extension-assets.mjs';
 import { stageExternalDependency } from './stage-external-dependencies.mjs';
+import { stageWorkspacePackage } from './stage-workspace-packages.mjs';
 import { verifyConsumerSurface } from './verify-consumer-surface.mjs';
 
 export const stagedExtensionRoot = defaultStageRoot;
@@ -24,10 +31,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 }
 
 export async function createPackageStage(options = {}) {
-  const {
-    stageRoot = defaultStageRoot,
-    languageServerModuleId = defaultLanguageServerModuleId,
-  } = options;
+  const { stageRoot = defaultStageRoot, languageServerModuleId = defaultLanguageServerModuleId } =
+    options;
   const extensionManifest = await readJson(new URL('../../package.json', import.meta.url));
   const stagedExternalPackages = new Set();
 

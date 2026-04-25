@@ -1,5 +1,6 @@
-import type { OutputChannel } from 'vscode';
 import { RevealOutputChannelOn, type LanguageClientOptions } from 'vscode-languageclient/node';
+
+import type { OutputChannel } from 'vscode';
 
 type CreateFileSystemWatcher = (globPattern: string) => unknown;
 
@@ -43,10 +44,14 @@ export function createLanguageClientOptions({
   };
 }
 
-export function readLanguageClientConfiguration(readSetting: ReadSetting): DatalogLanguageClientConfiguration {
+export function readLanguageClientConfiguration(
+  readSetting: ReadSetting,
+): DatalogLanguageClientConfiguration {
   return {
     traceServer: normalizeTraceServerSetting(readSetting('trace.server', 'off')),
-    revealOutputChannelOn: normalizeRevealOutputChannelOnSetting(readSetting('server.revealOutputChannelOn', 'error')),
+    revealOutputChannelOn: normalizeRevealOutputChannelOnSetting(
+      readSetting('server.revealOutputChannelOn', 'error'),
+    ),
   };
 }
 

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { createSmokeRunOptions, runSmoke } from './run-smoke.mjs';
+
 const mocks = vi.hoisted(() => ({
   cp: vi.fn(async () => undefined),
   mkdir: vi.fn(async () => undefined),
@@ -28,8 +30,6 @@ vi.mock('../packaging/create-package-stage.mjs', () => ({
   createPackageStage: mocks.createPackageStage,
   stagedExtensionId: 'test.extension',
 }));
-
-import { createSmokeRunOptions, runSmoke } from './run-smoke.mjs';
 
 describe('run-smoke helpers', () => {
   beforeEach(() => {
@@ -98,7 +98,9 @@ describe('run-smoke helpers', () => {
 
   it('writes expected-failure evidence for broken smoke runs', async () => {
     process.env.DATALOG_SMOKE_EVIDENCE_PATH = '.sisyphus/evidence/task-8-smoke-broken.md';
-    mocks.runTests.mockRejectedValueOnce(new Error('DATALOG_SMOKE_BROKEN_EXPECTED_FAILURE: broken smoke'));
+    mocks.runTests.mockRejectedValueOnce(
+      new Error('DATALOG_SMOKE_BROKEN_EXPECTED_FAILURE: broken smoke'),
+    );
 
     await runSmoke({ brokenMode: true });
 

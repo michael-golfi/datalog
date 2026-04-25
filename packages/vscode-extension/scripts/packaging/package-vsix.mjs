@@ -1,15 +1,11 @@
-import { cp, mkdtemp, rename, rm } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
+import { cp, mkdtemp, rename, rm } from 'node:fs/promises';
 import os from 'node:os';
-import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { createPackageStage } from './create-package-stage.mjs';
-import {
-  defaultStageRoot,
-  extensionRoot,
-  workspaceRoot,
-} from './extension-package-paths.mjs';
+import { defaultStageRoot, extensionRoot, workspaceRoot } from './extension-package-paths.mjs';
 
 const vsceBinaryPath = path.join(workspaceRoot, 'node_modules', '.bin', 'vsce');
 
@@ -39,7 +35,13 @@ export function createVscePackageArgs({ outputPath = defaultVsixPath, version = 
     args.push(version);
   }
 
-  args.push('--no-dependencies', '--allow-unused-files-pattern', '--allow-missing-repository', '--out', outputPath);
+  args.push(
+    '--no-dependencies',
+    '--allow-unused-files-pattern',
+    '--allow-missing-repository',
+    '--out',
+    outputPath,
+  );
 
   return args;
 }
@@ -74,9 +76,13 @@ async function injectNodeModulesIntoVsix({ stageRoot, vsixPath }) {
 
   try {
     await runCommand('unzip', ['-q', vsixPath, '-d', unpackRoot]);
-    await cp(path.join(stageRoot, 'node_modules'), path.join(unpackRoot, 'extension', 'node_modules'), {
-      recursive: true,
-    });
+    await cp(
+      path.join(stageRoot, 'node_modules'),
+      path.join(unpackRoot, 'extension', 'node_modules'),
+      {
+        recursive: true,
+      },
+    );
     await runCommand('zip', ['-qr', repackedVsixPath, '.'], unpackRoot);
     await rm(vsixPath, { force: true });
     await rename(repackedVsixPath, vsixPath);

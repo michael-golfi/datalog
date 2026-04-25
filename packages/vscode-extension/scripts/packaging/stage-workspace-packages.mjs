@@ -1,11 +1,14 @@
 import { cp, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import { createConsumerPackageManifest } from './create-consumer-package-manifest.mjs';
 import { workspacePackageRoots } from './extension-package-paths.mjs';
 import { readJson } from './package-stage-file-ops.mjs';
-import { createConsumerPackageManifest } from './create-consumer-package-manifest.mjs';
 import { validatePackageSurface } from './package-surface-validation.mjs';
-import { getExternalDependencyNames, stageExternalDependency } from './stage-external-dependencies.mjs';
+import {
+  getExternalDependencyNames,
+  stageExternalDependency,
+} from './stage-external-dependencies.mjs';
 
 export async function stageWorkspacePackage(packageName, stageRoot, stagedExternalPackages) {
   const packageRoot = workspacePackageRoots[packageName];
@@ -13,7 +16,12 @@ export async function stageWorkspacePackage(packageName, stageRoot, stagedExtern
 
   await validatePackageSurface(packageName, packageRoot, packageManifest);
 
-  const scopedDirectory = path.join(stageRoot, 'node_modules', '@datalog', packageName.split('/')[1]);
+  const scopedDirectory = path.join(
+    stageRoot,
+    'node_modules',
+    '@datalog',
+    packageName.split('/')[1],
+  );
   await mkdir(path.dirname(scopedDirectory), { recursive: true });
   await cp(path.join(packageRoot, 'dist'), path.join(scopedDirectory, 'dist'), { recursive: true });
   await writeFile(
