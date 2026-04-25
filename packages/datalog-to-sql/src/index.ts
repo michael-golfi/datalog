@@ -3,13 +3,18 @@ export { createPostgresSqlClient } from './runtime/create-postgres-sql-client.js
 export { initializeGraphSchema, startRecursiveClosurePostgresRuntime, waitForPostgres } from './runtime/recursive-closure-postgres-runtime.js';
 export { applyDatalogFacts } from './execution/apply-datalog-facts.js';
 export { executeTranslatedSql } from './execution/execute-translated-sql.js';
+export { buildPredicateCatalogFromSchema } from './translation/build-predicate-catalog-from-schema.js';
 export { createSelectFactsOperationFromDatalogQuery } from './translation/create-select-facts-operation-from-datalog-query.js';
+export { translateCompoundAssertion } from './translation/translate-compound-assertion.js';
 export { translateGraphOperation } from './translation/translate-graph-operation.js';
 export type {
   DeleteFactsOperation,
+  InsertCompoundAssertionOperation,
   InsertFactsOperation,
   PostgresGraphOperation,
+  SelectFactPattern,
   SelectFactsOperation,
+  SelectPredicatePattern,
   SelectRecursiveClosureCountOperation,
   SelectEdgesOperation,
   SelectVertexByIdOperation,
