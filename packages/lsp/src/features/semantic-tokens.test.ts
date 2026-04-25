@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 
-import type { SemanticToken } from './semantic-tokens.js';
 import {
   computeSemanticTokens,
   encodeSemanticTokens,
@@ -8,15 +7,11 @@ import {
   SEMANTIC_TOKEN_TYPES,
 } from './semantic-tokens.js';
 
+import type { SemanticToken } from './semantic-tokens.js';
+
 describe('computeSemanticTokens', () => {
   it('keeps the semantic token legend order stable', () => {
-    expect(SEMANTIC_TOKEN_TYPES).toEqual([
-      'comment',
-      'function',
-      'property',
-      'string',
-      'variable',
-    ]);
+    expect(SEMANTIC_TOKEN_TYPES).toEqual(['comment', 'function', 'property', 'string', 'variable']);
     expect(SEMANTIC_TOKEN_MODIFIERS).toEqual(['definition']);
   });
 
@@ -49,10 +44,9 @@ describe('computeSemanticTokens', () => {
   });
 
   it('does not emit predicate or graph-ref tokens for comment and string lookalikes', () => {
-    const source = [
-      '% Related(subject_id, "class/Fake").',
-      'Text("Serving@(serv_id)").',
-    ].join('\n');
+    const source = ['% Related(subject_id, "class/Fake").', 'Text("Serving@(serv_id)").'].join(
+      '\n',
+    );
 
     const tokens = computeSemanticTokens(source);
 
@@ -66,28 +60,17 @@ describe('computeSemanticTokens', () => {
   });
 
   it('encodes semantic tokens in stable LSP delta format', () => {
-    const source = [
-      'UserRule(subject_id) :-',
-      '  Edge(subject_id, "class/Thing").',
-    ].join('\n');
+    const source = ['UserRule(subject_id) :-', '  Edge(subject_id, "class/Thing").'].join('\n');
 
     expect(encodeSemanticTokens(computeSemanticTokens(source))).toEqual([
-      0, 0, 8, 1, 1,
-      0, 9, 10, 4, 0,
-      1, 2, 4, 1, 0,
-      0, 5, 10, 4, 0,
-      0, 13, 11, 2, 0,
+      0, 0, 8, 1, 1, 0, 9, 10, 4, 0, 1, 2, 4, 1, 0, 0, 5, 10, 4, 0, 0, 13, 11, 2, 0,
     ]);
   });
 });
 
-function toTokenTuples(tokens: readonly SemanticToken[]): Array<[
-  number,
-  number,
-  number,
-  SemanticToken['tokenType'],
-  string[],
-]> {
+function toTokenTuples(
+  tokens: readonly SemanticToken[],
+): Array<[number, number, number, SemanticToken['tokenType'], string[]]> {
   return tokens.map((token) => [
     token.line,
     token.startChar,

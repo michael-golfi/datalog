@@ -4,6 +4,7 @@ import {
   SEMANTIC_TOKEN_MODIFIERS,
   SEMANTIC_TOKEN_TYPES,
 } from './features/semantic-tokens.js';
+
 import type { SemanticToken } from './features/semantic-tokens.js';
 
 export {

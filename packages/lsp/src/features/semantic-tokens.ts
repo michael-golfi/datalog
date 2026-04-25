@@ -1,6 +1,15 @@
 import { BUILTIN_PREDICATE_NAMES, parseDocument } from '@datalog/parser';
 
-import { collectCommentSpans, collectVariableTokens, createOffsetToken, dedupeSemanticTokens, encodeModifiers, rangeToOffsetSpan, spansOverlapAny, sortSemanticTokens } from './semantic-token-helpers.js';
+import {
+  collectCommentSpans,
+  collectVariableTokens,
+  createOffsetToken,
+  dedupeSemanticTokens,
+  encodeModifiers,
+  rangeToOffsetSpan,
+  spansOverlapAny,
+  sortSemanticTokens,
+} from './semantic-token-helpers.js';
 
 export const SEMANTIC_TOKEN_TYPES = [
   'comment',
@@ -28,16 +37,31 @@ export function computeSemanticTokens(source: string): SemanticToken[] {
   const occupiedSpans = [...commentSpans];
 
   for (const commentSpan of commentSpans) {
-    tokens.push(createOffsetToken({ lineStarts: parsedDocument.lineStarts, startOffset: commentSpan.startOffset, endOffset: commentSpan.endOffset, tokenType: 'comment' }));
+    tokens.push(
+      createOffsetToken({
+        lineStarts: parsedDocument.lineStarts,
+        startOffset: commentSpan.startOffset,
+        endOffset: commentSpan.endOffset,
+        tokenType: 'comment',
+      }),
+    );
   }
 
   for (const clause of parsedDocument.clauses) {
     addOccurrenceTokens({ clause, lineStarts: parsedDocument.lineStarts, tokens, occupiedSpans });
     addFieldTokens({ clause, lineStarts: parsedDocument.lineStarts, tokens, occupiedSpans });
-    addReferenceTokens({ clause, lineStarts: parsedDocument.lineStarts, tokens, occupiedSpans, commentSpans });
+    addReferenceTokens({
+      clause,
+      lineStarts: parsedDocument.lineStarts,
+      tokens,
+      occupiedSpans,
+      commentSpans,
+    });
   }
 
-  tokens.push(...collectVariableTokens({ source, lineStarts: parsedDocument.lineStarts, occupiedSpans }));
+  tokens.push(
+    ...collectVariableTokens({ source, lineStarts: parsedDocument.lineStarts, occupiedSpans }),
+  );
   return sortSemanticTokens(dedupeSemanticTokens(tokens));
 }
 
@@ -50,7 +74,13 @@ export function encodeSemanticTokens(tokens: readonly SemanticToken[]): number[]
   for (const token of tokens) {
     const deltaLine = token.line - previousLine;
     const deltaStart = deltaLine === 0 ? token.startChar - previousCharacter : token.startChar;
-    encoded.push(deltaLine, deltaStart, token.length, SEMANTIC_TOKEN_TYPES.indexOf(token.tokenType), encodeModifiers(token.tokenModifiers ?? []));
+    encoded.push(
+      deltaLine,
+      deltaStart,
+      token.length,
+      SEMANTIC_TOKEN_TYPES.indexOf(token.tokenType),
+      encodeModifiers(token.tokenModifiers ?? []),
+    );
     previousLine = token.line;
     previousCharacter = token.startChar;
   }
@@ -65,9 +95,10 @@ function addOccurrenceTokens(input: {
   readonly occupiedSpans: Array<ReturnType<typeof rangeToOffsetSpan>>;
 }): void {
   for (const occurrence of input.clause.occurrences) {
-    const tokenModifiers = occurrence.kind === 'head' && !BUILTIN_PREDICATE_NAMES.has(occurrence.name)
-      ? ['definition'] satisfies Array<(typeof SEMANTIC_TOKEN_MODIFIERS)[number]>
-      : [];
+    const tokenModifiers =
+      occurrence.kind === 'head' && !BUILTIN_PREDICATE_NAMES.has(occurrence.name)
+        ? (['definition'] satisfies Array<(typeof SEMANTIC_TOKEN_MODIFIERS)[number]>)
+        : [];
 
     input.tokens.push({
       line: occurrence.range.start.line,
