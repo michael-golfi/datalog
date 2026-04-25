@@ -5,12 +5,8 @@ import type {
   Range,
 } from '@datalog/parser';
 
-import type {
-  DatalogWorkspaceDocument,
-  DatalogWorkspaceNodeSummaryTarget,
-  DatalogWorkspacePredicateDefinition,
-  DatalogWorkspacePredicateSchemaTarget,
-} from './datalog-workspace-index.js';
+import type { DatalogWorkspaceDocument } from './load-datalog-workspace-documents.js';
+import type { DatalogWorkspaceNodeSummaryTarget, DatalogWorkspacePredicateDefinition } from './datalog-workspace-index.js';
 
 /** Check whether `filePath` is at or beneath `workspaceRootPath`, handling both POSIX and Windows separators. */
 export function isPathInsideWorkspaceRoot(options: {
@@ -67,7 +63,7 @@ function getDocumentPredicateDefinitions(
       continue;
     }
 
-    for (const occurrence of predicate.occurrences.filter((candidate) => candidate.kind === 'head')) {
+    for (const occurrence of predicate.occurrences.filter((candidate: typeof predicate.occurrences[number]) => candidate.kind === 'head')) {
       definitions.push({
         uri: document.uri,
         identity: predicate.identity,
@@ -95,32 +91,6 @@ export function buildGraphPredicateIds(documents: readonly DatalogWorkspaceDocum
   return [...new Set(
     documents.flatMap((document) => document.parsedDocument.graphPredicateIds),
   )].sort((left, right) => left.localeCompare(right));
-}
-
-/** Collect predicate schema definitions across documents, keyed by graph predicate ID. */
-export function buildPredicateSchemaTargets(
-  documents: readonly DatalogWorkspaceDocument[],
-): Map<string, readonly DatalogWorkspacePredicateSchemaTarget[]> {
-  const targetsByPredicateId = new Map<string, DatalogWorkspacePredicateSchemaTarget[]>();
-
-  for (const document of documents) {
-    for (const schema of document.parsedDocument.predicateSchemas.values()) {
-      const targets = targetsByPredicateId.get(schema.predicateId) ?? [];
-      targets.push({
-        uri: document.uri,
-        schema,
-        range: schema.range,
-      });
-      targetsByPredicateId.set(schema.predicateId, targets);
-    }
-  }
-
-  return new Map(
-    [...targetsByPredicateId.entries()].map(([predicateId, targets]) => [
-      predicateId,
-      targets.sort(comparePredicateSchemaTargets),
-    ]),
-  );
 }
 
 /** Collect graph node summaries across documents, keyed by graph node ID. */
@@ -152,40 +122,13 @@ export function buildNodeSummaryTargets(
 /** Collect deduplicated, sorted graph node IDs across all workspace documents. */
 export function buildGraphNodeIds(documents: readonly DatalogWorkspaceDocument[]): readonly string[] {
   return [...new Set(
-    documents.flatMap((document) => document.parsedDocument.datalogSymbols.graphNodes.map((graphNode) => graphNode.id)),
+    documents.flatMap((document) => document.parsedDocument.datalogSymbols.graphNodes.map((graphNode: typeof document.parsedDocument.datalogSymbols.graphNodes[number]) => graphNode.id)),
   )].sort((left, right) => left.localeCompare(right));
-}
-
-/** Index compound field names by their parent predicate, deduplicated and sorted. */
-export function buildCompoundFieldNames(documents: readonly DatalogWorkspaceDocument[]): Map<string, readonly string[]> {
-  const fieldNamesByPredicate = new Map<string, Set<string>>();
-
-  for (const document of documents) {
-    for (const field of document.parsedDocument.datalogSymbols.compoundFields) {
-      const fieldNames = fieldNamesByPredicate.get(field.predicateName) ?? new Set<string>();
-      fieldNames.add(field.fieldName);
-      fieldNamesByPredicate.set(field.predicateName, fieldNames);
-    }
-  }
-
-  return new Map(
-    [...fieldNamesByPredicate.entries()].map(([predicateName, fieldNames]) => [
-      predicateName,
-      [...fieldNames].sort((left, right) => left.localeCompare(right)),
-    ]),
-  );
 }
 
 function comparePredicateDefinitions(
   left: DatalogWorkspacePredicateDefinition,
   right: DatalogWorkspacePredicateDefinition,
-): number {
-  return left.uri.localeCompare(right.uri) || compareRanges(left.range, right.range);
-}
-
-function comparePredicateSchemaTargets(
-  left: DatalogWorkspacePredicateSchemaTarget,
-  right: DatalogWorkspacePredicateSchemaTarget,
 ): number {
   return left.uri.localeCompare(right.uri) || compareRanges(left.range, right.range);
 }
