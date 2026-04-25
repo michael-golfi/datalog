@@ -2,11 +2,62 @@ import { queryStatement } from '@datalog/ast';
 import { describe, expect, it } from 'vitest';
 
 import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
+import { defineExternalResolverDefinition } from '../contracts/external-resolver-definition.js';
+import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 
 import { createSelectFactsOperationFromDatalogQuery } from './create-select-facts-operation-from-datalog-query.js';
+import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from './default-graph-predicate-catalog.js';
+
+const SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE = {
+  version: 1,
+  predicates: [
+    ...DEFAULT_SELECT_FACTS_PREDICATE_CATALOG.predicates,
+    {
+      signature: {
+        name: 'crmAccount',
+        arity: 2,
+        kind: 'edb',
+        outputTypes: ['text', 'text'],
+      },
+      source: 'catalog',
+      columns: [
+        { name: 'account_id', ordinal: 0, type: 'text' },
+        { name: 'account_name', ordinal: 1, type: 'text' },
+      ],
+      execution: {
+        kind: 'external-resolver',
+        resolver: defineExternalResolverDefinition({
+          version: 1,
+          provider: 'crm-api',
+          mode: 'materialize_before_sql',
+          keyColumns: ['account_id'],
+          requestScopedDedupe: 'by-key',
+          expectedRowShape: 'values-by-column',
+          materializeRows: () => ({ ok: true, value: [] }),
+        }),
+      },
+      constraints: [],
+      indexes: [],
+      capabilities: {
+        readable: true,
+        writable: false,
+        supportsPredicatePushdown: false,
+        supportsJoinPushdown: false,
+        supportsAggregationPushdown: false,
+        supportsRecursionSeedPushdown: false,
+        supportsDeltaScan: false,
+      },
+    },
+  ],
+  aliases: {
+    Vertex: 'vertex',
+    Node: 'vertex',
+    Edge: 'edge',
+  },
+} satisfies PredicateCatalog;
 
 describe('createSelectFactsOperationFromDatalogQuery', () => {
-  it('maps a single Vertex atom into a select-facts vertex pattern', () => {
+  it('catalog-driven graph predicates compile through the explicit catalog path', () => {
     const query = queryStatement({
       body: [
         {
@@ -22,21 +73,24 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
       ],
     });
 
-    expect(createSelectFactsOperationFromDatalogQuery(query)).toEqual({
+    expect(createSelectFactsOperationFromDatalogQuery(query, SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE)).toEqual({
       kind: 'select-facts',
       match: [
         {
-          kind: 'vertex',
-          id: {
-            kind: 'variable',
-            name: 'person',
-          },
+          kind: 'predicate',
+          predicate: 'vertex',
+          terms: [
+            {
+              kind: 'variable',
+              name: 'person',
+            },
+          ],
         },
       ],
     });
   });
 
-  it('preserves repeated variable bindings across multiple graph patterns', () => {
+  it('preserves repeated variable bindings across multiple catalog-driven graph patterns', () => {
     const query = queryStatement({
       body: [
         {
@@ -78,38 +132,85 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
       ],
     });
 
-    expect(createSelectFactsOperationFromDatalogQuery(query)).toEqual({
+    expect(createSelectFactsOperationFromDatalogQuery(query, SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE)).toEqual({
       kind: 'select-facts',
       match: [
         {
-          kind: 'edge',
-          subject: {
-            kind: 'variable',
-            name: 'person',
-          },
-          predicate: {
-            kind: 'constant',
-            value: 'graph/likes',
-          },
-          object: {
-            kind: 'variable',
-            name: 'friend',
-          },
+          kind: 'predicate',
+          predicate: 'edge',
+          terms: [
+            {
+              kind: 'variable',
+              name: 'person',
+            },
+            {
+              kind: 'constant',
+              value: 'graph/likes',
+            },
+            {
+              kind: 'variable',
+              name: 'friend',
+            },
+          ],
         },
         {
-          kind: 'edge',
-          subject: {
-            kind: 'variable',
-            name: 'friend',
-          },
-          predicate: {
-            kind: 'constant',
-            value: 'graph/works-with',
-          },
-          object: {
-            kind: 'variable',
-            name: 'person',
-          },
+          kind: 'predicate',
+          predicate: 'edge',
+          terms: [
+            {
+              kind: 'variable',
+              name: 'friend',
+            },
+            {
+              kind: 'constant',
+              value: 'graph/works-with',
+            },
+            {
+              kind: 'variable',
+              name: 'person',
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('catalog-driven external predicates compile into select-facts operations', () => {
+    const query = queryStatement({
+      body: [
+        {
+          kind: 'atom',
+          predicate: 'crmAccount',
+          terms: [
+            {
+              kind: 'variable',
+              name: 'accountId',
+            },
+            {
+              kind: 'variable',
+              name: 'accountName',
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(createSelectFactsOperationFromDatalogQuery(query, SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE)).toEqual({
+      kind: 'select-facts',
+      match: [
+        {
+          kind: 'predicate',
+          predicate: 'crmAccount',
+          terms: [
+            {
+              kind: 'variable',
+              name: 'accountId',
+            },
+            {
+              kind: 'variable',
+              name: 'accountName',
+            },
+          ],
         },
       ],
     });
@@ -135,11 +236,11 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
       ],
     });
 
-    expect(() => createSelectFactsOperationFromDatalogQuery(query)).toThrowError(
+    expect(() => createSelectFactsOperationFromDatalogQuery(query, SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE)).toThrowError(
       expect.objectContaining<Partial<GraphTranslationError>>({
         name: 'GraphTranslationError',
-        code: 'datalog-to-sql.query.unsupported-atom',
-        message: 'Select-facts queries only support Edge/3 and Vertex/1 graph atoms, received Likes/2.',
+        code: 'UNSUPPORTED_GRAPH_PREDICATE',
+        message: 'Unsupported graph predicate Likes/2.',
       }),
     );
   });
@@ -149,12 +250,12 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
       createSelectFactsOperationFromDatalogQuery({
         kind: 'query',
         body: [] as unknown as Parameters<typeof createSelectFactsOperationFromDatalogQuery>[0]['body'],
-      }),
+      }, SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE),
     ).toThrowError(
       expect.objectContaining<Partial<GraphTranslationError>>({
         name: 'GraphTranslationError',
         code: 'datalog-to-sql.query.empty-body',
-        message: 'Select-facts queries require at least one graph atom.',
+        message: 'Select-facts queries require at least one atom.',
       }),
     );
   });
@@ -177,11 +278,11 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
       ] as unknown as Parameters<typeof queryStatement>[0]['body'],
     });
 
-    expect(() => createSelectFactsOperationFromDatalogQuery(query)).toThrowError(
+    expect(() => createSelectFactsOperationFromDatalogQuery(query, SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE)).toThrowError(
       expect.objectContaining<Partial<GraphTranslationError>>({
         name: 'GraphTranslationError',
         code: 'datalog-to-sql.query.unsupported-literal',
-        message: 'Select-facts queries only support graph atom literals.',
+        message: 'Select-facts queries only support positive atom literals.',
       }),
     );
   });
@@ -206,11 +307,11 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
       ] as unknown as Parameters<typeof queryStatement>[0]['body'],
     });
 
-    expect(() => createSelectFactsOperationFromDatalogQuery(query)).toThrowError(
+    expect(() => createSelectFactsOperationFromDatalogQuery(query, SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE)).toThrowError(
       expect.objectContaining<Partial<GraphTranslationError>>({
         name: 'GraphTranslationError',
         code: 'datalog-to-sql.query.unsupported-term',
-        message: 'Select-facts queries do not support named graph terms.',
+        message: 'Select-facts queries do not support named terms.',
       }),
     );
   });
