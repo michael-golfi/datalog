@@ -1,5 +1,7 @@
+import { defPredSchema } from '@datalog/ast';
 import {
   applyDatalogFacts,
+  buildPredicateCatalogFromSchema,
   createSelectFactsOperationFromDatalogQuery,
 } from '@datalog/datalog-to-sql';
 import { parseDatalogQuery } from '@datalog/parser';
@@ -74,6 +76,29 @@ export interface OntologyGraphRagLiveRetrievalFixture extends OntologyLivePostgr
 }
 
 const COLUMN_EVIDENCE_ID = createColumnSource('evidence_id');
+const GRAPH_QUERY_PREDICATE_CATALOG = buildPredicateCatalogFromSchema([
+  defPredSchema({
+    predicateName: 'Edge',
+    subjectCardinality: '*',
+    subjectDomain: 'node',
+    objectCardinality: '*',
+    objectDomain: 'node',
+  }),
+  defPredSchema({
+    predicateName: 'Vertex',
+    subjectCardinality: '*',
+    subjectDomain: 'node',
+    objectCardinality: '*',
+    objectDomain: 'node',
+  }),
+  defPredSchema({
+    predicateName: 'Node',
+    subjectCardinality: '*',
+    subjectDomain: 'node',
+    objectCardinality: '*',
+    objectDomain: 'node',
+  }),
+]);
 
 const pregnancyLisinoprilHypertensionQuerySpecs = [
   createEvidenceNodeSpec({
@@ -212,7 +237,7 @@ export async function retrieveLiveGraphRagScenarioEvidence(
     for (const spec of querySpecs) {
       const rows = await executeOntologyGraphQuery<LiveGraphRagEvidenceRow>(
         sql,
-        createSelectFactsOperationFromDatalogQuery(parseDatalogQuery(spec.querySource)),
+        createSelectFactsOperationFromDatalogQuery(parseDatalogQuery(spec.querySource), GRAPH_QUERY_PREDICATE_CATALOG),
       );
 
       for (const row of rows) {
