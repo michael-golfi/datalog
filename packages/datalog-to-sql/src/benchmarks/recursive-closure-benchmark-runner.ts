@@ -1,14 +1,15 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { applyDatalogFacts } from '../execution/apply-datalog-facts.js';
 import { createRecursiveClosureBenchmarkFixture } from './create-recursive-closure-benchmark-fixture.js';
-import { createPostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
-import { executeTranslatedSql } from '../execution/execute-translated-sql.js';
 import {
   DEFAULT_RECURSIVE_CLOSURE_BENCHMARK_CONTRACT,
   type RecursiveClosureBenchmarkContract,
 } from './recursive-closure-benchmark-contract.js';
+import { validateRecursiveClosureBenchmark } from './validate-recursive-closure-benchmark.js';
+import { applyDatalogFacts } from '../execution/apply-datalog-facts.js';
+import { executeTranslatedSql } from '../execution/execute-translated-sql.js';
+import { createPostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
 import {
   initializeGraphSchema,
   readExecutionTime,
@@ -16,9 +17,10 @@ import {
   startRecursiveClosurePostgresRuntime,
   waitForPostgres,
 } from '../runtime/recursive-closure-postgres-runtime.js';
-import type { TranslatedSqlQuery } from '../contracts/translated-sql-query.js';
 import { translateSelectRecursiveClosureCount } from '../translation/translate-select-recursive-closure-count.js';
-import { validateRecursiveClosureBenchmark } from './validate-recursive-closure-benchmark.js';
+
+import type { TranslatedSqlQuery } from '../contracts/translated-sql-query.js';
+
 
 export interface RunRecursiveClosureBenchmarkOptions {
   readonly validate: boolean;
