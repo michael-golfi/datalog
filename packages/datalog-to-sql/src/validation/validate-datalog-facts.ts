@@ -24,7 +24,7 @@ export function validateDatalogFacts(facts: readonly DatalogFact[], mode: 'inser
 }
 
 function assertIdentifier(value: string, mode: 'insert' | 'delete'): void {
-  if (value.trim().length > 0) {
+  if (typeof value === 'string' && value.trim().length > 0) {
     return;
   }
 
