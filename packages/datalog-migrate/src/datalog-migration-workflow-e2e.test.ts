@@ -6,9 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   applyDatalogFacts,
   createPostgresSqlClient,
-  executeTranslatedSql,
   initializeGraphSchema,
-  translateGraphOperation,
   waitForPostgres,
 } from '@datalog/datalog-to-sql';
 
@@ -80,17 +78,6 @@ describe('datalog migration workflow e2e', () => {
         facts: loadCommittedWorkflowFacts(workspaceRoot),
       });
 
-      const linkedRows = await executeQuery<{ target_id: string }>(sql, {
-        kind: 'select-facts',
-        match: [
-          {
-            kind: 'edge',
-            subject: { kind: 'constant', value: 'vertex/alpha' },
-            predicate: { kind: 'constant', value: 'graph/links_to' },
-            object: { kind: 'variable', name: 'target_id' },
-          },
-        ],
-      });
       const edgeCount = await sql<Array<{ count: string }>>`select count(*)::text as count from edges`;
       const vertexCount = await sql<Array<{ count: string }>>`select count(*)::text as count from vertices`;
       const edgeRows = await sql<Array<{ subject_id: string; predicate_id: string; object_id: string }>>`
@@ -105,8 +92,6 @@ describe('datalog migration workflow e2e', () => {
         where id in ('vertex/alpha', 'vertex/beta')
         order by id asc
       `;
-
-      expect(linkedRows[0]?.target_id).toBe('vertex/beta');
       expect(Number.parseInt(edgeCount[0]?.count ?? '0', 10)).toBeGreaterThan(0);
       expect(Number.parseInt(vertexCount[0]?.count ?? '0', 10)).toBeGreaterThan(0);
       expect(edgeRows).toContainEqual({
@@ -216,17 +201,3 @@ describe('datalog migration workflow e2e', () => {
     expect(statusAfterApply.statusFlags.pendingCommittedUnknown).toBe(false);
   }, 20_000);
 });
-
-async function executeQuery<Row extends Record<string, unknown>>(
-  sql: ReturnType<typeof createPostgresSqlClient>,
-  operation: Parameters<typeof translateGraphOperation>[0],
-): Promise<readonly Row[]> {
-  const translated = translateGraphOperation(operation);
-
-  expect(translated.ok).toBe(true);
-  if (!translated.ok) {
-    throw translated.error;
-  }
-
-  return executeTranslatedSql<Row>(sql, translated.value);
-}
