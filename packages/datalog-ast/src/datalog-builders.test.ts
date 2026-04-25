@@ -4,7 +4,9 @@ import {
   atom,
   comparison,
   constantTerm,
+  directiveStatement,
   factStatement,
+  functionCall,
   namedTerm,
   negatedAtom,
   position,
@@ -131,6 +133,97 @@ describe('datalog builders', () => {
       kind: 'program',
       sourceName: 'likes.dl',
       statements: [fact, rule, query],
+    });
+  });
+
+  it('builds function calls and directives with empty argument lists when needed', () => {
+    const call = functionCall({
+      name: 'json_extract_path_text',
+      args: [],
+      returns: 'text',
+      location: sourceLocation({ sourceName: 'functions.dl' }),
+    });
+    const directive = directiveStatement({
+      name: 'pragma',
+      args: [],
+    });
+
+    expect(call).toEqual({
+      kind: 'function',
+      name: 'json_extract_path_text',
+      args: [],
+      returns: 'text',
+      location: { sourceName: 'functions.dl' },
+    });
+    expect(directive).toEqual({
+      kind: 'directive',
+      name: 'pragma',
+      args: [],
+    });
+  });
+
+  it('clones builder-owned arrays and annotation maps instead of reusing caller references', () => {
+    const atomTerms = [variableTerm('X')];
+    const callArgs = [constantTerm('segment')];
+    const directiveArgs = ['strict', 1, false, null] as const;
+    const statements = [factStatement(atom('seed', [constantTerm('alice')]))];
+    const annotations = {
+      emptyText: '',
+      retries: 0,
+      enabled: false,
+    };
+
+    const builtAtom = atom('path', atomTerms);
+    const builtCall = functionCall({
+      name: 'lower',
+      args: callArgs,
+    });
+    const builtDirective = directiveStatement({
+      name: 'pragma',
+      args: directiveArgs,
+    });
+    const builtRule = ruleStatement({
+      head: atom('path', [variableTerm('X')]),
+      body: [atom('path', [variableTerm('X')])],
+      annotations,
+    });
+    const builtProgram = program({ statements });
+
+    atomTerms.push(variableTerm('Y'));
+    callArgs.push(constantTerm('extra'));
+    statements.push(factStatement(atom('seed', [constantTerm('bob')])));
+    annotations.enabled = true;
+    annotations.retries = 2;
+
+    expect(builtAtom.terms).toEqual([{ kind: 'variable', name: 'X' }]);
+    expect(builtAtom.terms).not.toBe(atomTerms);
+    expect(builtCall.args).toEqual([{ kind: 'constant', value: 'segment' }]);
+    expect(builtCall.args).not.toBe(callArgs);
+    expect(builtDirective.args).toEqual(['strict', 1, false, null]);
+    expect(builtDirective.args).not.toBe(directiveArgs);
+    expect(builtRule.annotations).toEqual({
+      emptyText: '',
+      retries: 0,
+      enabled: false,
+    });
+    expect(builtRule.annotations).not.toBe(annotations);
+    expect(builtProgram.statements).toHaveLength(1);
+    expect(builtProgram.statements).not.toBe(statements);
+  });
+
+  it('preserves empty annotations and empty statement lists without inventing defaults', () => {
+    const head = atom('reachable', [variableTerm('X')]);
+    const rule = ruleStatement({
+      head,
+      body: [head],
+      annotations: {},
+    });
+    const astProgram = program({ statements: [] });
+
+    expect(rule.annotations).toEqual({});
+    expect(astProgram).toEqual({
+      kind: 'program',
+      statements: [],
     });
   });
 });
