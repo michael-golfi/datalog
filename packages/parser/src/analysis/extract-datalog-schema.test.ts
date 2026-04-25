@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ParsedClause } from '../contracts/parsed-document.js';
-import { classifyReferenceRole } from '../semantics/reference-role-classifier.js';
-import { computeLineStarts } from '../syntax/line-starts.js';
-import { parseClause } from '../syntax/parse-clause.js';
-import { splitStatements } from '../syntax/split-statements.js';
-
 import {
   extractDatalogSchema,
   extractDefCompoundSchemas,
   extractDefPredSchema,
 } from './extract-datalog-schema.js';
+import { classifyReferenceRole } from '../semantics/reference-role-classifier.js';
+import { computeLineStarts } from '../syntax/line-starts.js';
+import { parseClause } from '../syntax/parse-clause.js';
+import { splitStatements } from '../syntax/split-statements.js';
+
+import type { ParsedClause } from '../contracts/parsed-document.js';
 
 describe('extractDatalogSchema', () => {
   it('extracts a typed predicate schema from DefPred clauses', () => {

@@ -1,7 +1,7 @@
 import type { DatalogSchema } from '@datalog/ast';
 
-import type { Range } from './position.js';
 import type { DatalogSymbols } from './datalog-symbol-identity.js';
+import type { Range } from './position.js';
 
 export interface NodeSummary {
   readonly id: string;

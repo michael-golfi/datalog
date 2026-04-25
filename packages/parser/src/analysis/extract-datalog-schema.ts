@@ -1,11 +1,4 @@
-import {
-  defPredSchema,
-} from '@datalog/ast';
-
-import type {
-  ParsedClause,
-  ParsedSchemaDeclaration,
-} from '../contracts/parsed-document.js';
+import { defPredSchema } from '@datalog/ast';
 
 import {
   createDefCompoundSchemaEntry,
@@ -13,6 +6,11 @@ import {
   normalizeDefPredSchema,
   type CompoundSchemaEntry,
 } from './extract-datalog-schema-helpers.js';
+
+import type {
+  ParsedClause,
+  ParsedSchemaDeclaration,
+} from '../contracts/parsed-document.js';
 
 /** Extract predicate and compound schema declarations from parsed clauses. */
 export function extractDatalogSchema(clauses: readonly ParsedClause[]): readonly ParsedSchemaDeclaration[] {
