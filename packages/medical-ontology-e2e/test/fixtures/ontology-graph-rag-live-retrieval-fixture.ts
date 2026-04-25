@@ -11,13 +11,14 @@ import {
   type GraphRagEvidence,
   type GraphRagEvidenceType,
 } from './ontology-graph-rag-evidence-fixture.js';
-import type { GraphRagScenario } from './ontology-graph-rag-scenarios-fixture.js';
 import {
   createOntologyLivePostgresProofFixture,
   executeOntologyGraphQuery,
   type OntologyLivePostgresProofFixture,
 } from './ontology-live-postgres-proof-fixture.js';
 import { extractOntologyFactsFromSource } from './ontology-migration-fact-extraction-fixture.js';
+
+import type { GraphRagScenario } from './ontology-graph-rag-scenarios-fixture.js';
 
 type GraphRagRetrievableEvidenceType = Exclude<GraphRagEvidenceType, 'label'>;
 

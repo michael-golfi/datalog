@@ -1,15 +1,16 @@
 import OpenAI from 'openai';
 import { z } from 'zod';
 
+import {
+  sortEvidenceRecords,
+  type GraphRagEvidence,
+} from './ontology-graph-rag-evidence-fixture.js';
+
 import type {
   GraphRagLlmClient,
   GraphRagLlmInput,
   GraphRagLlmOutput,
 } from './ontology-graph-rag-agent-fixture.js';
-import {
-  sortEvidenceRecords,
-  type GraphRagEvidence,
-} from './ontology-graph-rag-evidence-fixture.js';
 
 const DEFAULT_OPENAI_MODEL = 'gpt-4o-mini';
 

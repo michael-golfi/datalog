@@ -3,6 +3,7 @@ import {
   type EvidenceValidationResult,
   type GraphRagEvidence,
 } from './ontology-graph-rag-evidence-fixture.js';
+
 import type { GraphRagScenario } from './ontology-graph-rag-scenarios-fixture.js';
 
 export interface GraphRagLlmInput {

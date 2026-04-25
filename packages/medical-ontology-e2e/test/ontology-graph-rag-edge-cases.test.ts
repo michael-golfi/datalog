@@ -5,11 +5,12 @@ import {
   type GraphRagLlmClient,
   type GraphRagLlmOutput,
 } from './fixtures/ontology-graph-rag-agent-fixture.js';
-import type { GraphRagEvidence } from './fixtures/ontology-graph-rag-evidence-fixture.js';
 import {
   ckdHeartFailureIbuprofenScenario,
   pregnancyLisinoprilHypertensionScenario,
 } from './fixtures/ontology-graph-rag-scenarios-fixture.js';
+
+import type { GraphRagEvidence } from './fixtures/ontology-graph-rag-evidence-fixture.js';
 
 describe('ontology graph rag edge cases', () => {
   describe('insufficient evidence short-circuits', () => {
