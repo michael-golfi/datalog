@@ -1,9 +1,5 @@
 import type { DatalogQueryStatement } from '@datalog/ast';
 
-import { GraphTranslationError } from '../contracts/graph-translation-error.js';
-import type { LogicalPlan, LogicalPlanNode } from '../contracts/logical-plan.js';
-import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
-import type { ExternalPredicateBinding, PredicateCatalog } from '../contracts/predicate-catalog.js';
 import {
   addPatternVariables,
   getKeyColumnTerm,
@@ -12,6 +8,11 @@ import {
   isExternalPredicateBinding,
   isMaterializationKeyBound,
 } from './external-select-facts-pattern-support.js';
+import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
+import type { LogicalPlan, LogicalPlanNode } from '../contracts/logical-plan.js';
+import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
+import type { ExternalPredicateBinding, PredicateCatalog } from '../contracts/predicate-catalog.js';
 
 const EXTERNAL_SELECT_FACTS_UNSUPPORTED_NEGATION = 'EXTERNAL_SELECT_FACTS_UNSUPPORTED_NEGATION';
 const EXTERNAL_SELECT_FACTS_UNSUPPORTED_AGGREGATE = 'EXTERNAL_SELECT_FACTS_UNSUPPORTED_AGGREGATE';

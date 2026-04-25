@@ -1,15 +1,17 @@
-import { queryStatement } from '@datalog/ast';
 import { describe, expect, it } from 'vitest';
 
-import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
+import { queryStatement } from '@datalog/ast';
+
+import { validateExternalSelectFactsExecution } from './validate-external-select-facts-execution.js';
 import { defineExternalResolverDefinition } from '../contracts/external-resolver-definition.js';
+import { prepareSelectFactsExecution } from '../execution/prepare-select-facts-execution.js';
+import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from '../translation/default-graph-predicate-catalog.js';
+
+import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 import type { LogicalPlan, LogicalPlanNode, OutputColumn } from '../contracts/logical-plan.js';
 import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
 import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
-import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from '../translation/default-graph-predicate-catalog.js';
-import { prepareSelectFactsExecution } from '../execution/prepare-select-facts-execution.js';
 
-import { validateExternalSelectFactsExecution } from './validate-external-select-facts-execution.js';
 
 const EXTERNAL_VALIDATION_TEST_CATALOG = {
   version: 1,
@@ -272,6 +274,7 @@ describe('validateExternalSelectFactsExecution', () => {
 function createExternalSelectFactsOperation(): SelectFactsOperation {
   return {
     kind: 'select-facts',
+    predicateCatalog: EXTERNAL_VALIDATION_TEST_CATALOG,
     match: [
       {
         kind: 'predicate',

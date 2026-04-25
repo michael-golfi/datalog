@@ -1,9 +1,10 @@
 import type { DatalogLiteral, DatalogTerm } from '@datalog/ast';
 
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+import { getPredicateColumns } from '../contracts/predicate-catalog.js';
+
 import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
 import type { ExternalPredicateBinding, PredicateBinding, PredicateCatalog } from '../contracts/predicate-catalog.js';
-import { getPredicateColumns } from '../contracts/predicate-catalog.js';
 
 /** Resolve whether a query literal targets an external predicate binding. */
 export function isExternalLiteral(literal: DatalogLiteral, catalog: PredicateCatalog): boolean {
