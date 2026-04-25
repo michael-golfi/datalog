@@ -1,27 +1,15 @@
 import { offsetToPosition, positionToOffset } from '@datalog/parser';
 
+import { collectCommentSpans as collectCommentSourceSpans } from './semantic-token-comment-spans.js';
+
+import type { SourceSpan as CommentSourceSpan } from './semantic-token-comment-spans.js';
 import type { SemanticToken } from './semantic-tokens.js';
 
-export interface SourceSpan {
-  readonly startOffset: number;
-  readonly endOffset: number;
-}
+export interface SourceSpan extends CommentSourceSpan {}
 
 /** Collect inline `%` comment spans while respecting quoted strings. */
 export function collectCommentSpans(source: string): SourceSpan[] {
-  const commentSpans: SourceSpan[] = [];
-  let inString = false;
-  let commentStart: number | null = null;
-
-  for (let index = 0; index < source.length; index += 1) {
-    ({ commentStart, inString } = scanCommentCharacter({ source, index, commentSpans, commentStart, inString }));
-  }
-
-  if (commentStart !== null) {
-    appendTrailingCommentSpan(commentSpans, commentStart, source.length);
-  }
-
-  return commentSpans;
+  return collectCommentSourceSpans(source);
 }
 
 /** Collect variable tokens that are not already occupied by parser-backed spans. */
@@ -38,13 +26,23 @@ export function collectVariableTokens(input: {
       continue;
     }
 
-    const span = { startOffset: tokenBounds.startOffset, endOffset: tokenBounds.endOffset } satisfies SourceSpan;
+    const span = {
+      startOffset: tokenBounds.startOffset,
+      endOffset: tokenBounds.endOffset,
+    } satisfies SourceSpan;
     if (shouldSkipVariableSpan(input.source, span, input.occupiedSpans)) {
       index = tokenBounds.endOffset - 1;
       continue;
     }
 
-    tokens.push(createOffsetToken({ lineStarts: input.lineStarts, startOffset: span.startOffset, endOffset: span.endOffset, tokenType: 'variable' }));
+    tokens.push(
+      createOffsetToken({
+        lineStarts: input.lineStarts,
+        startOffset: span.startOffset,
+        endOffset: span.endOffset,
+        tokenType: 'variable',
+      }),
+    );
     index = tokenBounds.endOffset - 1;
   }
 
@@ -62,7 +60,9 @@ export function dedupeSemanticTokens(tokens: readonly SemanticToken[]): Semantic
   const deduped: SemanticToken[] = [];
 
   for (const token of tokens) {
-    const key = `${token.line}:${token.startChar}:${token.length}:${token.tokenType}:${encodeModifiers(token.tokenModifiers ?? [])}`;
+    const key = `${token.line}:${token.startChar}:${token.length}:${
+      token.tokenType
+    }:${encodeModifiers(token.tokenModifiers ?? [])}`;
     if (seen.has(key)) {
       continue;
     }
@@ -101,12 +101,17 @@ export function rangeToOffsetSpan(
   },
   lineStarts: readonly number[],
 ): SourceSpan {
-  return { startOffset: positionToOffset(lineStarts, range.start), endOffset: positionToOffset(lineStarts, range.end) };
+  return {
+    startOffset: positionToOffset(lineStarts, range.start),
+    endOffset: positionToOffset(lineStarts, range.end),
+  };
 }
 
 /** Check whether a span overlaps any existing occupied spans. */
 export function spansOverlapAny(span: SourceSpan, otherSpans: readonly SourceSpan[]): boolean {
-  return otherSpans.some((otherSpan) => span.startOffset < otherSpan.endOffset && otherSpan.startOffset < span.endOffset);
+  return otherSpans.some(
+    (otherSpan) => span.startOffset < otherSpan.endOffset && otherSpan.startOffset < span.endOffset,
+  );
 }
 
 /** Encode semantic token modifiers into the LSP bitmask representation. */
@@ -122,50 +127,12 @@ const semanticTokenOrder: Record<SemanticToken['tokenType'], number> = {
   variable: 4,
 };
 
-function flushCommentSpan(options: {
-  readonly commentSpans: SourceSpan[];
-  readonly commentStart: number;
-  readonly index: number;
-  readonly character: string;
-}): number | null {
-  if (options.character !== '\n') {
-    return options.commentStart;
-  }
-
-  options.commentSpans.push({ startOffset: options.commentStart, endOffset: options.index });
-  return null;
-}
-
-function appendTrailingCommentSpan(
-  commentSpans: SourceSpan[],
-  commentStart: number,
-  sourceLength: number,
-): void {
-  commentSpans.push({ startOffset: commentStart, endOffset: sourceLength });
-}
-
-function scanCommentCharacter(options: {
-  readonly source: string;
-  readonly index: number;
-  readonly commentSpans: SourceSpan[];
-  readonly commentStart: number | null;
-  readonly inString: boolean;
-}): { readonly commentStart: number | null; readonly inString: boolean } {
-  const character = options.source[options.index] ?? '';
-  if (options.commentStart !== null) {
-    return { commentStart: flushCommentSpan({ commentSpans: options.commentSpans, commentStart: options.commentStart, index: options.index, character }), inString: options.inString };
-  }
-
-  if (isUnescapedQuote(options.source, options.index)) {
-    return { commentStart: null, inString: !options.inString };
-  }
-
-  return { commentStart: !options.inString && character === '%' ? options.index : null, inString: options.inString };
-}
-
 function getVariableTokenBounds(source: string, startOffset: number): SourceSpan | null {
   const character = source[startOffset];
-  if (!isVariableIdentifierStart(character) || isVariableIdentifierContinuation(source[startOffset - 1])) {
+  if (
+    !isVariableIdentifierStart(character) ||
+    isVariableIdentifierContinuation(source[startOffset - 1])
+  ) {
     return null;
   }
 
@@ -194,11 +161,13 @@ function shouldSkipVariableSpan(
 }
 
 function compareSemanticTokens(left: SemanticToken, right: SemanticToken): number {
-  return left.line - right.line
-    || left.startChar - right.startChar
-    || left.length - right.length
-    || semanticTokenOrder[left.tokenType] - semanticTokenOrder[right.tokenType]
-    || encodeModifiers(left.tokenModifiers ?? []) - encodeModifiers(right.tokenModifiers ?? []);
+  return (
+    left.line - right.line ||
+    left.startChar - right.startChar ||
+    left.length - right.length ||
+    semanticTokenOrder[left.tokenType] - semanticTokenOrder[right.tokenType] ||
+    encodeModifiers(left.tokenModifiers ?? []) - encodeModifiers(right.tokenModifiers ?? [])
+  );
 }
 
 function isPredicateCall(source: string, endOffset: number): boolean {
@@ -223,8 +192,4 @@ function isVariableIdentifierStart(character: string | undefined): boolean {
 
 function isVariableIdentifierContinuation(character: string | undefined): boolean {
   return character !== undefined && /[A-Za-z0-9_]/.test(character);
-}
-
-function isUnescapedQuote(text: string, index: number): boolean {
-  return text[index] === '"' && text[index - 1] !== '\\';
 }

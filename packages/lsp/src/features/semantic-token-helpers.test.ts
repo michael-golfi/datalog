@@ -1,7 +1,7 @@
-import { parseDocument } from '@datalog/parser';
 import { describe, expect, it } from 'vitest';
 
-import type { SemanticToken } from './semantic-tokens.js';
+import { parseDocument } from '@datalog/parser';
+
 import {
   collectCommentSpans,
   collectVariableTokens,
@@ -10,11 +10,11 @@ import {
   sortSemanticTokens,
 } from './semantic-token-helpers.js';
 
+import type { SemanticToken } from './semantic-tokens.js';
+
 describe('collectCommentSpans', () => {
   it('collects a single inline percent comment span', () => {
-    expect(collectCommentSpans('% comment')).toEqual([
-      { startOffset: 0, endOffset: 9 },
-    ]);
+    expect(collectCommentSpans('% comment')).toEqual([{ startOffset: 0, endOffset: 9 }]);
   });
 
   it('collects consecutive comment lines as distinct spans', () => {
@@ -38,16 +38,26 @@ describe('collectVariableTokens', () => {
     ].join('\n');
     const parsedDocument = parseDocument(source);
     const occupiedSpans = parsedDocument.clauses.flatMap((clause) => [
-      ...clause.occurrences.map((occurrence) => rangeToOffsetSpan(occurrence.range, parsedDocument.lineStarts)),
-      ...clause.references.map((reference) => rangeToOffsetSpan(reference.range, parsedDocument.lineStarts)),
-      ...clause.compoundFieldOccurrences.map((occurrence) => rangeToOffsetSpan(occurrence.range, parsedDocument.lineStarts)),
+      ...clause.occurrences.map((occurrence) =>
+        rangeToOffsetSpan(occurrence.range, parsedDocument.lineStarts),
+      ),
+      ...clause.references.map((reference) =>
+        rangeToOffsetSpan(reference.range, parsedDocument.lineStarts),
+      ),
+      ...clause.compoundFieldOccurrences.map((occurrence) =>
+        rangeToOffsetSpan(occurrence.range, parsedDocument.lineStarts),
+      ),
     ]);
 
-    expect(toTokenTuples(collectVariableTokens({
-      source,
-      lineStarts: parsedDocument.lineStarts,
-      occupiedSpans,
-    }))).toEqual([
+    expect(
+      toTokenTuples(
+        collectVariableTokens({
+          source,
+          lineStarts: parsedDocument.lineStarts,
+          occupiedSpans,
+        }),
+      ),
+    ).toEqual([
       [0, 5, 1, 'variable'],
       [0, 8, 10, 'variable'],
       [1, 7, 10, 'variable'],
@@ -59,11 +69,17 @@ describe('collectVariableTokens', () => {
     const source = 'Rule(X).';
     const parsedDocument = parseDocument(source);
 
-    expect(collectVariableTokens({
-      source,
-      lineStarts: parsedDocument.lineStarts,
-      occupiedSpans: parsedDocument.clauses.flatMap((clause) => clause.occurrences.map((occurrence) => rangeToOffsetSpan(occurrence.range, parsedDocument.lineStarts))),
-    })).toEqual([]);
+    expect(
+      collectVariableTokens({
+        source,
+        lineStarts: parsedDocument.lineStarts,
+        occupiedSpans: parsedDocument.clauses.flatMap((clause) =>
+          clause.occurrences.map((occurrence) =>
+            rangeToOffsetSpan(occurrence.range, parsedDocument.lineStarts),
+          ),
+        ),
+      }),
+    ).toEqual([]);
   });
 });
 
@@ -94,27 +110,18 @@ describe('dedupeSemanticTokens', () => {
       tokenType: 'variable',
     };
 
-    expect(dedupeSemanticTokens([
-      duplicateToken,
-      { ...duplicateToken },
-      { line: 1, startChar: 20, length: 4, tokenType: 'string' },
-    ])).toEqual([
-      duplicateToken,
-      { line: 1, startChar: 20, length: 4, tokenType: 'string' },
-    ]);
+    expect(
+      dedupeSemanticTokens([
+        duplicateToken,
+        { ...duplicateToken },
+        { line: 1, startChar: 20, length: 4, tokenType: 'string' },
+      ]),
+    ).toEqual([duplicateToken, { line: 1, startChar: 20, length: 4, tokenType: 'string' }]);
   });
 });
 
-function toTokenTuples(tokens: readonly SemanticToken[]): Array<[
-  number,
-  number,
-  number,
-  SemanticToken['tokenType'],
-]> {
-  return tokens.map((token) => [
-    token.line,
-    token.startChar,
-    token.length,
-    token.tokenType,
-  ]);
+function toTokenTuples(
+  tokens: readonly SemanticToken[],
+): Array<[number, number, number, SemanticToken['tokenType']]> {
+  return tokens.map((token) => [token.line, token.startChar, token.length, token.tokenType]);
 }
