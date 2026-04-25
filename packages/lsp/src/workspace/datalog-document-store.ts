@@ -20,6 +20,8 @@ export class DatalogDocumentStore {
   }
 
   getDocuments(): readonly DatalogTextDocumentSnapshot[] {
-    return [...this.#documentsByUri.values()].sort((left, right) => left.uri.localeCompare(right.uri));
+    return [...this.#documentsByUri.values()].sort((left, right) =>
+      left.uri.localeCompare(right.uri),
+    );
   }
 }

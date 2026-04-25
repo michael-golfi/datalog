@@ -1,11 +1,9 @@
-import type { Dirent } from 'node:fs';
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
-type ReadDir = (
-  directoryPath: string,
-  options: { withFileTypes: true },
-) => Promise<Dirent[]>;
+import type { Dirent } from 'node:fs';
+
+type ReadDir = (directoryPath: string, options: { withFileTypes: true }) => Promise<Dirent[]>;
 
 const IGNORED_DIRECTORY_NAMES = new Set([
   '.git',
@@ -82,7 +80,10 @@ async function collectWorkspaceEntry(
   }
 }
 
-async function readWorkspaceEntries(directoryPath: string, readDir: ReadDir): Promise<Dirent[] | null> {
+async function readWorkspaceEntries(
+  directoryPath: string,
+  readDir: ReadDir,
+): Promise<Dirent[] | null> {
   try {
     return await readDir(directoryPath, { withFileTypes: true });
   } catch (error) {
@@ -108,12 +109,14 @@ function isIgnoredWorkspacePath(relativePath: string): boolean {
 }
 
 function isSkippableWorkspaceFsError(error: unknown): boolean {
-  if (!(error instanceof Error) || !("code" in error)) {
+  if (!(error instanceof Error) || !('code' in error)) {
     return false;
   }
 
-  return error.code === 'ENOENT'
-    || error.code === 'ENOTDIR'
-    || error.code === 'EACCES'
-    || error.code === 'EPERM';
+  return (
+    error.code === 'ENOENT' ||
+    error.code === 'ENOTDIR' ||
+    error.code === 'EACCES' ||
+    error.code === 'EPERM'
+  );
 }

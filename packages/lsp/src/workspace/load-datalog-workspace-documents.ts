@@ -1,9 +1,9 @@
-import type { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 
 import type { ParsedDocument, parseDocument } from '@datalog/parser';
 
 import type { listDatalogWorkspaceFiles } from './datalog-workspace-files.js';
+import type { readFile } from 'node:fs/promises';
 
 export interface DatalogWorkspaceDocument {
   readonly uri: string;
@@ -23,29 +23,33 @@ export async function loadDatalogWorkspaceDocuments(options: {
   }
 
   const filePaths = await options.listWorkspaceFiles(options.workspaceRootPath);
-  const documents = await Promise.all(filePaths.map(async (filePath) => {
-    try {
-      const source = await options.readWorkspaceFile(filePath, 'utf8');
-      const uri = pathToFileURL(filePath).href;
+  const documents = await Promise.all(
+    filePaths.map(async (filePath) => {
+      try {
+        const source = await options.readWorkspaceFile(filePath, 'utf8');
+        const uri = pathToFileURL(filePath).href;
 
-      return [
-        uri,
-        {
+        return [
           uri,
-          source,
-          parsedDocument: options.parseWorkspaceDocument(source),
-        },
-      ] as const;
-    } catch (error) {
-      if (isSkippableWorkspaceFsError(error)) {
-        return null;
+          {
+            uri,
+            source,
+            parsedDocument: options.parseWorkspaceDocument(source),
+          },
+        ] as const;
+      } catch (error) {
+        if (isSkippableWorkspaceFsError(error)) {
+          return null;
+        }
+
+        throw error;
       }
+    }),
+  );
 
-      throw error;
-    }
-  }));
-
-  return new Map(documents.filter((document): document is NonNullable<typeof document> => document !== null));
+  return new Map(
+    documents.filter((document): document is NonNullable<typeof document> => document !== null),
+  );
 }
 
 function isSkippableWorkspaceFsError(error: unknown): boolean {
@@ -53,8 +57,10 @@ function isSkippableWorkspaceFsError(error: unknown): boolean {
     return false;
   }
 
-  return error.code === 'ENOENT'
-    || error.code === 'ENOTDIR'
-    || error.code === 'EACCES'
-    || error.code === 'EPERM';
+  return (
+    error.code === 'ENOENT' ||
+    error.code === 'ENOTDIR' ||
+    error.code === 'EACCES' ||
+    error.code === 'EPERM'
+  );
 }
