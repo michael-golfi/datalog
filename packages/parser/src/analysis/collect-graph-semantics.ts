@@ -1,17 +1,17 @@
-import type {
-  NodeSummary,
-  ParsedClause,
-  ParsedDocument,
-  ParsedSchemaDeclaration,
-} from '../contracts/parsed-document.js';
+import { extractDatalogSchema } from './extract-datalog-schema.js';
+import { createGraphClassNodeSummaryInput, createNodeSummary } from './node-summary.js';
 import {
   BUILTIN_PREDICATE_NAMES,
   GRAPH_CLASS_PREDICATE_NAMES,
   GRAPH_LABEL_PREDICATE,
 } from '../semantics/graph-vocabulary.js';
 
-import { createGraphClassNodeSummaryInput, createNodeSummary } from './node-summary.js';
-import { extractDatalogSchema } from './extract-datalog-schema.js';
+import type {
+  NodeSummary,
+  ParsedClause,
+  ParsedDocument,
+  ParsedSchemaDeclaration,
+} from '../contracts/parsed-document.js';
 
 type CollectedGraphSemantics = Omit<ParsedDocument, 'clauses' | 'datalogSymbols' | 'lineStarts'>;
 
