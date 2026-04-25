@@ -5,8 +5,8 @@ import { pathToFileURL } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-import { DATALOG_SAMPLE } from './datalog-sample.js';
 import { computeCompletions } from './completions.js';
+import { DATALOG_SAMPLE } from './datalog-sample.js';
 import { DatalogDocumentStore } from '../workspace/datalog-document-store.js';
 import { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
 
@@ -26,10 +26,14 @@ describe('computeCompletions', () => {
     const workspaceRoot = await mkdtemp(join(tmpdir(), 'datalog-completions-'));
 
     try {
-      await writeFile(join(workspaceRoot, 'workspace.dl'), [
-        'DefPred("food/workspace_only", "1", "class/WorkspaceSubject", "1", "class/WorkspaceObject").',
-        'DefPred("food/shared_predicate", "1", "class/WorkspaceSubject", "1", "class/WorkspaceObject").',
-      ].join('\n'), 'utf8');
+      await writeFile(
+        join(workspaceRoot, 'workspace.dl'),
+        [
+          'DefPred("food/workspace_only", "1", "class/WorkspaceSubject", "1", "class/WorkspaceObject").',
+          'DefPred("food/shared_predicate", "1", "class/WorkspaceSubject", "1", "class/WorkspaceObject").',
+        ].join('\n'),
+        'utf8',
+      );
 
       const workspaceIndex = new DatalogWorkspaceIndex({
         documentStore: new DatalogDocumentStore(),
@@ -37,23 +41,31 @@ describe('computeCompletions', () => {
       await workspaceIndex.setWorkspaceRootPath(workspaceRoot);
 
       const defPredSource = 'DefPred("food/';
-      const defPredItems = computeCompletions(defPredSource, {
-        line: 0,
-        character: defPredSource.length,
-      }, {
-        workspaceIndex,
-      });
+      const defPredItems = computeCompletions(
+        defPredSource,
+        {
+          line: 0,
+          character: defPredSource.length,
+        },
+        {
+          workspaceIndex,
+        },
+      );
 
       const edgeSource = [
         'DefPred("food/shared_predicate", "1", "class/LocalSubject", "1", "class/LocalObject").',
         'Edge("concept/local", "food/',
       ].join('\n');
-      const edgeItems = computeCompletions(edgeSource, {
-        line: 1,
-        character: 'Edge("concept/local", "food/'.length,
-      }, {
-        workspaceIndex,
-      });
+      const edgeItems = computeCompletions(
+        edgeSource,
+        {
+          line: 1,
+          character: 'Edge("concept/local", "food/'.length,
+        },
+        {
+          workspaceIndex,
+        },
+      );
       const edgeLabels = edgeItems.map((item) => item.label);
 
       expect(defPredItems.map((item) => item.label)).toContain('food/workspace_only');
@@ -81,10 +93,14 @@ describe('computeCompletions', () => {
     const workspaceRoot = await mkdtemp(join(tmpdir(), 'datalog-completions-'));
 
     try {
-      await writeFile(join(workspaceRoot, 'workspace.dl'), [
-        'Edge("class/WorkspaceSubject", "food/preferred_label", "Workspace subject").',
-        'Edge("class/WorkspaceObject", "food/preferred_label", "Workspace object").',
-      ].join('\n'), 'utf8');
+      await writeFile(
+        join(workspaceRoot, 'workspace.dl'),
+        [
+          'Edge("class/WorkspaceSubject", "food/preferred_label", "Workspace subject").',
+          'Edge("class/WorkspaceObject", "food/preferred_label", "Workspace object").',
+        ].join('\n'),
+        'utf8',
+      );
 
       const workspaceIndex = new DatalogWorkspaceIndex({
         documentStore: new DatalogDocumentStore(),
@@ -92,12 +108,16 @@ describe('computeCompletions', () => {
       await workspaceIndex.setWorkspaceRootPath(workspaceRoot);
 
       const source = 'Edge("class/';
-      const items = computeCompletions(source, {
-        line: 0,
-        character: source.length,
-      }, {
-        workspaceIndex,
-      });
+      const items = computeCompletions(
+        source,
+        {
+          line: 0,
+          character: source.length,
+        },
+        {
+          workspaceIndex,
+        },
+      );
 
       expect(items.map((item) => item.label)).toContain('class/WorkspaceSubject');
       expect(items.map((item) => item.label)).toContain('class/WorkspaceObject');
@@ -140,10 +160,14 @@ describe('computeCompletions', () => {
     const workspaceRoot = await mkdtemp(join(tmpdir(), 'datalog-completions-'));
 
     try {
-      await writeFile(join(workspaceRoot, 'schema.dl'), [
-        'DefCompound("Serving", "serv/id", "1", "liquid/node").',
-        'DefCompound("Serving", "serv/unit", "?", "liquid/string").',
-      ].join('\n'), 'utf8');
+      await writeFile(
+        join(workspaceRoot, 'schema.dl'),
+        [
+          'DefCompound("Serving", "serv/id", "1", "liquid/node").',
+          'DefCompound("Serving", "serv/unit", "?", "liquid/string").',
+        ].join('\n'),
+        'utf8',
+      );
 
       const workspaceIndex = new DatalogWorkspaceIndex({
         documentStore: new DatalogDocumentStore(),
@@ -151,12 +175,16 @@ describe('computeCompletions', () => {
       await workspaceIndex.setWorkspaceRootPath(workspaceRoot);
 
       const source = 'Serving@(serv/';
-      const items = computeCompletions(source, {
-        line: 0,
-        character: source.length,
-      }, {
-        workspaceIndex,
-      });
+      const items = computeCompletions(
+        source,
+        {
+          line: 0,
+          character: source.length,
+        },
+        {
+          workspaceIndex,
+        },
+      );
 
       expect(items.find((item) => item.label === 'serv/id=')).toMatchObject({
         detail: 'Compound field · node · 1',
@@ -173,10 +201,11 @@ describe('computeCompletions', () => {
     const workspaceRoot = await mkdtemp(join(tmpdir(), 'datalog-completions-'));
 
     try {
-      await writeFile(join(workspaceRoot, 'workspace.dl'), [
-        'WorkspaceOnly(child, parent).',
-        'ClassAncestor(left, right).',
-      ].join('\n'), 'utf8');
+      await writeFile(
+        join(workspaceRoot, 'workspace.dl'),
+        ['WorkspaceOnly(child, parent).', 'ClassAncestor(left, right).'].join('\n'),
+        'utf8',
+      );
 
       const workspaceIndex = new DatalogWorkspaceIndex({
         documentStore: new DatalogDocumentStore(),
@@ -188,12 +217,16 @@ describe('computeCompletions', () => {
         'ClassAncestor(local_child, local_parent).',
         'same_clause(X, Y) :- Cla',
       ].join('\n');
-      const items = computeCompletions(source, {
-        line: 2,
-        character: 'same_clause(X, Y) :- Cla'.length,
-      }, {
-        workspaceIndex,
-      });
+      const items = computeCompletions(
+        source,
+        {
+          line: 2,
+          character: 'same_clause(X, Y) :- Cla'.length,
+        },
+        {
+          workspaceIndex,
+        },
+      );
 
       expect(items.map((item) => item.label)).toEqual(['ClassAncestor']);
       expect(items[0]).toMatchObject({
@@ -201,12 +234,16 @@ describe('computeCompletions', () => {
         sortText: '0:predicate:user-predicate:ClassAncestor/2',
       });
 
-      const allItems = computeCompletions(source, {
-        line: 2,
-        character: 'same_clause(X, Y) :- '.length,
-      }, {
-        workspaceIndex,
-      });
+      const allItems = computeCompletions(
+        source,
+        {
+          line: 2,
+          character: 'same_clause(X, Y) :- '.length,
+        },
+        {
+          workspaceIndex,
+        },
+      );
 
       expect(allItems.map((item) => item.label)).toContain('WorkspaceOnly');
       expect(allItems.map((item) => item.label)).toContain('ClassAncestor');
@@ -251,20 +288,28 @@ describe('computeCompletions', () => {
       });
 
       const edgeSource = `${DATALOG_SAMPLE}\nEdge("concept/chickpea_bowl", "food/instance_of", "cla`;
-      const edgeItems = computeCompletions(edgeSource, {
-        line: edgeSource.split('\n').length - 1,
-        character: 'Edge("concept/chickpea_bowl", "food/instance_of", "cla'.length,
-      }, {
-        workspaceIndex,
-      });
+      const edgeItems = computeCompletions(
+        edgeSource,
+        {
+          line: edgeSource.split('\n').length - 1,
+          character: 'Edge("concept/chickpea_bowl", "food/instance_of", "cla'.length,
+        },
+        {
+          workspaceIndex,
+        },
+      );
 
       const defPredSource = `${DATALOG_SAMPLE}\nDefPred("food/new_predicate", "1", "cla`;
-      const defPredItems = computeCompletions(defPredSource, {
-        line: defPredSource.split('\n').length - 1,
-        character: 'DefPred("food/new_predicate", "1", "cla'.length,
-      }, {
-        workspaceIndex,
-      });
+      const defPredItems = computeCompletions(
+        defPredSource,
+        {
+          line: defPredSource.split('\n').length - 1,
+          character: 'DefPred("food/new_predicate", "1", "cla'.length,
+        },
+        {
+          workspaceIndex,
+        },
+      );
 
       expect(edgeItems.map((item) => item.label)).toContain('class/Thing');
       expect(edgeItems.map((item) => item.label)).toContain('class/FoodConcept');

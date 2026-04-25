@@ -1,9 +1,19 @@
 import { getCompoundSchemaDeclaration, parseDocument } from '@datalog/parser';
 
-import type { LanguageServerCompletionItem, Position } from '../contracts/language-feature-types.js';
-import type { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
-import { createCompoundFieldCompletions, createGraphPredicateCompletions, createNodeReferenceCompletions, createPredicateCompletions, createVariableCompletions } from './completion-items.js';
+import {
+  createCompoundFieldCompletions,
+  createGraphPredicateCompletions,
+  createNodeReferenceCompletions,
+  createPredicateCompletions,
+  createVariableCompletions,
+} from './completion-items.js';
 import { classifyCompletionSlot } from './completion-slots.js';
+
+import type {
+  LanguageServerCompletionItem,
+  Position,
+} from '../contracts/language-feature-types.js';
+import type { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
 
 export interface CompletionContext {
   readonly workspaceIndex?: DatalogWorkspaceIndex;
@@ -27,33 +37,65 @@ function getCompletionItemsForSlot(
   context: CompletionContext,
 ): LanguageServerCompletionItem[] {
   const prefix = 'prefix' in slot ? slot.prefix : '';
-  const localCompoundSchema = slot.kind === 'compound-field-key'
-    ? getCompoundSchemaDeclaration(parsed.schemaDeclarations, slot.predicateName)?.schema
-    : undefined;
 
-  return {
-    suppressed: (): LanguageServerCompletionItem[] => [],
-    'graph-predicate-string': (): LanguageServerCompletionItem[] => createGraphPredicateCompletions([
-      ...parsed.graphPredicateIds,
-      ...(context.workspaceIndex?.getGraphPredicateIds() ?? []),
-    ], prefix),
-    'node-id-string': (): LanguageServerCompletionItem[] => createNodeReferenceCompletions({
+  if (slot.kind === 'suppressed') {
+    return [];
+  }
+
+  if (slot.kind === 'graph-predicate-string') {
+    return createGraphPredicateStringCompletions(parsed, context, prefix);
+  }
+
+  if (slot.kind === 'node-id-string') {
+    return createNodeReferenceCompletions({
       localNodeIds: parsed.nodeIds,
       workspaceNodeIds: getWorkspaceNodeIds(context.workspaceIndex),
       prefix,
-    }),
-    'compound-field-key': (): LanguageServerCompletionItem[] => createCompoundFieldCompletions({
-      localFields: localCompoundSchema?.kind === 'compound-schema' ? localCompoundSchema.fields : [],
-      workspaceFields: slot.kind === 'compound-field-key' ? (context.workspaceIndex?.getCompoundFieldSchemas(slot.predicateName) ?? []) : [],
-      prefix,
-    }),
-    'variable-term': (): LanguageServerCompletionItem[] => createVariableCompletions(slot.kind === 'variable-term' ? slot.variables : [], prefix),
-    predicate: (): LanguageServerCompletionItem[] => createPredicateCompletions({
-      parsed,
-      prefix,
-      ...(context.workspaceIndex ? { workspaceIndex: context.workspaceIndex } : {}),
-    }),
-  }[slot.kind]();
+    });
+  }
+
+  if (slot.kind === 'compound-field-key') {
+    return createCompoundFieldSlotCompletions({ parsed, predicateName: slot.predicateName, context, prefix });
+  }
+
+  if (slot.kind === 'variable-term') {
+    return createVariableCompletions(slot.variables, prefix);
+  }
+
+  return createPredicateCompletions({
+    parsed,
+    prefix,
+    ...(context.workspaceIndex ? { workspaceIndex: context.workspaceIndex } : {}),
+  });
+}
+
+function createGraphPredicateStringCompletions(
+  parsed: ReturnType<typeof parseDocument>,
+  context: CompletionContext,
+  prefix: string,
+): LanguageServerCompletionItem[] {
+  return createGraphPredicateCompletions(
+    [...parsed.graphPredicateIds, ...(context.workspaceIndex?.getGraphPredicateIds() ?? [])],
+    prefix,
+  );
+}
+
+function createCompoundFieldSlotCompletions(options: {
+  readonly parsed: ReturnType<typeof parseDocument>;
+  readonly predicateName: string;
+  readonly context: CompletionContext;
+  readonly prefix: string;
+}): LanguageServerCompletionItem[] {
+  const localCompoundSchema = getCompoundSchemaDeclaration(
+    options.parsed.schemaDeclarations,
+    options.predicateName,
+  )?.schema;
+
+  return createCompoundFieldCompletions({
+    localFields: localCompoundSchema?.kind === 'compound-schema' ? localCompoundSchema.fields : [],
+    workspaceFields: options.context.workspaceIndex?.getCompoundFieldSchemas(options.predicateName) ?? [],
+    prefix: options.prefix,
+  });
 }
 
 function getWorkspaceNodeIds(workspaceIndex: DatalogWorkspaceIndex | undefined): readonly string[] {
