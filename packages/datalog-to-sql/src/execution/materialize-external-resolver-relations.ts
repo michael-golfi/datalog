@@ -1,19 +1,20 @@
 import type { DatalogScalarValue, DatalogTerm } from '@datalog/ast';
 
+import {
+  assertMaterializedResolverRows,
+  serializeExternalResolverKey,
+} from './materialize-external-resolver-row-support.js';
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
+import type { PredicateSignature } from '../contracts/datalog-program.js';
 import type {
   ExternalResolverKey,
   ExternalResolverLookupRequest,
   ExternalResolverResult,
   ExternalResolverRow,
 } from '../contracts/external-resolver-definition.js';
-import type { PredicateSignature } from '../contracts/datalog-program.js';
 import type { SqlParameterValue } from '../contracts/physical-plan.js';
 import type { PreparedSelectFactsMaterializationStep } from '../contracts/prepared-select-facts-execution.js';
-import {
-  assertMaterializedResolverRows,
-  serializeExternalResolverKey,
-} from './materialize-external-resolver-row-support.js';
 
 type BindingValue = SqlParameterValue | null;
 type BindingContext = ReadonlyMap<string, BindingValue>;

@@ -1,6 +1,7 @@
-import type { SqlParameterValue } from '../contracts/physical-plan.js';
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
 import type { ExternalResolverKey, ExternalResolverRow } from '../contracts/external-resolver-definition.js';
+import type { SqlParameterValue } from '../contracts/physical-plan.js';
 import type { PreparedSelectFactsMaterializationStep } from '../contracts/prepared-select-facts-execution.js';
 
 type BindingValue = SqlParameterValue | null;

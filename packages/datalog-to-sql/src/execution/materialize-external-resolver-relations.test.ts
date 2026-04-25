@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { executePreparedSelectFacts } from './execute-prepared-select-facts.js';
+import { materializeExternalResolverRelations } from './materialize-external-resolver-relations.js';
+import { prepareSelectFactsExecution } from './prepare-select-facts-execution.js';
+import { createQueryCountTracker } from './query-count-tracker.js';
 import { defineExternalResolverDefinition } from '../contracts/external-resolver-definition.js';
+import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from '../translation/default-graph-predicate-catalog.js';
+
 import type {
   MaterializeBeforeSqlExternalResolverDefinition,
   ExternalResolverLookupRequest,
@@ -10,12 +16,7 @@ import type {
 import type { PredicateCatalog, RelationColumnBinding } from '../contracts/predicate-catalog.js';
 import type { PreparedSelectFactsMaterializationStep } from '../contracts/prepared-select-facts-execution.js';
 import type { PostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
-import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from '../translation/default-graph-predicate-catalog.js';
 
-import { executePreparedSelectFacts } from './execute-prepared-select-facts.js';
-import { materializeExternalResolverRelations } from './materialize-external-resolver-relations.js';
-import { prepareSelectFactsExecution } from './prepare-select-facts-execution.js';
-import { createQueryCountTracker } from './query-count-tracker.js';
 
 describe('materializeExternalResolverRelations', () => {
   it('batches bound keys once for one resolver request', async () => {
@@ -57,9 +58,12 @@ describe('materializeExternalResolverRelations', () => {
         value: [{ valuesByColumn: { person_id: 'vertex/alice', account_id: 'account-1' } }],
       };
     });
+    const catalog = createMaterializationCatalog(resolver);
     const execution = prepareSelectFactsExecution({
+      catalog,
       operation: {
         kind: 'select-facts',
+        predicateCatalog: catalog,
         match: [
           {
             kind: 'predicate',
@@ -68,7 +72,6 @@ describe('materializeExternalResolverRelations', () => {
           },
         ],
       },
-      catalog: createMaterializationCatalog(resolver),
     });
     const sql = createTrackedSqlClient([{ accountId: 'account-1' }]);
 
@@ -88,9 +91,12 @@ describe('materializeExternalResolverRelations', () => {
   });
 
   it('rejects empty provider results before final SQL', async () => {
+    const catalog = createMaterializationCatalog(() => ({ ok: true, value: [] }));
     const execution = prepareSelectFactsExecution({
+      catalog,
       operation: {
         kind: 'select-facts',
+        predicateCatalog: catalog,
         match: [
           {
             kind: 'predicate',
@@ -99,7 +105,6 @@ describe('materializeExternalResolverRelations', () => {
           },
         ],
       },
-      catalog: createMaterializationCatalog(() => ({ ok: true, value: [] })),
     });
     const sql = createTrackedSqlClient([{ accountId: 'account-1' }]);
 
@@ -115,9 +120,18 @@ describe('materializeExternalResolverRelations', () => {
   });
 
   it('rejects duplicate provider keys before final SQL', async () => {
+    const catalog = createMaterializationCatalog(() => ({
+      ok: true,
+      value: [
+        { valuesByColumn: { person_id: 'vertex/alice', account_id: 'account-1' } },
+        { valuesByColumn: { person_id: 'vertex/alice', account_id: 'account-2' } },
+      ],
+    }));
     const execution = prepareSelectFactsExecution({
+      catalog,
       operation: {
         kind: 'select-facts',
+        predicateCatalog: catalog,
         match: [
           {
             kind: 'predicate',
@@ -126,13 +140,6 @@ describe('materializeExternalResolverRelations', () => {
           },
         ],
       },
-      catalog: createMaterializationCatalog(() => ({
-        ok: true,
-        value: [
-          { valuesByColumn: { person_id: 'vertex/alice', account_id: 'account-1' } },
-          { valuesByColumn: { person_id: 'vertex/alice', account_id: 'account-2' } },
-        ],
-      })),
     });
     const sql = createTrackedSqlClient([{ accountId: 'account-1' }]);
 
@@ -148,9 +155,15 @@ describe('materializeExternalResolverRelations', () => {
   });
 
   it('rejects provider row-shape mismatches before final SQL', async () => {
+    const catalog = createMaterializationCatalog(() => ({
+      ok: true,
+      value: [{ valuesByColumn: { person_id: 'vertex/alice' } }],
+    }));
     const execution = prepareSelectFactsExecution({
+      catalog,
       operation: {
         kind: 'select-facts',
+        predicateCatalog: catalog,
         match: [
           {
             kind: 'predicate',
@@ -159,10 +172,6 @@ describe('materializeExternalResolverRelations', () => {
           },
         ],
       },
-      catalog: createMaterializationCatalog(() => ({
-        ok: true,
-        value: [{ valuesByColumn: { person_id: 'vertex/alice' } }],
-      })),
     });
     const sql = createTrackedSqlClient([{ accountId: 'account-1' }]);
 
