@@ -145,19 +145,19 @@ describe('DatalogWorkspaceIndex', () => {
 
     try {
       await writeWorkspaceFile(workspaceRoot, 'schema-b.dl', [
-        'DefPred("graph/shared", "0", "class/Entity", "0", "class/Target").',
-        'DefPred("graph/b-only", "0", "class/Entity", "0", "class/Target").',
+        'DefPred("graph/shared", "0", "liquid/node", "0", "liquid/node").',
+        'DefPred("graph/b-only", "0", "liquid/node", "0", "liquid/node").',
         'Edge("node/shared", "food/preferred_label", "Shared B").',
         'Edge("node/b", "food/instance_of", "class/B").',
       ].join('\n'));
       await writeWorkspaceFile(workspaceRoot, 'schema-a.dl', [
-        'DefPred("graph/shared", "0", "class/Entity", "0", "class/Target").',
-        'DefPred("graph/a-only", "0", "class/Entity", "0", "class/Target").',
+        'DefPred("graph/shared", "0", "liquid/node", "0", "liquid/node").',
+        'DefPred("graph/a-only", "0", "liquid/node", "0", "liquid/node").',
         'Edge("node/shared", "food/preferred_label", "Shared A").',
         'Edge("node/a", "food/instance_of", "class/A").',
       ].join('\n'));
       await writeWorkspaceFile(workspaceRoot, 'current.dl', [
-        'DefPred("graph/disk-only", "0", "class/Entity", "0", "class/Target").',
+        'DefPred("graph/disk-only", "0", "liquid/node", "0", "liquid/node").',
         'Edge("node/disk", "food/preferred_label", "Disk node").',
       ].join('\n'));
 
@@ -170,7 +170,7 @@ describe('DatalogWorkspaceIndex', () => {
       workspaceIndex.upsertOpenDocument({
         uri: currentUri,
         source: [
-          'DefPred("graph/open-only", "0", "class/Entity", "0", "class/Target").',
+          'DefPred("graph/open-only", "0", "liquid/node", "0", "liquid/node").',
           'Edge("node/open", "food/preferred_label", "Open node").',
         ].join('\n'),
       });
@@ -191,9 +191,9 @@ describe('DatalogWorkspaceIndex', () => {
         pathToFileURL(join(workspaceRoot, 'schema-a.dl')).href,
         pathToFileURL(join(workspaceRoot, 'schema-b.dl')).href,
       ]);
-      expect(workspaceIndex.getPredicateSchemaTargets('graph/shared').map((target) => target.schema.subjectType)).toEqual([
-        'class/Entity',
-        'class/Entity',
+      expect(workspaceIndex.getPredicateSchemaTargets('graph/shared').map((target) => target.schema.subjectDomain)).toEqual([
+        'node',
+        'node',
       ]);
       expect(workspaceIndex.getNodeSummaryTargets('node/disk')).toEqual([]);
       expect(workspaceIndex.getNodeSummaryTargets('node/open').map((target) => ({
