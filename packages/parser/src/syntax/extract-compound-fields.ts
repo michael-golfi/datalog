@@ -14,14 +14,10 @@ interface ExtractCompoundFieldOccurrencesInput {
 /** Extract unique `field=` names from a compound fact or projection argument list. */
 export function extractCompoundFields(text: string): string[] {
   const fields = new Set<string>();
-  let match: RegExpExecArray | null;
+  const occurrences = collectFieldMatches(text);
 
-  while ((match = FIELD_PATTERN.exec(text)) !== null) {
-    const field = match[1];
-
-    if (field !== undefined) {
-      fields.add(field);
-    }
+  for (const occurrence of occurrences) {
+    fields.add(occurrence.name);
   }
 
   return [...fields];
@@ -40,14 +36,10 @@ export function extractCompoundFieldOccurrences(
     }
 
     const callStart = input.statement.startOffset + match.openParenIndex + 1;
-    let fieldMatch: RegExpExecArray | null;
+    const fieldMatches = collectFieldMatches(match.argumentText);
 
-    while ((fieldMatch = FIELD_PATTERN.exec(match.argumentText)) !== null) {
-      const fieldName = fieldMatch[1];
-
-      if (fieldName === undefined) {
-        continue;
-      }
+    for (const fieldMatch of fieldMatches) {
+      const fieldName = fieldMatch.name;
 
       const start = callStart + fieldMatch.index;
       occurrences.push({
@@ -64,6 +56,29 @@ export function extractCompoundFieldOccurrences(
   });
 
   return occurrences;
+}
+
+function collectFieldMatches(text: string): Array<{ readonly name: string; readonly index: number }> {
+  const matches: Array<{ readonly name: string; readonly index: number }> = [];
+
+  forEachTopLevelStructuralCharacter(text, (index) => {
+    const character = text[index];
+
+    if (!isIdentifierStart(character)) {
+      return undefined;
+    }
+
+    const fieldMatch = readFieldAssignment(text, index);
+
+    if (fieldMatch === null) {
+      return undefined;
+    }
+
+    matches.push(fieldMatch);
+    return fieldMatch.index + fieldMatch.name.length;
+  });
+
+  return matches;
 }
 
 function getCompoundPredicateMatch(
@@ -166,4 +181,27 @@ function isIdentifierStart(character: string | undefined): boolean {
 
 function isIdentifierContinuation(character: string | undefined): boolean {
   return character !== undefined && /[A-Za-z0-9_]/.test(character);
+}
+
+function readFieldAssignment(
+  text: string,
+  startIndex: number,
+): { readonly name: string; readonly index: number } | null {
+  FIELD_PATTERN.lastIndex = startIndex;
+  const match = FIELD_PATTERN.exec(text);
+
+  if (match === null || match.index !== startIndex) {
+    return null;
+  }
+
+  const name = match[1];
+
+  if (name === undefined) {
+    return null;
+  }
+
+  return {
+    name,
+    index: startIndex,
+  };
 }

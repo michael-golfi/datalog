@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 
 import type { CommittedDatalogMigrationFile } from './read-committed-datalog-migration-file.js';
@@ -36,6 +36,10 @@ function loadCommittedMigrations(migrationsDirectory: string): CommittedDatalogM
 }
 
 function listCommittedMigrationPaths(migrationsDirectory: string): string[] {
+  if (!existsSync(migrationsDirectory)) {
+    return [];
+  }
+
   return readdirSync(migrationsDirectory, { withFileTypes: true })
     .flatMap((entry) => getCommittedMigrationPaths(migrationsDirectory, entry.name, entry.isDirectory()))
     .sort((left, right) => left.localeCompare(right));

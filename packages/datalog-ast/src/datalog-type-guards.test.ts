@@ -2,9 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import {
   atom,
+  comparison,
   constantTerm,
+  directiveStatement,
   factStatement,
+  functionCall,
   namedTerm,
+  negatedAtom,
   position,
   queryStatement,
   range,
@@ -14,35 +18,27 @@ import {
   wildcardTerm,
 } from './datalog-builders.js';
 import {
-  edgeFact,
-  edgeFactPattern,
-  vertexFact,
-  vertexFactPattern,
-} from './datalog-graph-builders.js';
-import {
   isDatalogAtom,
   isDatalogAtomArgument,
+  isDatalogComparison,
   isDatalogConstantTerm,
+  isDatalogDirectiveStatement,
   isDatalogFactStatement,
+  isDatalogFunctionCall,
+  isDatalogLiteral,
   isDatalogNamedTerm,
+  isDatalogNegatedAtom,
   isDatalogProgram,
   isDatalogQueryStatement,
   isDatalogRuleStatement,
   isDatalogSourceLocation,
+  isDatalogStatement,
   isDatalogTerm,
   isDatalogVariableTerm,
   isDatalogWildcardTerm,
   isPosition,
   isRange,
 } from './datalog-type-guards.js';
-import {
-  isDatalogFact,
-  isDatalogFactPattern,
-  isEdgeFact,
-  isEdgeFactPattern,
-  isVertexFact,
-  isVertexFactPattern,
-} from './datalog-graph-type-guards.js';
 
 describe('datalog type guards', () => {
   it('accepts shared source span contracts', () => {
@@ -71,28 +67,6 @@ describe('datalog type guards', () => {
     expect(isDatalogTerm({ kind: 'variable' })).toBe(false);
   });
 
-  it('accepts graph facts and graph fact patterns', () => {
-    const subject = variableTerm('Subject');
-    const predicate = constantTerm('graph/likes');
-    const object = constantTerm('node/bob');
-
-    expect(isVertexFact(vertexFact('node/alice'))).toBe(true);
-    expect(isEdgeFact(edgeFact({
-      subjectId: 'node/alice',
-      predicateId: 'graph/likes',
-      objectId: 'node/bob',
-    }))).toBe(true);
-    expect(isDatalogFact(edgeFact({
-      subjectId: 'node/alice',
-      predicateId: 'graph/likes',
-      objectId: 'node/bob',
-    }))).toBe(true);
-    expect(isVertexFactPattern(vertexFactPattern(subject))).toBe(true);
-    expect(isEdgeFactPattern(edgeFactPattern({ subject, predicate, object }))).toBe(true);
-    expect(isDatalogFactPattern(edgeFactPattern({ subject, predicate, object }))).toBe(true);
-    expect(isDatalogFact({ kind: 'edge', subjectId: 'a' })).toBe(false);
-  });
-
   it('accepts fact, rule, and query statement nodes', () => {
     const bodyAtom = atom('likes', [variableTerm('X'), variableTerm('Y')]);
     const fact = factStatement(atom('likes', [constantTerm('alice'), constantTerm('bob')]));
@@ -116,5 +90,58 @@ describe('datalog type guards', () => {
     expect(isDatalogProgram(astProgram)).toBe(true);
     expect(isDatalogProgram({ kind: 'program', statements: [] })).toBe(true);
     expect(isDatalogRuleStatement({ kind: 'rule', head: bodyAtom, body: [] })).toBe(false);
+  });
+
+  it('accepts negated atoms, comparisons, function calls, and literals only when shapes match', () => {
+    const positiveAtom = atom('likes', [variableTerm('X'), variableTerm('Y')]);
+    const negated = negatedAtom(positiveAtom);
+    const compared = comparison({
+      operator: '!=',
+      left: variableTerm('X'),
+      right: constantTerm('system'),
+    });
+    const call = functionCall({
+      name: 'lower',
+      args: [variableTerm('X')],
+      returns: 'text',
+    });
+
+    expect(isDatalogNegatedAtom(negated)).toBe(true);
+    expect(isDatalogNegatedAtom({ kind: 'not', atom: variableTerm('X') })).toBe(false);
+    expect(isDatalogComparison(compared)).toBe(true);
+    expect(isDatalogComparison({ kind: 'comparison', operator: 'contains', left: variableTerm('X'), right: constantTerm('system') })).toBe(false);
+    expect(isDatalogFunctionCall(call)).toBe(true);
+    expect(isDatalogFunctionCall({ kind: 'function', name: 'lower', args: [namedTerm('value', variableTerm('X'))] })).toBe(false);
+    expect(isDatalogLiteral(positiveAtom)).toBe(true);
+    expect(isDatalogLiteral(negated)).toBe(true);
+    expect(isDatalogLiteral(compared)).toBe(true);
+    expect(isDatalogLiteral(call)).toBe(true);
+    expect(isDatalogLiteral(directiveStatement({ name: 'pragma', args: [] }))).toBe(false);
+  });
+
+  it('accepts directives and statements only for supported statement shapes', () => {
+    const bodyAtom = atom('likes', [variableTerm('X'), variableTerm('Y')]);
+    const fact = factStatement(bodyAtom);
+    const rule = ruleStatement({
+      head: bodyAtom,
+      body: [bodyAtom],
+      annotations: { retries: 0, enabled: false, label: '' },
+    });
+    const query = queryStatement({
+      body: [bodyAtom, functionCall({ name: 'lower', args: [variableTerm('X')] })],
+      project: ['X'],
+    });
+    const directive = directiveStatement({
+      name: 'pragma',
+      args: ['strict', 1, false, null],
+    });
+
+    expect(isDatalogDirectiveStatement(directive)).toBe(true);
+    expect(isDatalogDirectiveStatement({ kind: 'directive', name: 'pragma', args: [Symbol('x')] })).toBe(false);
+    expect(isDatalogStatement(fact)).toBe(true);
+    expect(isDatalogStatement(rule)).toBe(true);
+    expect(isDatalogStatement(query)).toBe(true);
+    expect(isDatalogStatement(directive)).toBe(true);
+    expect(isDatalogStatement(bodyAtom)).toBe(false);
   });
 });

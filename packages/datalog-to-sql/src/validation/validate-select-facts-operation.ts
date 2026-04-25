@@ -21,7 +21,14 @@ function validateFactPattern(pattern: DatalogFactPattern): void {
   validateTerm(pattern.object);
 }
 
-function validateTerm(term: DatalogTerm): void {
+function validateTerm(term: DatalogTerm | undefined): void {
+  if (term === undefined) {
+    throw new GraphTranslationError(
+      'datalog-to-sql.query.invalid-term',
+      'Query fact patterns must include all required terms.',
+    );
+  }
+
   if (term.kind === 'constant') {
     if (typeof term.value === 'string' && term.value.trim().length > 0) {
       return;

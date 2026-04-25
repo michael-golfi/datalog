@@ -25,6 +25,10 @@ function createTermFromText(
   text: string,
   location: ReturnType<typeof createSourceLocation>,
 ): DatalogTerm {
+  if (text.length === 0) {
+    throw new Error('Expected Datalog term.');
+  }
+
   if (isQuotedString(text)) {
     return constantTerm(unescapeString(text.slice(1, -1)), { location });
   }
