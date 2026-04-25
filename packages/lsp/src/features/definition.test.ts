@@ -14,11 +14,17 @@ describe('computeDefinition', () => {
   it('jumps from an Edge predicate id to its DefPred declaration', () => {
     const line = 'Edge("concept/chickpea_bowl", "food/has_cuisine", "cuisine/mediterranean").';
     const source = `${DATALOG_SAMPLE}\n${line}`;
-    const result = computeDefinition(source, {
-      line: source.split('\n').length - 1,
-      character: line.indexOf('food/has_cuisine') + 5,
-    }, { targetUri: 'file:///workspace/test.dl' });
-    const expectedLine = DATALOG_SAMPLE.split('\n').findIndex((entry) => entry.includes('DefPred("food/has_cuisine"'));
+    const result = computeDefinition(
+      source,
+      {
+        line: source.split('\n').length - 1,
+        character: line.indexOf('food/has_cuisine') + 5,
+      },
+      { targetUri: 'file:///workspace/test.dl' },
+    );
+    const expectedLine = DATALOG_SAMPLE.split('\n').findIndex((entry) =>
+      entry.includes('DefPred("food/has_cuisine"'),
+    );
 
     expect(result).toEqual([
       {
@@ -42,10 +48,12 @@ describe('computeDefinition', () => {
     workspaceIndex.upsertOpenDocument({ uri: schemaUri, source: schemaSource });
     workspaceIndex.upsertOpenDocument({ uri: currentUri, source: currentSource });
 
-    expect(computeDefinition(currentSource, positionOf(currentSource, 'food/has_spice'), {
-      targetUri: currentUri,
-      workspaceIndex,
-    })).toEqual([
+    expect(
+      computeDefinition(currentSource, positionOf(currentSource, 'food/has_spice'), {
+        targetUri: currentUri,
+        workspaceIndex,
+      }),
+    ).toEqual([
       {
         targetUri: schemaUri,
         targetSelectionRange: stringValueRange(schemaSource, 'food/has_spice'),
@@ -65,10 +73,12 @@ describe('computeDefinition', () => {
     workspaceIndex.upsertOpenDocument({ uri: summaryUri, source: summarySource });
     workspaceIndex.upsertOpenDocument({ uri: currentUri, source: currentSource });
 
-    expect(computeDefinition(currentSource, positionOf(currentSource, 'class/Dish'), {
-      targetUri: currentUri,
-      workspaceIndex,
-    })).toEqual([
+    expect(
+      computeDefinition(currentSource, positionOf(currentSource, 'class/Dish'), {
+        targetUri: currentUri,
+        workspaceIndex,
+      }),
+    ).toEqual([
       {
         targetUri: summaryUri,
         targetSelectionRange: stringValueRange(summarySource, 'class/Dish'),
@@ -91,10 +101,12 @@ describe('computeDefinition', () => {
     workspaceIndex.upsertOpenDocument({ uri: workspaceUri, source: workspaceSource });
     workspaceIndex.upsertOpenDocument({ uri: currentUri, source: currentSource });
 
-    expect(computeDefinition(currentSource, positionOf(currentSource, 'food/local', 1), {
-      targetUri: currentUri,
-      workspaceIndex,
-    })).toEqual([
+    expect(
+      computeDefinition(currentSource, positionOf(currentSource, 'food/local', 1), {
+        targetUri: currentUri,
+        workspaceIndex,
+      }),
+    ).toEqual([
       {
         targetUri: currentUri,
         targetSelectionRange: stringValueRange(currentSource, 'food/local'),
@@ -122,10 +134,12 @@ describe('computeDefinition', () => {
       await workspaceIndex.setWorkspaceRootPath(workspaceRoot);
       workspaceIndex.upsertOpenDocument({ uri: currentUri, source: currentSource });
 
-      expect(computeDefinition(currentSource, positionOf(currentSource, 'food/shared'), {
-        targetUri: currentUri,
-        workspaceIndex,
-      })).toEqual([
+      expect(
+        computeDefinition(currentSource, positionOf(currentSource, 'food/shared'), {
+          targetUri: currentUri,
+          workspaceIndex,
+        }),
+      ).toEqual([
         {
           targetUri: firstUri,
           targetSelectionRange: stringValueRange(firstSource, 'food/shared'),
@@ -152,10 +166,12 @@ describe('computeDefinition', () => {
     workspaceIndex.upsertOpenDocument({ uri: schemaUri, source: schemaSource });
     workspaceIndex.upsertOpenDocument({ uri: currentUri, source: currentSource });
 
-    expect(computeDefinition(currentSource, positionOf(currentSource, 'Parent(child, parent)'), {
-      targetUri: currentUri,
-      workspaceIndex,
-    })).toEqual([
+    expect(
+      computeDefinition(currentSource, positionOf(currentSource, 'Parent(child, parent)'), {
+        targetUri: currentUri,
+        workspaceIndex,
+      }),
+    ).toEqual([
       {
         targetUri: schemaUri,
         targetSelectionRange: predicateRange(schemaSource, 'Parent(child, parent)'),
@@ -183,10 +199,12 @@ describe('computeDefinition', () => {
       await workspaceIndex.setWorkspaceRootPath(workspaceRoot);
       workspaceIndex.upsertOpenDocument({ uri: currentUri, source: currentSource });
 
-      expect(computeDefinition(currentSource, positionOf(currentSource, 'Shared(child, parent)', 1), {
-        targetUri: currentUri,
-        workspaceIndex,
-      })).toEqual([
+      expect(
+        computeDefinition(currentSource, positionOf(currentSource, 'Shared(child, parent)', 1), {
+          targetUri: currentUri,
+          workspaceIndex,
+        }),
+      ).toEqual([
         {
           targetUri: migrationsUri,
           targetSelectionRange: predicateRange(migrationsSource, 'Shared(left, right)'),
@@ -216,20 +234,32 @@ describe('computeDefinition', () => {
     workspaceIndex.upsertOpenDocument({ uri: schemaUri, source: schemaSource });
     workspaceIndex.upsertOpenDocument({ uri: currentUri, source: currentSource });
 
-    expect(computeDefinition(currentSource, positionOf(currentSource, 'Shared(left, middle, right)', 1), {
-      targetUri: currentUri,
-      workspaceIndex,
-    })).toEqual([
+    expect(
+      computeDefinition(
+        currentSource,
+        positionOf(currentSource, 'Shared(left, middle, right)', 1),
+        {
+          targetUri: currentUri,
+          workspaceIndex,
+        },
+      ),
+    ).toEqual([
       {
         targetUri: schemaUri,
         targetSelectionRange: predicateRange(schemaSource, 'Shared(left, middle, right)'),
       },
     ]);
 
-    expect(computeDefinition('UsesShared(value) :- Shared(value).', positionOf('UsesShared(value) :- Shared(value).', 'Shared(value)', 1), {
-      targetUri: 'file:///workspace/missing-arity.dl',
-      workspaceIndex,
-    })).toBeNull();
+    expect(
+      computeDefinition(
+        'UsesShared(value) :- Shared(value).',
+        positionOf('UsesShared(value) :- Shared(value).', 'Shared(value)', 1),
+        {
+          targetUri: 'file:///workspace/missing-arity.dl',
+          workspaceIndex,
+        },
+      ),
+    ).toBeNull();
   });
 
   it('continues to resolve user predicates independently from quoted string metadata', () => {
@@ -247,10 +277,12 @@ describe('computeDefinition', () => {
     workspaceIndex.upsertOpenDocument({ uri: schemaUri, source: schemaSource });
     workspaceIndex.upsertOpenDocument({ uri: currentUri, source: currentSource });
 
-    expect(computeDefinition(currentSource, positionOf(currentSource, 'Shared(child, parent)', 1), {
-      targetUri: currentUri,
-      workspaceIndex,
-    })).toEqual([
+    expect(
+      computeDefinition(currentSource, positionOf(currentSource, 'Shared(child, parent)', 1), {
+        targetUri: currentUri,
+        workspaceIndex,
+      }),
+    ).toEqual([
       {
         targetUri: schemaUri,
         targetSelectionRange: predicateRange(schemaSource, 'Shared(child, parent)'),
@@ -264,22 +296,36 @@ describe('computeDefinition', () => {
       'Eligible(child, predicate, object) :- Edge(child, predicate, object), Missing(object).',
     ].join('\n');
 
-    expect(computeDefinition(source, positionOf(source, 'Edge(child, predicate, object)', 0), {
-      targetUri: 'file:///workspace/current.dl',
-    })).toBeNull();
-    expect(computeDefinition(source, positionOf(source, 'Missing(object)', 0), {
-      targetUri: 'file:///workspace/current.dl',
-    })).toBeNull();
-    expect(computeDefinition('Edge("node/a", "graph/missing", "node/b").', positionOf('Edge("node/a", "graph/missing", "node/b").', 'graph/missing'), {
-      targetUri: 'file:///workspace/current.dl',
-      workspaceIndex: new DatalogWorkspaceIndex({
-        documentStore: new DatalogDocumentStore(),
+    expect(
+      computeDefinition(source, positionOf(source, 'Edge(child, predicate, object)', 0), {
+        targetUri: 'file:///workspace/current.dl',
       }),
-    })).toBeNull();
+    ).toBeNull();
+    expect(
+      computeDefinition(source, positionOf(source, 'Missing(object)', 0), {
+        targetUri: 'file:///workspace/current.dl',
+      }),
+    ).toBeNull();
+    expect(
+      computeDefinition(
+        'Edge("node/a", "graph/missing", "node/b").',
+        positionOf('Edge("node/a", "graph/missing", "node/b").', 'graph/missing'),
+        {
+          targetUri: 'file:///workspace/current.dl',
+          workspaceIndex: new DatalogWorkspaceIndex({
+            documentStore: new DatalogDocumentStore(),
+          }),
+        },
+      ),
+    ).toBeNull();
   });
 });
 
-function positionOf(source: string, snippet: string, occurrenceIndex = 0): { line: number; character: number } {
+function positionOf(
+  source: string,
+  snippet: string,
+  occurrenceIndex = 0,
+): { line: number; character: number } {
   const lines = source.split('\n');
   let matchesSeen = 0;
 
@@ -346,7 +392,11 @@ function stringValueRange(source: string, value: string) {
   throw new Error(`Could not find string value: ${value}`);
 }
 
-async function writeWorkspaceFile(workspaceRoot: string, relativePath: string, source: string): Promise<void> {
+async function writeWorkspaceFile(
+  workspaceRoot: string,
+  relativePath: string,
+  source: string,
+): Promise<void> {
   const filePath = join(workspaceRoot, relativePath);
   await mkdir(dirname(filePath), { recursive: true });
   await writeFile(filePath, source, 'utf8');

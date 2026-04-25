@@ -54,9 +54,11 @@ function getStringReferenceDefinition(
     return null;
   }
 
-  return getLocalStringReferenceDefinition(options.parsed, stringReference.value, options.targetUri)
-    ?? getWorkspaceStringReferenceDefinition(options.workspaceIndex, stringReference.value)
-    ?? null;
+  return (
+    getLocalStringReferenceDefinition(options.parsed, stringReference.value, options.targetUri) ??
+    getWorkspaceStringReferenceDefinition(options.workspaceIndex, stringReference.value) ??
+    null
+  );
 }
 
 function getLocalStringReferenceDefinition(
@@ -77,9 +79,11 @@ function getWorkspaceStringReferenceDefinition(
   workspaceIndex: DatalogWorkspaceIndex | undefined,
   referenceId: string,
 ): LanguageServerDefinition | null {
-  return mapDefinitionTargets(workspaceIndex?.getPredicateSchemaTargets(referenceId) ?? [])
-    ?? mapDefinitionTargets(workspaceIndex?.getNodeSummaryTargets(referenceId) ?? [])
-    ?? null;
+  return (
+    mapDefinitionTargets(workspaceIndex?.getPredicateSchemaTargets(referenceId) ?? []) ??
+    mapDefinitionTargets(workspaceIndex?.getNodeSummaryTargets(referenceId) ?? []) ??
+    null
+  );
 }
 
 function getDerivedPredicateDefinition(
@@ -106,12 +110,11 @@ function getDerivedPredicateDefinition(
   return definitions;
 }
 
-function findPredicateOccurrence(
-  parsed: ParsedDocument,
-  position: Position,
-) {
+function findPredicateOccurrence(parsed: ParsedDocument, position: Position) {
   for (const predicate of parsed.datalogSymbols.predicates) {
-    const occurrence = predicate.occurrences.find((candidate) => containsPosition(position, candidate.range));
+    const occurrence = predicate.occurrences.find((candidate) =>
+      containsPosition(position, candidate.range),
+    );
     if (occurrence) {
       return {
         identity: predicate.identity,
@@ -130,9 +133,12 @@ function getPredicateDefinitions(options: {
   readonly arity: number;
   readonly context: DefinitionContext;
 }): LanguageServerDefinition {
-  const workspaceDefinitions = options.context.workspaceIndex?.getPredicateDefinitions(options.identityKey) ?? [];
+  const workspaceDefinitions =
+    options.context.workspaceIndex?.getPredicateDefinitions(options.identityKey) ?? [];
   if (workspaceDefinitions.length > 0) {
-    return workspaceDefinitions.map((definition) => createDefinitionResult(definition.range, definition.uri));
+    return workspaceDefinitions.map((definition) =>
+      createDefinitionResult(definition.range, definition.uri),
+    );
   }
 
   return [...(options.parsed.derivedPredicates.get(options.predicateName) ?? [])]
@@ -142,16 +148,26 @@ function getPredicateDefinitions(options: {
 }
 
 function mapDefinitionTargets(
-  targets: ReadonlyArray<{ readonly range: LanguageServerDefinitionTarget['targetSelectionRange']; readonly uri: string }>,
+  targets: ReadonlyArray<{
+    readonly range: LanguageServerDefinitionTarget['targetSelectionRange'];
+    readonly uri: string;
+  }>,
 ): LanguageServerDefinition | null {
-  return targets.length > 0 ? targets.map((target) => createDefinitionResult(target.range, target.uri)) : null;
+  return targets.length > 0
+    ? targets.map((target) => createDefinitionResult(target.range, target.uri))
+    : null;
 }
 
-function containsPosition(position: Position, range: LanguageServerDefinitionTarget['targetSelectionRange']): boolean {
-  const startsBefore = position.line > range.start.line
-    || (position.line === range.start.line && position.character >= range.start.character);
-  const endsAfter = position.line < range.end.line
-    || (position.line === range.end.line && position.character <= range.end.character);
+function containsPosition(
+  position: Position,
+  range: LanguageServerDefinitionTarget['targetSelectionRange'],
+): boolean {
+  const startsBefore =
+    position.line > range.start.line ||
+    (position.line === range.start.line && position.character >= range.start.character);
+  const endsAfter =
+    position.line < range.end.line ||
+    (position.line === range.end.line && position.character <= range.end.character);
 
   return startsBefore && endsAfter;
 }
