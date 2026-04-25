@@ -1,6 +1,13 @@
 export interface GraphRagScenario {
   readonly scenarioId: string;
   readonly question: string;
+  readonly answerQuality: {
+    readonly requiredPhrases: readonly string[];
+    readonly forbiddenPhrases?: readonly string[];
+  };
+  readonly liveTestSeedOverlay?: {
+    readonly datalogFacts: readonly string[];
+  };
   readonly requiredEvidenceIds: readonly string[];
   readonly requiredEntityIds: readonly string[];
 }
@@ -8,6 +15,13 @@ export interface GraphRagScenario {
 export const pregnancyLisinoprilHypertensionScenario: GraphRagScenario = {
   scenarioId: 'pregnancy-lisinopril-hypertension',
   question: 'For a pregnant patient taking lisinopril for hypertension, what evidence supports the indication and what risk should be reviewed?',
+  answerQuality: {
+    requiredPhrases: [
+      'lisinopril is indicated for hypertension',
+      'pregnancy is a review risk',
+      'ace inhibitor',
+    ],
+  },
   requiredEvidenceIds: [
     'indication/lisinopril/hypertension',
     'contraindication/lisinopril/pregnancy',
@@ -28,6 +42,14 @@ export const pregnancyLisinoprilHypertensionScenario: GraphRagScenario = {
 export const ckdHeartFailureIbuprofenScenario: GraphRagScenario = {
   scenarioId: 'ckd-heart-failure-ibuprofen',
   question: 'For a patient with chronic kidney disease and heart failure, what connected ontology evidence makes ibuprofen a review risk?',
+  answerQuality: {
+    requiredPhrases: [
+      'ibuprofen is a review risk',
+      'chronic kidney disease',
+      'heart failure',
+      'nsaid',
+    ],
+  },
   requiredEvidenceIds: [
     'contraindication/ibuprofen/chronic_kidney_disease',
     'contraindication/ibuprofen/heart_failure',
@@ -48,6 +70,15 @@ export const ckdHeartFailureIbuprofenScenario: GraphRagScenario = {
 export const atrialFibrillationAlternativesScenario: GraphRagScenario = {
   scenarioId: 'atrial-fibrillation-anticoagulant-alternatives',
   question: 'Which anticoagulants are indicated for atrial fibrillation, and what classes and mappings support them?',
+  answerQuality: {
+    requiredPhrases: [
+      'warfarin',
+      'apixaban',
+      'atrial fibrillation',
+      'vitamin k antagonist',
+      'factor xa inhibitor',
+    ],
+  },
   requiredEvidenceIds: [
     'indication/warfarin/atrial_fibrillation',
     'indication/apixaban/atrial_fibrillation',
