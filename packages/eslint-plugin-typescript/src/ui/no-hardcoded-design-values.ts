@@ -1,6 +1,6 @@
-import type { Rule } from 'eslint';
-
 import { reportHardcodedDesignValues } from '../shared/style-ast.js';
+
+import type { Rule } from 'eslint';
 
 interface LiteralLike {
   value: unknown;

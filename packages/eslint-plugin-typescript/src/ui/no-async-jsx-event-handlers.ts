@@ -1,6 +1,6 @@
-import type { Rule } from 'eslint';
-
 import { getJsxAttributeName, getJsxExpression, isAsyncFunctionExpression } from '../shared/ast.js';
+
+import type { Rule } from 'eslint';
 
 export const noAsyncJsxEventHandlers: Rule.RuleModule = {
   meta: {

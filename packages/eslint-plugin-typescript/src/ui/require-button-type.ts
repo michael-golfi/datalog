@@ -1,6 +1,6 @@
-import type { Rule } from 'eslint';
-
 import { getJsxName, hasJsxAttribute } from '../shared/ast.js';
+
+import type { Rule } from 'eslint';
 
 interface JsxOpeningElementLike {
   name: unknown;

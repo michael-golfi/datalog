@@ -1,7 +1,7 @@
-import type { Rule } from 'eslint';
-
 import { getJsxAttributeName } from '../shared/ast.js';
 import { isCssVariablesOnlyStyle } from '../shared/style-ast.js';
+
+import type { Rule } from 'eslint';
 
 export const noInlineStyles: Rule.RuleModule = {
   meta: {
