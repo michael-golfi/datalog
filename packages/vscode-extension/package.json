@@ -2,7 +2,7 @@
   "name": "@datalog/vscode-extension",
   "displayName": "Datalog Graph Language Support",
   "description": "Syntax highlighting and editor configuration for Datalog source files (.dl).",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "main": "./build/out/extension.js",
   "engines": {

@@ -4,6 +4,7 @@
   "commit": false,
   "fixed": [
     [
+      "@datalog/ast",
       "@datalog/parser",
       "@datalog/datalog-to-sql",
       "@datalog/lsp",

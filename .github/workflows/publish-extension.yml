@@ -7,6 +7,11 @@ on:
         description: Optional extension version for the VSIX
         required: false
         type: string
+      publish:
+        description: Publish to marketplaces after packaging
+        required: false
+        type: boolean
+        default: false
   push:
     branches:
       - main
@@ -61,3 +66,19 @@ jobs:
           name: datalog-language-support-vsix
           path: ${{ env.VSIX_PATH }}
           if-no-files-found: error
+
+      - name: Publish to VS Code Marketplace
+        if: ${{ github.event.inputs.publish == 'true' }}
+        working-directory: packages/vscode-extension/build/package-stage
+        run: |
+          "$GITHUB_WORKSPACE/node_modules/.bin/vsce" publish --no-dependencies --allow-missing-repository --pat "$VSCE_PAT"
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      - name: Publish to Open VSX Registry
+        if: ${{ github.event.inputs.publish == 'true' }}
+        working-directory: packages/vscode-extension/build/package-stage
+        run: |
+          "$GITHUB_WORKSPACE/node_modules/.bin/ovsx" publish --no-dependencies --allow-missing-repository --pat "$OVSX_PAT"
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
