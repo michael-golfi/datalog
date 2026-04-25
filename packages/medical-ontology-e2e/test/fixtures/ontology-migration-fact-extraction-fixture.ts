@@ -1,13 +1,19 @@
 import {
+  defPredSchema,
   edgeFact,
-  vertexFact,
-  type DatalogAtomArgument,
   type DatalogFact,
-  type DatalogFactStatement,
+  type DatalogSchema,
+  type DefCompoundSchema,
   type EdgeFact,
+  vertexFact,
   type VertexFact,
 } from '@datalog/ast';
-import { parseDatalogProgram, parseDocument } from '@datalog/parser';
+import {
+  extractDatalogFactsFromMigrations,
+  extractDatalogSchemaFromMigrations,
+  type CompoundBacklinkExpander,
+} from '@datalog/datalog-migrate';
+import { parseDocument } from '@datalog/parser';
 
 export type OntologyVertexFact = VertexFact;
 export type OntologyEdgeFact = EdgeFact;
@@ -19,185 +25,215 @@ export interface OntologyMigrationFactExtraction {
   readonly facts: readonly OntologyFact[];
 }
 
+interface OntologyCompoundBacklinkSpec {
+  readonly compoundName: string;
+  readonly predicateId: string;
+  readonly subjectFieldName: string;
+  readonly objectFieldName?: string;
+  readonly useCidAsObject?: boolean;
+}
+
+const ONTOLOGY_COMPOUND_BACKLINK_SPECS = new Map<string, OntologyCompoundBacklinkSpec>([
+  [
+    'ExternalMapping',
+    {
+      compoundName: 'ExternalMapping',
+      predicateId: 'med/has_mapping',
+      subjectFieldName: 'mapping/concept',
+      useCidAsObject: true,
+    },
+  ],
+  [
+    'MedicationClassMembership',
+    {
+      compoundName: 'MedicationClassMembership',
+      predicateId: 'med/has_drug_class',
+      subjectFieldName: 'clinical/medication',
+      objectFieldName: 'clinical/drug_class',
+    },
+  ],
+]);
+
+const ONTOLOGY_SUPPORTING_SCHEMAS: readonly DatalogSchema[] = [
+  defPredSchema({
+    predicateName: 'liquid/mutable',
+    subjectCardinality: '1',
+    subjectDomain: 'node',
+    objectCardinality: '?',
+    objectDomain: 'text',
+  }),
+];
+
 export function extractOntologyFactsFromSource(source: string): OntologyMigrationFactExtraction {
-  const vertexIds = new Set<string>();
-  const edgeFacts: OntologyEdgeFact[] = [];
+  return extractOntologyFactsFromMigrations([{ body: source }]);
+}
 
-  for (const fact of extractStandardGraphFacts(source)) {
-    if (fact.kind === 'vertex') {
-      vertexIds.add(fact.id);
-      continue;
-    }
+export function extractOntologyFactsFromMigrations(
+  migrations: ReadonlyArray<{ readonly body: string }>,
+): OntologyMigrationFactExtraction {
+  const schemas = mergeOntologySupportingSchemas(extractDatalogSchemaFromMigrations(migrations));
+  const extraction = extractDatalogFactsFromMigrations(migrations, {
+    schemas,
+    compoundBacklinkExpander: expandOntologyCompoundBacklink,
+  });
+  const compoundFieldEdges = extractCompoundFieldEdgesFromMigrations(migrations, schemas);
+  const vertexIds = new Set(extraction.vertices.map((vertex) => vertex.id));
+  const edges = [...extraction.edges, ...compoundFieldEdges];
 
-    vertexIds.add(fact.subjectId);
-    vertexIds.add(fact.objectId);
-    edgeFacts.push(fact);
-  }
-
-  for (const clause of parseDocument(source).clauses) {
-    if (clause.predicate === 'DefCompound' || clause.predicate === 'DefPred' || !clause.isCompound) {
-      continue;
-    }
-
-    expandCompoundBacklinks(clause, vertexIds, edgeFacts);
+  for (const edge of edges) {
+    vertexIds.add(edge.subjectId);
+    vertexIds.add(edge.objectId);
   }
 
   const vertices = [...vertexIds].map<OntologyVertexFact>((id) => vertexFact(id));
+  const facts = [...vertices, ...edges];
+
   return {
     vertices,
-    edges: edgeFacts,
-    facts: [...vertices, ...edgeFacts],
+    edges,
+    facts,
   };
 }
 
-function extractStandardGraphFacts(source: string): readonly OntologyFact[] {
-  const facts: OntologyFact[] = [];
-
-  for (const statement of parseDatalogProgram(source).statements) {
-    const fact = tryExtractGraphFact(statement);
-
-    if (fact !== null) {
-      facts.push(fact);
-    }
-  }
-
-  return facts;
+function mergeOntologySupportingSchemas(schemas: readonly DatalogSchema[]): readonly DatalogSchema[] {
+  return [...schemas, ...ONTOLOGY_SUPPORTING_SCHEMAS.filter((supportingSchema) =>
+    schemas.every((schema) => schema.kind !== 'predicate-schema' || supportingSchema.kind !== 'predicate-schema'
+      || schema.predicateName !== supportingSchema.predicateName))];
 }
 
-function tryExtractGraphFact(statement: ReturnType<typeof parseDatalogProgram>['statements'][number]): OntologyFact | null {
-  if (statement.kind !== 'fact') {
-    return null;
-  }
+function extractCompoundFieldEdgesFromMigrations(
+  migrations: ReadonlyArray<{ readonly body: string }>,
+  schemas: readonly DatalogSchema[],
+): readonly EdgeFact[] {
+  const compoundSchemas = new Map(
+    schemas
+      .filter((schema): schema is DefCompoundSchema => schema.kind === 'compound-schema')
+      .map((schema) => [schema.compoundName, schema]),
+  );
+  const edges: EdgeFact[] = [];
 
-  if (isEdgeFactStatement(statement)) {
-    return toEdgeFact(statement);
-  }
-
-  if (isVertexFactStatement(statement)) {
-    return toVertexFact(statement);
-  }
-
-  return null;
-}
-
-function isEdgeFactStatement(statement: DatalogFactStatement): boolean {
-  return statement.atom.predicate === 'Edge' && statement.atom.terms.length === 3;
-}
-
-function isVertexFactStatement(statement: DatalogFactStatement): boolean {
-  return (statement.atom.predicate === 'Vertex' || statement.atom.predicate === 'Node')
-    && statement.atom.terms.length === 1;
-}
-
-function toEdgeFact(statement: DatalogFactStatement): OntologyEdgeFact | null {
-  const [subject, predicate, object] = statement.atom.terms;
-  const subjectId = getQuotedGraphId(subject);
-  const predicateId = getQuotedGraphId(predicate);
-  const objectId = getQuotedGraphId(object);
-
-  if (subjectId === undefined || predicateId === undefined || objectId === undefined) {
-    return null;
-  }
-
-  return edgeFact({ subjectId, predicateId, objectId });
-}
-
-function toVertexFact(statement: DatalogFactStatement): OntologyVertexFact | null {
-  const [vertexIdTerm] = statement.atom.terms;
-  const id = getQuotedGraphId(vertexIdTerm);
-
-  if (id === undefined) {
-    return null;
-  }
-
-  return vertexFact(id);
-}
-
-function getQuotedGraphId(term: DatalogAtomArgument | undefined): string | undefined {
-  if (term === undefined || term.kind === 'named' || term.kind !== 'constant' || typeof term.value !== 'string') {
-    return undefined;
-  }
-
-  return term.value;
-}
-
-function expandCompoundBacklinks(
-  clause: ReturnType<typeof parseDocument>['clauses'][number],
-  nodeIds: Set<string>,
-  edgeFacts: OntologyEdgeFact[],
-): void {
-  const compoundFieldValues = new Map<string, string>();
-
-  for (const [index, field] of clause.compoundFields.entries()) {
-    const reference = clause.references[index];
-
-    if (reference !== undefined) {
-      compoundFieldValues.set(field, reference.value);
-    }
-  }
-
-  const cid = compoundFieldValues.get('cid');
-
-  if (cid !== undefined) {
-    for (const [field, value] of compoundFieldValues) {
-      if (field === 'cid') {
+  for (const migration of migrations) {
+    for (const clause of parseDocument(migration.body).clauses) {
+      if (!clause.isCompound || clause.predicate === 'DefCompound' || clause.predicate === 'DefPred') {
         continue;
       }
 
-      nodeIds.add(cid);
-      nodeIds.add(value);
-      edgeFacts.push(edgeFact({
-        subjectId: cid,
-        predicateId: field,
-        objectId: value,
-      }));
+      const schema = compoundSchemas.get(clause.predicate);
+
+      if (schema === undefined) {
+        continue;
+      }
+
+      const fieldValues = collectCompoundFieldValues(clause);
+      const cid = fieldValues.get('cid');
+
+      if (cid === undefined) {
+        continue;
+      }
+
+      for (const field of schema.fields) {
+        const value = fieldValues.get(field.fieldName);
+
+        if (value === undefined) {
+          continue;
+        }
+
+        edges.push(edgeFact({
+          subjectId: cid,
+          predicateId: field.fieldName,
+          objectId: value,
+        }));
+      }
     }
   }
 
-  const backlink = createCompoundBacklink(clause.predicate, compoundFieldValues);
+  return edges;
+}
 
-  if (backlink === undefined) {
+const expandOntologyCompoundBacklink: CompoundBacklinkExpander = ({ clause, schema }) => {
+  const backlinkSpec = ONTOLOGY_COMPOUND_BACKLINK_SPECS.get(schema.compoundName);
+
+  if (backlinkSpec === undefined) {
+    return null;
+  }
+
+  if (clause.predicate !== schema.compoundName) {
+    throw new Error(`Expected compound clause ${clause.predicate} to match schema ${schema.compoundName}.`);
+  }
+
+  const fieldValues = collectCompoundFieldValues(clause);
+  const subjectId = getRequiredCompoundFieldValue({
+    schema,
+    fieldName: backlinkSpec.subjectFieldName,
+    fieldValues,
+  });
+  const objectId = backlinkSpec.useCidAsObject === true
+    ? getRequiredCompoundIdentity(fieldValues, schema)
+    : getRequiredCompoundFieldValue({
+        schema,
+        fieldName: backlinkSpec.objectFieldName,
+        fieldValues,
+      });
+
+  return edgeFact({
+    subjectId,
+    predicateId: backlinkSpec.predicateId,
+    objectId,
+  });
+};
+
+function collectCompoundFieldValues(
+  clause: Parameters<CompoundBacklinkExpander>[0]['clause'],
+): ReadonlyMap<string, string> {
+  const fieldValues = new Map<string, string>();
+
+  for (const [index, fieldName] of clause.compoundFields.entries()) {
+    const reference = clause.references[index];
+
+    if (reference !== undefined) {
+      fieldValues.set(fieldName, reference.value);
+    }
+  }
+
+  return fieldValues;
+}
+
+function getRequiredCompoundIdentity(
+  fieldValues: ReadonlyMap<string, string>,
+  schema: DefCompoundSchema,
+): string {
+  const cid = fieldValues.get('cid');
+
+  if (cid === undefined) {
+    throw new Error(`Compound ${schema.compoundName}@ must provide a cid field for ontology backlink extraction.`);
+  }
+
+  return cid;
+}
+
+function getRequiredCompoundFieldValue(input: {
+  readonly schema: DefCompoundSchema;
+  readonly fieldName: string | undefined;
+  readonly fieldValues: ReadonlyMap<string, string>;
+}): string {
+  if (input.fieldName === undefined) {
+    throw new Error(`Compound ${input.schema.compoundName} backlink extraction requires a declared field name.`);
+  }
+
+  assertSchemaDeclaresField(input.schema, input.fieldName);
+  const value = input.fieldValues.get(input.fieldName);
+
+  if (value === undefined) {
+    throw new Error(`Compound ${input.schema.compoundName}@ must provide field ${input.fieldName} for ontology backlink extraction.`);
+  }
+
+  return value;
+}
+
+function assertSchemaDeclaresField(schema: DefCompoundSchema, fieldName: string): void {
+  if (schema.fields.some((field) => field.fieldName === fieldName)) {
     return;
   }
 
-  nodeIds.add(backlink.subjectId);
-  nodeIds.add(backlink.objectId);
-  edgeFacts.push(backlink);
-}
-
-function createCompoundBacklink(
-  predicate: string,
-  compoundFieldValues: ReadonlyMap<string, string>,
-): OntologyEdgeFact | undefined {
-  if (predicate === 'ExternalMapping') {
-    return createBacklinkEdge({
-      subjectId: compoundFieldValues.get('mapping/concept'),
-      predicateId: 'med/has_mapping',
-      objectId: compoundFieldValues.get('cid'),
-    });
-  }
-
-  if (predicate === 'MedicationClassMembership') {
-    return createBacklinkEdge({
-      subjectId: compoundFieldValues.get('clinical/medication'),
-      predicateId: 'med/has_drug_class',
-      objectId: compoundFieldValues.get('clinical/drug_class'),
-    });
-  }
-
-  return undefined;
-}
-
-function createBacklinkEdge(input: {
-  readonly subjectId: string | undefined;
-  readonly predicateId: string;
-  readonly objectId: string | undefined;
-}): OntologyEdgeFact {
-  const { subjectId, predicateId, objectId } = input;
-
-  if (subjectId === undefined || objectId === undefined) {
-    throw new Error('Committed ontology compound declarations must provide all required backlink fields.');
-  }
-
-  return edgeFact({ subjectId, predicateId, objectId });
+  throw new Error(`Compound schema ${schema.compoundName} must declare field ${fieldName} for ontology backlink extraction.`);
 }
