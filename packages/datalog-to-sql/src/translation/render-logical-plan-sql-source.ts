@@ -81,14 +81,14 @@ function renderScanSource(node: LogicalScanNode, catalog: PredicateCatalog): str
   const predicate = getPredicateBinding(catalog, node.predicate, node.output.length);
   const storage = predicate.storage;
 
-  if (storage.kind !== 'postgres-table' && storage.kind !== 'postgres-view') {
+  if (storage === undefined) {
     throw new GraphTranslationError(
       'UNSUPPORTED_GRAPH_PREDICATE',
-      `Unsupported storage binding ${storage.kind} for ${String(predicate.signature.name)}/${predicate.signature.arity}.`,
+      `Unsupported external predicate ${String(predicate.signature.name)}/${predicate.signature.arity} for SQL rendering.`,
     );
   }
 
-  return `${quoteRelationName(storage)} ${node.id}`;
+  return `${renderStorageRelationName(storage, predicate)} ${node.id}`;
 }
 
 function getPredicateBinding(catalog: PredicateCatalog, predicateName: string, arity: number): PredicateBinding {
@@ -135,6 +135,21 @@ function expectProjectNode(node: LogicalPlanNode): LogicalProjectNode {
 
 function createUnsupportedNodeError(kind: LogicalPlanNode['kind']): GraphTranslationError {
   return new GraphTranslationError('UNSUPPORTED_LOGICAL_PLAN_NODE', `Unsupported logical plan node ${kind}.`);
+}
+
+function renderStorageRelationName(storage: PredicateStorageBinding, predicate: PredicateBinding): string {
+  if (storage.kind === 'work-table') {
+    return quoteIdentifier(storage.relationName);
+  }
+
+  if (storage.kind === 'postgres-table' || storage.kind === 'postgres-view') {
+    return quoteRelationName(storage);
+  }
+
+  throw new GraphTranslationError(
+    'UNSUPPORTED_GRAPH_PREDICATE',
+    `Unsupported storage binding ${storage.kind} for ${String(predicate.signature.name)}/${predicate.signature.arity}.`,
+  );
 }
 
 function quoteRelationName(storage: Extract<PredicateStorageBinding, { kind: 'postgres-table' | 'postgres-view' }>): string {

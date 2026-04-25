@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
-import { DEFAULT_GRAPH_PREDICATE_CATALOG } from './default-graph-predicate-catalog.js';
+import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from './default-graph-predicate-catalog.js';
 import { compileSelectFactsLogicalPlan } from './compile-select-facts-logical-plan.js';
 import { renderLogicalPlanToSql } from './render-logical-plan-to-sql.js';
 
@@ -36,7 +36,7 @@ describe('renderLogicalPlanToSql', () => {
           },
         ],
       },
-      DEFAULT_GRAPH_PREDICATE_CATALOG,
+      DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
     );
 
     expect(renderLogicalPlanToSql(plan)).toEqual({
@@ -60,7 +60,7 @@ describe('renderLogicalPlanToSql', () => {
           },
         ],
       },
-      DEFAULT_GRAPH_PREDICATE_CATALOG,
+      DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
     );
 
     expect(renderLogicalPlanToSql(plan)).toEqual({
@@ -84,10 +84,10 @@ describe('renderLogicalPlanToSql', () => {
           },
         ],
       },
-      DEFAULT_GRAPH_PREDICATE_CATALOG,
+      DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
     );
 
-    const edgePredicate = DEFAULT_GRAPH_PREDICATE_CATALOG.predicates.find((predicate) => {
+    const edgePredicate = DEFAULT_SELECT_FACTS_PREDICATE_CATALOG.predicates.find((predicate) => {
       return predicate.signature.name === 'edge' && predicate.signature.arity === 3;
     });
 
