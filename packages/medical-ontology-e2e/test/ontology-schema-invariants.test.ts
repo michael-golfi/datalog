@@ -1,7 +1,8 @@
+import { describe, expect, it } from 'vitest';
+
 import { generateCompoundIdentity, isDatalogSchema, isDefCompoundSchema } from '@datalog/ast';
 import { extractDatalogSchemaFromMigrations, loadDatalogMigrationProjectFiles } from '@datalog/datalog-migrate';
 import { parseDocument } from '@datalog/parser';
-import { describe, expect, it } from 'vitest';
 
 import { resolveMedicalOntologyWorkspacePath } from './fixtures/medical-ontology-workspace-path-support.js';
 
