@@ -7,10 +7,14 @@ import type {
 } from '@datalog/ast';
 
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
 
 /** Convert a shared Datalog query AST into the SQL package's select-facts operation envelope. */
-export function createSelectFactsOperationFromDatalogQuery(query: DatalogQueryStatement): SelectFactsOperation {
+export function createSelectFactsOperationFromDatalogQuery(
+  query: DatalogQueryStatement,
+  predicateCatalog: PredicateCatalog,
+): SelectFactsOperation {
   const [firstPattern, ...remainingPatterns] = query.body.map((literal) => {
     if (literal.kind !== 'atom') {
       throw new GraphTranslationError(
@@ -31,6 +35,7 @@ export function createSelectFactsOperationFromDatalogQuery(query: DatalogQuerySt
 
   return {
     kind: 'select-facts',
+    predicateCatalog,
     match: [firstPattern, ...remainingPatterns],
   };
 }

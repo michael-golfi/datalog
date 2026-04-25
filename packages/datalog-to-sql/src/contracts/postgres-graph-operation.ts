@@ -1,7 +1,12 @@
 import type {
+  DatalogFactStatement,
   DatalogFactPatternMatch,
   DatalogFactSet,
+  DatalogPredicateName,
+  DatalogTerm,
+  DefCompoundSchema,
 } from '@datalog/ast';
+import type { PredicateCatalog } from './predicate-catalog.js';
 
 export interface SelectVertexByIdOperation {
   readonly kind: 'select-vertex-by-id';
@@ -17,14 +22,29 @@ export interface SelectEdgesOperation {
   };
 }
 
+export interface SelectPredicatePattern {
+  readonly kind: 'predicate';
+  readonly predicate: DatalogPredicateName;
+  readonly terms: readonly [DatalogTerm, ...DatalogTerm[]];
+}
+
+export type SelectFactPattern = DatalogFactPatternMatch[number] | SelectPredicatePattern;
+
 export interface SelectFactsOperation {
   readonly kind: 'select-facts';
-  readonly match: DatalogFactPatternMatch;
+  readonly predicateCatalog: PredicateCatalog;
+  readonly match: readonly [SelectFactPattern, ...SelectFactPattern[]];
 }
 
 export interface InsertFactsOperation {
   readonly kind: 'insert-facts';
   readonly facts: DatalogFactSet;
+}
+
+export interface InsertCompoundAssertionOperation {
+  readonly kind: 'insert-compound-assertion';
+  readonly schema: DefCompoundSchema;
+  readonly assertion: DatalogFactStatement;
 }
 
 export interface DeleteFactsOperation {
@@ -43,5 +63,6 @@ export type PostgresGraphOperation =
   | SelectEdgesOperation
   | SelectFactsOperation
   | InsertFactsOperation
+  | InsertCompoundAssertionOperation
   | DeleteFactsOperation
   | SelectRecursiveClosureCountOperation;

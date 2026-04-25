@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { defPredSchema } from '@datalog/ast';
 
 import { applyDatalogFacts } from './apply-datalog-facts.js';
 import { createQueryCountTracker } from './query-count-tracker.js';
@@ -12,7 +13,25 @@ import {
   startRecursiveClosurePostgresRuntime,
   waitForPostgres,
 } from '../runtime/recursive-closure-postgres-runtime.js';
+import { buildPredicateCatalogFromSchema } from '../translation/build-predicate-catalog-from-schema.js';
 import { translateGraphOperation } from '../translation/translate-graph-operation.js';
+
+const GRAPH_PREDICATE_CATALOG = buildPredicateCatalogFromSchema([
+  defPredSchema({
+    predicateName: 'vertex',
+    subjectCardinality: '1',
+    subjectDomain: 'node',
+    objectCardinality: '0',
+    objectDomain: 'node',
+  }),
+  defPredSchema({
+    predicateName: 'edge',
+    subjectCardinality: '0',
+    subjectDomain: 'node',
+    objectCardinality: '0',
+    objectDomain: 'node',
+  }),
+]);
 
 describe('postgres e2e validation', () => {
   const runtime = startRecursiveClosurePostgresRuntime(DEFAULT_RECURSIVE_CLOSURE_BENCHMARK_CONTRACT);
@@ -48,6 +67,7 @@ describe('postgres e2e validation', () => {
 
     const selectResult = translateGraphOperation({
       kind: 'select-facts',
+      predicateCatalog: GRAPH_PREDICATE_CATALOG,
       match: [
         { kind: 'vertex', id: { kind: 'variable', name: 'person' } },
         {
@@ -159,6 +179,7 @@ describe('postgres e2e validation', () => {
 
     const selectedFacts = await executeTrackedOperation<{ person: string }>({
       kind: 'select-facts',
+      predicateCatalog: GRAPH_PREDICATE_CATALOG,
       match: [
         { kind: 'vertex', id: { kind: 'variable', name: 'person' } },
         {

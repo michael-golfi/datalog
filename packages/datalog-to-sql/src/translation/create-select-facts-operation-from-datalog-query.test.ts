@@ -2,8 +2,14 @@ import { queryStatement } from '@datalog/ast';
 import { describe, expect, it } from 'vitest';
 
 import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
+import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 
 import { createSelectFactsOperationFromDatalogQuery } from './create-select-facts-operation-from-datalog-query.js';
+
+const EMPTY_PREDICATE_CATALOG = {
+  version: 1,
+  predicates: [],
+} satisfies PredicateCatalog;
 
 describe('createSelectFactsOperationFromDatalogQuery', () => {
   it('maps a single Vertex atom into a select-facts vertex pattern', () => {
@@ -22,8 +28,9 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
       ],
     });
 
-    expect(createSelectFactsOperationFromDatalogQuery(query)).toEqual({
+    expect(createSelectFactsOperationFromDatalogQuery(query, EMPTY_PREDICATE_CATALOG)).toEqual({
       kind: 'select-facts',
+      predicateCatalog: EMPTY_PREDICATE_CATALOG,
       match: [
         {
           kind: 'vertex',
@@ -78,8 +85,9 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
       ],
     });
 
-    expect(createSelectFactsOperationFromDatalogQuery(query)).toEqual({
+    expect(createSelectFactsOperationFromDatalogQuery(query, EMPTY_PREDICATE_CATALOG)).toEqual({
       kind: 'select-facts',
+      predicateCatalog: EMPTY_PREDICATE_CATALOG,
       match: [
         {
           kind: 'edge',
@@ -135,7 +143,7 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
       ],
     });
 
-    expect(() => createSelectFactsOperationFromDatalogQuery(query)).toThrowError(
+    expect(() => createSelectFactsOperationFromDatalogQuery(query, EMPTY_PREDICATE_CATALOG)).toThrowError(
       expect.objectContaining<Partial<GraphTranslationError>>({
         name: 'GraphTranslationError',
         code: 'datalog-to-sql.query.unsupported-atom',
@@ -149,7 +157,7 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
       createSelectFactsOperationFromDatalogQuery({
         kind: 'query',
         body: [] as unknown as Parameters<typeof createSelectFactsOperationFromDatalogQuery>[0]['body'],
-      }),
+      }, EMPTY_PREDICATE_CATALOG),
     ).toThrowError(
       expect.objectContaining<Partial<GraphTranslationError>>({
         name: 'GraphTranslationError',
@@ -177,7 +185,7 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
       ] as unknown as Parameters<typeof queryStatement>[0]['body'],
     });
 
-    expect(() => createSelectFactsOperationFromDatalogQuery(query)).toThrowError(
+    expect(() => createSelectFactsOperationFromDatalogQuery(query, EMPTY_PREDICATE_CATALOG)).toThrowError(
       expect.objectContaining<Partial<GraphTranslationError>>({
         name: 'GraphTranslationError',
         code: 'datalog-to-sql.query.unsupported-literal',
@@ -206,7 +214,7 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
       ] as unknown as Parameters<typeof queryStatement>[0]['body'],
     });
 
-    expect(() => createSelectFactsOperationFromDatalogQuery(query)).toThrowError(
+    expect(() => createSelectFactsOperationFromDatalogQuery(query, EMPTY_PREDICATE_CATALOG)).toThrowError(
       expect.objectContaining<Partial<GraphTranslationError>>({
         name: 'GraphTranslationError',
         code: 'datalog-to-sql.query.unsupported-term',
