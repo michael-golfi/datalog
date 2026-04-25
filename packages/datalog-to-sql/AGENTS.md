@@ -18,9 +18,15 @@
 - This package owns only generic SQL/runtime/translation helpers.
 - It must not own canonical medical ontology migrations, ontology fixture source-of-truth files, or ontology-specific assertion logic.
 
+## Benchmark seams
+
+- Keep recursive-closure benchmark contracts, fixtures, validation, and runner code under `src/benchmarks/`.
+- When benchmark behavior changes, run the benchmark validation command in addition to normal package checks.
+
 ## Verification
 
 - `yarn workspace @datalog/datalog-to-sql lint`
 - `yarn workspace @datalog/datalog-to-sql typecheck`
 - `yarn workspace @datalog/datalog-to-sql build`
 - `yarn workspace @datalog/datalog-to-sql test`
+- `yarn workspace @datalog/datalog-to-sql benchmark:recursive-closure:validate` when benchmark code changes
