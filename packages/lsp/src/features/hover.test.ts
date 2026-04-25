@@ -19,8 +19,54 @@ describe('computeHover', () => {
       character: line.indexOf('food/has_cuisine') + 4,
     });
 
-    expect(hover?.contents).toContain('Graph predicate contract');
-    expect(hover?.contents).toContain('liquid/node');
+    expect(hover?.contents).toContain('Runtime predicate schema.');
+    expect(hover?.contents).toContain('`node`');
+  });
+
+  it('describes DefCompound field schema with normalized domain and cardinality', () => {
+    const source = [
+      'DefCompound("Serving", "serv/id", "1", "liquid/node").',
+      'DefCompound("Serving", "serv/unit", "?", "liquid/string").',
+    ].join('\n');
+
+    const hover = computeHover(source, {
+      line: 0,
+      character: source.indexOf('serv/id') + 2,
+    });
+
+    expect(hover?.contents).toContain('**serv/id**');
+    expect(hover?.contents).toContain('Compound field on `Serving@`.');
+    expect(hover?.contents).toContain('- domain: `node`');
+    expect(hover?.contents).toContain('- cardinality: `1`');
+  });
+
+  it('describes compound field usages from workspace-backed schema metadata', async () => {
+    const workspaceRoot = await createWorkspaceRoot();
+
+    try {
+      const currentUri = pathToFileURL(join(workspaceRoot, 'current.dl')).href;
+      const source = 'Serving@(serv/id="serv/chickpea_bowl").';
+
+      await writeWorkspaceFile(workspaceRoot, 'schema.dl', [
+        'DefCompound("Serving", "serv/id", "1", "liquid/node").',
+        'DefCompound("Serving", "serv/unit", "?", "liquid/string").',
+      ].join('\n'));
+
+      const workspaceIndex = await createWorkspaceIndex(workspaceRoot, currentUri, source);
+      const hover = computeHover(source, {
+        line: 0,
+        character: source.indexOf('serv/id') + 2,
+      }, {
+        targetUri: currentUri,
+        workspaceIndex,
+      });
+
+      expect(hover?.contents).toContain('**serv/id**');
+      expect(hover?.contents).toContain('- domain: `node`');
+      expect(hover?.contents).toContain('- cardinality: `1`');
+    } finally {
+      await rm(workspaceRoot, { recursive: true, force: true });
+    }
   });
 
   it('describes nodes using self-describing graph metadata', () => {
@@ -117,9 +163,9 @@ describe('computeHover', () => {
       });
 
       expect(hover?.contents).toContain('**food/has_cuisine**');
-      expect(hover?.contents).toContain('Graph predicate contract.');
-      expect(hover?.contents).toContain('- subject: `liquid/node` (cardinality `0`)');
-      expect(hover?.contents).toContain('- object: `liquid/string` (cardinality `1`)');
+      expect(hover?.contents).toContain('Runtime predicate schema.');
+      expect(hover?.contents).toContain('- subject: `node` (cardinality `0`)');
+      expect(hover?.contents).toContain('- object: `text` (cardinality `1`)');
     } finally {
       await rm(workspaceRoot, { recursive: true, force: true });
     }
@@ -161,11 +207,11 @@ describe('computeHover', () => {
     try {
       const currentUri = pathToFileURL(join(workspaceRoot, 'current.dl')).href;
       const source = [
-        'DefPred("food/has_cuisine", "0", "local/subject", "0", "local/object").',
+        'DefPred("food/has_cuisine", "0", "node", "0", "text").',
         'Edge("concept/ramen", "food/has_cuisine", "cuisine/japanese").',
       ].join('\n');
 
-      await writeWorkspaceFile(workspaceRoot, 'schema.dl', 'DefPred("food/has_cuisine", "0", "workspace/subject", "0", "workspace/object").');
+      await writeWorkspaceFile(workspaceRoot, 'schema.dl', 'DefPred("food/has_cuisine", "0", "text", "0", "node").');
 
       const workspaceIndex = await createWorkspaceIndex(workspaceRoot, currentUri, source);
       const hover = computeHover(source, {
@@ -176,10 +222,10 @@ describe('computeHover', () => {
         workspaceIndex,
       });
 
-      expect(hover?.contents).toContain('local/subject');
-      expect(hover?.contents).toContain('local/object');
-      expect(hover?.contents).not.toContain('workspace/subject');
-      expect(hover?.contents).not.toContain('workspace/object');
+      expect(hover?.contents).toContain('- subject: `node` (cardinality `0`)');
+      expect(hover?.contents).toContain('- object: `text` (cardinality `0`)');
+      expect(hover?.contents).not.toContain('- subject: `text` (cardinality `0`)');
+      expect(hover?.contents).not.toContain('- object: `node` (cardinality `0`)');
     } finally {
       await rm(workspaceRoot, { recursive: true, force: true });
     }
