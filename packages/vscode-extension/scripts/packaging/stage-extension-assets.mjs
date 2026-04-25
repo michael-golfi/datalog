@@ -1,13 +1,26 @@
-import { cp, mkdir, writeFile } from 'node:fs/promises';
+import { cp, mkdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { compiledExtensionRelativeRoot, extensionRoot } from './extension-package-paths.mjs';
 import { createLanguageServerModuleResolverSource } from './create-language-server-module-resolver-source.mjs';
 import { createStageExtensionManifest } from './create-stage-extension-manifest.mjs';
 
-export async function copyStageAsset(stageRoot, relativePath) {
+export async function copyStageAsset(stageRoot, relativePath, options = {}) {
+  const { allowMissing = false } = options;
   const sourcePath = path.join(extensionRoot, relativePath);
   const destinationPath = path.join(stageRoot, relativePath);
+
+  if (allowMissing) {
+    try {
+      await stat(sourcePath);
+    } catch (error) {
+      if (error?.code === 'ENOENT') {
+        return;
+      }
+
+      throw error;
+    }
+  }
 
   await cp(sourcePath, destinationPath, { recursive: true });
 }

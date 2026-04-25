@@ -27,6 +27,7 @@ export async function createPackageStage(options = {}) {
   const {
     stageRoot = defaultStageRoot,
     languageServerModuleId = defaultLanguageServerModuleId,
+    allowMissingCompiledExtension = false,
   } = options;
   const extensionManifest = await readJson(new URL('../../package.json', import.meta.url));
   const stagedExternalPackages = new Set();
@@ -34,7 +35,9 @@ export async function createPackageStage(options = {}) {
   await rm(stageRoot, { recursive: true, force: true });
   await mkdir(stageRoot, { recursive: true });
   await writeStageExtensionManifest(stageRoot, extensionManifest);
-  await copyStageAsset(stageRoot, compiledExtensionRelativeRoot);
+  await copyStageAsset(stageRoot, compiledExtensionRelativeRoot, {
+    allowMissing: allowMissingCompiledExtension,
+  });
   await copyStageAsset(stageRoot, 'syntaxes');
   await copyStageAsset(stageRoot, 'language-configuration.json');
   await copyStageAsset(stageRoot, 'README.md');

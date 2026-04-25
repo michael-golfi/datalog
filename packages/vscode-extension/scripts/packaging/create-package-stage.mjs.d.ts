@@ -42,4 +42,5 @@ export function createStageExtensionManifest(
 export function createPackageStage(options?: {
   stageRoot?: string;
   languageServerModuleId?: string;
+  allowMissingCompiledExtension?: boolean;
 }): Promise<string>;
