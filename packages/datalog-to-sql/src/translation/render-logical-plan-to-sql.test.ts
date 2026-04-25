@@ -1,17 +1,36 @@
 import { describe, expect, it } from 'vitest';
+import { defPredSchema } from '@datalog/ast';
 
 import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
-import { DEFAULT_GRAPH_PREDICATE_CATALOG } from './default-graph-predicate-catalog.js';
+import { buildPredicateCatalogFromSchema } from './build-predicate-catalog-from-schema.js';
 import { compileSelectFactsLogicalPlan } from './compile-select-facts-logical-plan.js';
 import { renderLogicalPlanToSql } from './render-logical-plan-to-sql.js';
+
+const GRAPH_PREDICATE_CATALOG = buildPredicateCatalogFromSchema([
+  defPredSchema({
+    predicateName: 'vertex',
+    subjectCardinality: '1',
+    subjectDomain: 'node',
+    objectCardinality: '0',
+    objectDomain: 'node',
+  }),
+  defPredSchema({
+    predicateName: 'edge',
+    subjectCardinality: '0',
+    subjectDomain: 'node',
+    objectCardinality: '0',
+    objectDomain: 'node',
+  }),
+]);
 
 describe('renderLogicalPlanToSql', () => {
   it('renders the shared logical plan for the likes query with explicit joins and parameters', () => {
     const plan = compileSelectFactsLogicalPlan(
-      {
-        kind: 'select-facts',
-        match: [
+        {
+          kind: 'select-facts',
+          predicateCatalog: GRAPH_PREDICATE_CATALOG,
+          match: [
           {
             kind: 'vertex',
             id: {
@@ -36,7 +55,7 @@ describe('renderLogicalPlanToSql', () => {
           },
         ],
       },
-      DEFAULT_GRAPH_PREDICATE_CATALOG,
+      GRAPH_PREDICATE_CATALOG,
     );
 
     expect(renderLogicalPlanToSql(plan)).toEqual({
@@ -48,9 +67,10 @@ describe('renderLogicalPlanToSql', () => {
 
   it('renders a filter-only logical plan as a select distinct with a where clause', () => {
     const plan = compileSelectFactsLogicalPlan(
-      {
-        kind: 'select-facts',
-        match: [
+        {
+          kind: 'select-facts',
+          predicateCatalog: GRAPH_PREDICATE_CATALOG,
+          match: [
           {
             kind: 'vertex',
             id: {
@@ -60,7 +80,7 @@ describe('renderLogicalPlanToSql', () => {
           },
         ],
       },
-      DEFAULT_GRAPH_PREDICATE_CATALOG,
+      GRAPH_PREDICATE_CATALOG,
     );
 
     expect(renderLogicalPlanToSql(plan)).toEqual({
@@ -72,9 +92,10 @@ describe('renderLogicalPlanToSql', () => {
 
   it('throws the structured graph translation error for unsupported predicate catalog lookups', () => {
     const plan = compileSelectFactsLogicalPlan(
-      {
-        kind: 'select-facts',
-        match: [
+        {
+          kind: 'select-facts',
+          predicateCatalog: GRAPH_PREDICATE_CATALOG,
+          match: [
           {
             kind: 'vertex',
             id: {
@@ -84,10 +105,10 @@ describe('renderLogicalPlanToSql', () => {
           },
         ],
       },
-      DEFAULT_GRAPH_PREDICATE_CATALOG,
+      GRAPH_PREDICATE_CATALOG,
     );
 
-    const edgePredicate = DEFAULT_GRAPH_PREDICATE_CATALOG.predicates.find((predicate) => {
+    const edgePredicate = GRAPH_PREDICATE_CATALOG.predicates.find((predicate) => {
       return predicate.signature.name === 'edge' && predicate.signature.arity === 3;
     });
 

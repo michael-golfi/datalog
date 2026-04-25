@@ -44,10 +44,7 @@ export function renderSource(nodeId: string, context: RenderContext): RenderedSo
   }
 
   if (node.kind === 'scan') {
-    return {
-      from: renderScanSource(node, context.plan.catalog),
-      where: [],
-    };
+    return renderScanSource(node, context.plan.catalog);
   }
 
   throw createUnsupportedNodeError(node.kind);
@@ -77,7 +74,7 @@ function renderFilterSource(node: LogicalFilterNode, context: RenderContext): Re
   };
 }
 
-function renderScanSource(node: LogicalScanNode, catalog: PredicateCatalog): string {
+function renderScanSource(node: LogicalScanNode, catalog: PredicateCatalog): RenderedSource {
   const predicate = getPredicateBinding(catalog, node.predicate, node.output.length);
   const storage = predicate.storage;
 
@@ -88,7 +85,10 @@ function renderScanSource(node: LogicalScanNode, catalog: PredicateCatalog): str
     );
   }
 
-  return `${quoteRelationName(storage)} ${node.id}`;
+  return {
+    from: `${renderRelationSource(storage)} ${node.id}`,
+    where: storage.literalWhereSql === undefined ? [] : [storage.literalWhereSql],
+  };
 }
 
 function getPredicateBinding(catalog: PredicateCatalog, predicateName: string, arity: number): PredicateBinding {
@@ -138,11 +138,19 @@ function createUnsupportedNodeError(kind: LogicalPlanNode['kind']): GraphTransla
 }
 
 function quoteRelationName(storage: Extract<PredicateStorageBinding, { kind: 'postgres-table' | 'postgres-view' }>): string {
+  if (storage.kind === 'postgres-view' && storage.definitionSql !== undefined) {
+    return `(${storage.definitionSql})`;
+  }
+
   if (storage.schemaName === undefined) {
     return storage.relationName;
   }
 
   return `${quoteIdentifier(storage.schemaName)}.${quoteIdentifier(storage.relationName)}`;
+}
+
+function renderRelationSource(storage: Extract<PredicateStorageBinding, { kind: 'postgres-table' | 'postgres-view' }>): string {
+  return quoteRelationName(storage);
 }
 
 function quoteIdentifier(value: string): string {
