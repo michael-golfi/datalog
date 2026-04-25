@@ -1,9 +1,11 @@
-import type { PostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
-import { executeTranslatedSql } from './execute-translated-sql.js';
 import type { DatalogFact } from '@datalog/ast';
+
+import { executeTranslatedSql } from './execute-translated-sql.js';
 import { splitDatalogFactBatches } from './split-datalog-fact-batches.js';
 import { translateFactDelete } from '../translation/translate-fact-delete.js';
 import { translateFactInsert } from '../translation/translate-fact-insert.js';
+
+import type { PostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
 
 /** Apply a non-empty batch of Datalog facts through the generic SQL translation surface. */
 export async function applyDatalogFacts(input: {

@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { executePreparedSelectFacts } from './execute-prepared-select-facts.js';
 import { defineExternalResolverDefinition } from '../contracts/external-resolver-definition.js';
+import { compileSelectFactsLogicalPlan } from '../translation/compile-select-facts-logical-plan.js';
+import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from '../translation/default-graph-predicate-catalog.js';
+import { renderLogicalPlanToSql } from '../translation/render-logical-plan-to-sql.js';
+
 import type {
   MaterializeBeforeSqlExternalResolverDefinition,
   PostQueryHydrateExternalResolverDefinition,
@@ -8,11 +13,7 @@ import type {
 import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 import type { PreparedSelectFactsExecution } from '../contracts/prepared-select-facts-execution.js';
 import type { PostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
-import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from '../translation/default-graph-predicate-catalog.js';
-import { compileSelectFactsLogicalPlan } from '../translation/compile-select-facts-logical-plan.js';
-import { renderLogicalPlanToSql } from '../translation/render-logical-plan-to-sql.js';
 
-import { executePreparedSelectFacts } from './execute-prepared-select-facts.js';
 
 const WORK_TABLE_TEST_CATALOG = {
   version: 1,
@@ -56,6 +57,7 @@ describe('executePreparedSelectFacts', () => {
     const plan = compileSelectFactsLogicalPlan(
       {
         kind: 'select-facts',
+        predicateCatalog: WORK_TABLE_TEST_CATALOG,
         match: [
           {
             kind: 'vertex',
@@ -205,6 +207,7 @@ function createPreparedExecutionFixture(): PreparedSelectFactsExecution {
   const plan = compileSelectFactsLogicalPlan(
     {
       kind: 'select-facts',
+      predicateCatalog: WORK_TABLE_TEST_CATALOG,
       match: [
         {
           kind: 'vertex',

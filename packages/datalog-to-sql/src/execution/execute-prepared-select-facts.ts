@@ -1,22 +1,23 @@
 import type { DatalogTypeName } from '@datalog/ast';
 
+import { executeTranslatedSql } from './execute-translated-sql.js';
+import { hydrateExternalSelectFactsRows } from './hydrate-external-select-facts-rows.js';
+import { materializeExternalResolverRelations } from './materialize-external-resolver-relations.js';
+
 import type {
   ExternalResolverLookupRequest,
   ExternalResolverResult,
   ExternalResolverRow,
 } from '../contracts/external-resolver-definition.js';
 import type { SqlParameterValue } from '../contracts/physical-plan.js';
+import type { RelationColumnBinding } from '../contracts/predicate-catalog.js';
 import type {
   PreparedSelectFactsExecution,
   PreparedSelectFactsHydrationInstruction,
   PreparedSelectFactsMaterializationStep,
 } from '../contracts/prepared-select-facts-execution.js';
-import type { RelationColumnBinding } from '../contracts/predicate-catalog.js';
 import type { PostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
 
-import { executeTranslatedSql } from './execute-translated-sql.js';
-import { hydrateExternalSelectFactsRows } from './hydrate-external-select-facts-rows.js';
-import { materializeExternalResolverRelations } from './materialize-external-resolver-relations.js';
 
 type PreparedExecutionSqlClient = Pick<PostgresSqlClient, 'unsafe'>;
 type SqlWriteParameterValue = SqlParameterValue | null;
