@@ -1,4 +1,5 @@
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
 import type { SelectRecursiveClosureCountOperation } from '../contracts/postgres-graph-operation.js';
 import type { TranslatedSqlQuery } from '../contracts/translated-sql-query.js';
 

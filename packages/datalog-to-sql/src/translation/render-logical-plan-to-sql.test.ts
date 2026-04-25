@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
+
 import { defPredSchema } from '@datalog/ast';
 
-import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
-import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 import { buildPredicateCatalogFromSchema } from './build-predicate-catalog-from-schema.js';
 import { compileSelectFactsLogicalPlan } from './compile-select-facts-logical-plan.js';
 import { renderLogicalPlanToSql } from './render-logical-plan-to-sql.js';
+
+import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
+import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 
 const GRAPH_PREDICATE_CATALOG = buildPredicateCatalogFromSchema([
   defPredSchema({

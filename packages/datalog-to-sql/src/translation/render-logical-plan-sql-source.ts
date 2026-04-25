@@ -1,4 +1,7 @@
+import { renderExpression, renderJoinCondition } from './render-logical-plan-sql-expression.js';
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
+import type { RenderContext } from './render-logical-plan-sql-context.js';
 import type {
   LogicalFilterNode,
   LogicalJoinNode,
@@ -9,8 +12,6 @@ import type {
 } from '../contracts/logical-plan.js';
 import type { PredicateBinding, PredicateCatalog, PredicateStorageBinding } from '../contracts/predicate-catalog.js';
 
-import type { RenderContext } from './render-logical-plan-sql-context.js';
-import { renderExpression, renderJoinCondition } from './render-logical-plan-sql-expression.js';
 
 export interface RenderedSource {
   readonly from: string;
@@ -87,7 +88,7 @@ function renderScanSource(node: LogicalScanNode, catalog: PredicateCatalog): Ren
 
   return {
     from: `${renderStorageRelationName(storage, predicate)} ${node.id}`,
-    where: 'literalWhereSql' in storage && storage.literalWhereSql !== undefined ? [storage.literalWhereSql] : [],
+    where: 'literalWhereSql' in storage ? [storage.literalWhereSql] : [],
   };
 }
 
