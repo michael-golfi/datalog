@@ -12,11 +12,12 @@ The root package identity is `datalog`, and the workspace is organized under `pa
 The current package surfaces are:
 
 * `packages/parser` for parser contracts, syntax, semantics, and document analysis primitives
+* `packages/datalog-ast` for shared Datalog AST node contracts, builders, graph fact primitives, type guards, and visitor keys
 * `packages/datalog-to-sql` for PostgreSQL 13+ graph translation and generic SQL/runtime helpers over `vertices` and `edges`
 * `packages/datalog-migrate` for generic Datalog migration workflow tooling and Graphile-Migrate-style command behavior
 * `packages/lsp` for language-server contracts, runtime wiring, protocol mapping, and editor-facing features
 * `packages/eslint-plugin-datalog` for Datalog-specific ESLint processor and rule behavior
-* `packages/eslint-plugin-typescript` for generic TypeScript/workspace ESLint rules
+* `packages/eslint-plugin-typescript` for generic TypeScript/workspace/runtime/export/UI ESLint rules
 * `packages/medical-ontology-e2e` for the canonical medical ontology project, immutable migrations, mappings, and ontology e2e assertions
 * `packages/vscode-extension` for the VS Code extension
 
@@ -28,12 +29,13 @@ This is a Yarn 4 monorepo with workspaces under `packages/*`.
 
 Use these boundaries:
 
+* `packages/datalog-ast` owns shared Datalog AST language contracts and low-level builders/guards used by parser, SQL translation, migration tooling, and LSP packages.
 * `packages/parser` owns syntax, parsing, shared document analysis primitives, and parser-facing tests.
 * `packages/datalog-to-sql` owns Datalog-to-SQL translation behavior plus generic execution/runtime helpers and must stay independent from editor, LSP, and VS Code extension concerns.
 * `packages/datalog-migrate` owns generic Datalog migration workflow tooling and must stay independent from ontology-specific schema content and production SQL execution ownership.
 * `packages/lsp` owns language-server behavior and depends on parser package surfaces instead of reimplementing parser logic.
 * `packages/eslint-plugin-datalog` owns Datalog-specific lint processor/rule behavior only.
-* `packages/eslint-plugin-typescript` owns generic TypeScript/workspace lint rule behavior only.
+* `packages/eslint-plugin-typescript` owns generic TypeScript/workspace/runtime/export/UI lint rule behavior only.
 * `packages/medical-ontology-e2e` owns the canonical ontology project, immutable migration structure, ontology mappings, and ontology-specific assertions while remaining free of production SQL runtime ownership.
 * `packages/vscode-extension` owns editor integration and delegates protocol and analysis work to the language server.
 * Cross-workspace imports use package names, preferably `@datalog/*` when those package names exist. No cross-package relative imports.
@@ -51,6 +53,7 @@ Treat workspace entry files as boundary-only surfaces. They may wire dependencie
 * Keep workspace boundaries clear.
 * Put reusable logic in the package that owns it.
 * Prefer explicit structure over cleverness.
+* Do not provide time estimates. Work relentlessly until the task is complete, taking as much time as correctness requires.
 * After correcting an agent mistake, update `AGENTS.md` so the mistake is less likely to recur.
 
 ## Default workflow
@@ -70,15 +73,55 @@ Execution order:
 1. Read root `AGENTS.md`.
 2. Read the nearest descendant `AGENTS.md` for every touched workspace.
 3. Restate the task as one verifiable goal.
-4. Make a smallest-green-slice plan.
-5. Name the exact tests and checks before implementation.
-6. Implement with seam discipline.
-7. Run package checks first.
-8. Run root verification when required.
-9. Record evidence.
-10. If the agent got something wrong, update `AGENTS.md`.
+4. If planning in a read-only tool or from the main worktree, create a draft plan and a planning-to-worktree handoff block; do not mutate files there.
+5. Create or select the named feature worktree and materialize the canonical plan inside it before implementation.
+6. Name the exact tests and checks before implementation.
+7. Implement with seam discipline inside the feature worktree.
+8. Run package checks first.
+9. Run root verification when required.
+10. Record evidence.
+11. If the agent got something wrong, update `AGENTS.md`.
 
 If implementation starts drifting, stop and re-plan before continuing.
+
+## Feature worktree workflow
+
+Every new feature or planned implementation gets its own non-main git worktree nested under `.wt/`. Read-only planning may happen before the worktree exists, but mutation must not.
+
+Use this workflow:
+
+1. Start from a clean `main` worktree or another explicit base branch.
+2. Create or select a dedicated branch and worktree under `.wt/`, using a repo-prefixed task slug such as `.wt/datalog-vscode-my-feature`.
+3. Launch or direct the execution agent with that absolute worktree path; do not rely on it inferring or changing directories.
+4. Keep the canonical plan, code changes, validation evidence, and review context inside that feature worktree.
+5. Do not use the main worktree as scratch space for experiments, generated files, partial fixes, or feature implementation.
+6. Complete the feature in its worktree: implement, validate with the tightest relevant checks first, then broaden verification as required by this file.
+7. Merge the completed feature branch back to `main` only after validation evidence is recorded and the worktree contains no unrelated dirty state.
+8. After merge completion, remove the completed worktree, delete the local branch when it is no longer needed, and prune stale worktree metadata.
+
+If a task is only investigation and produces no planned implementation, it may stay read-only. Once it becomes feature work, create or move to a dedicated worktree before editing.
+
+## Planning-to-worktree handoff
+
+Planning tools that cannot mutate, such as Prometheus, may draft plans without creating a worktree. They must end with a handoff block rather than requiring manual plan moves or restarting context.
+
+Every handoff block must include:
+
+* task slug
+* base branch
+* branch name
+* absolute `.wt/` worktree path
+* canonical plan destination inside that worktree, usually `.sisyphus/plans/<task-slug>.md`
+* touched packages and likely files
+* exact package-local and root verification commands
+* whether an existing worktree should be reused
+
+Execution agents must do this on receipt:
+
+1. Create or reuse the named `.wt/` worktree from the handoff block.
+2. Copy or recreate the approved plan at the canonical plan destination in that worktree.
+3. Run all mutation, validation, review, and evidence capture with the worktree path as the command working directory.
+4. Do not ask the user to manually move plan files or reopen tooling unless the execution environment truly cannot target the worktree path.
 
 ## Planning rules
 
@@ -132,6 +175,7 @@ yarn build
 
 Rules:
 
+* Before evaluating lint as green, run the repo's formatter first, then the relevant lint autofix command, then the non-fixing lint command. Use checked-in scripts when available; if formatter or autofix tooling is missing, record that tooling gap instead of claiming the full lint-green sequence ran.
 * `yarn lint` is blocking. Warnings fail verification when the configured scripts treat them as failures.
 * `yarn dev` is not a verification substitute.
 
@@ -181,7 +225,8 @@ Evidence should include, where relevant:
 
 Ignore these paths unless the task explicitly requires them:
 
-* `.worktrees/**`
+* `.wt/**`
+* `.worktrees/**` (legacy only; do not create new feature worktrees here)
 * `**/dist/**`
 * `**/coverage/**`
 * `**/*.tsbuildinfo`

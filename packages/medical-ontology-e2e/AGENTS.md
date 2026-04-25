@@ -12,7 +12,7 @@
 - Do not keep a package-style `src/` tree or export surface here; this workspace is fixture/test-owned.
 - Keep helper code test-scoped and package-local under `test/fixtures/` with explicit fixture-oriented names.
 - Keep ontology meaning in Datalog files under `migrations/` rather than expanding TypeScript modeling layers.
-- Committed migrations are moving to flat dated `.dl` files, with `current.dl` reserved as the mutable working area for later CLI tasks.
+- Committed migrations use flat dated `.dl` files, with `current.dl` reserved as the mutable working area consumed by the package migration CLI scripts.
 - Keep workspace test suites under `test/**/*.test.ts` and package-local support modules under `test/fixtures/**/*.ts`.
 - Avoid deep imports into other workspaces; use `@datalog/*` package surfaces when cross-workspace dependencies become necessary in later tasks.
 - When invoking migration tooling, use `@datalog/datalog-migrate` package exports or public binaries only; do not deep-link into sibling `dist/` output or private source files.
@@ -29,6 +29,8 @@
 - `test/fixtures/medical-ontology-workspace-path-support.ts` owns package-local path resolution for tests and workspace helpers.
 - `test/fixtures/committed-ontology-facts-fixture.ts` owns domain-specific loading of committed ontology edge facts for SQL-backed verification.
 - `test/fixtures/ontology-migration-chain-fixture.ts` owns the package-local CLI workspace fixture and canonical migration-chain replay used by consumer-side tests.
+- `test/fixtures/localhost-postgres-fixture.ts` and live-postgres proof fixtures own localhost PostgreSQL verification support.
+- `test/fixtures/ontology-graph-rag-*.ts` owns package-local GraphRAG query and assertion fixtures.
 - Graphile-Migrate-style workflow tooling now lives in `@datalog/datalog-migrate` and this package consumes it through scripts/tests instead of owning the implementation directly.
 - Consumer-side tests should generate chains by writing current-state step bodies and committing them through the public CLI seam, then prove outcomes from the generated `migrations/` state rather than inspecting migration internals directly.
 
