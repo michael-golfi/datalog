@@ -1,11 +1,15 @@
 import {
+  DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
   createSelectFactsOperationFromDatalogQuery,
   type SelectFactsOperation,
 } from '@datalog/datalog-to-sql';
 import { parseDatalogQuery } from '@datalog/parser';
 
 function createSelectFactsOperation(querySource: string): SelectFactsOperation {
-  return createSelectFactsOperationFromDatalogQuery(parseDatalogQuery(querySource));
+  return createSelectFactsOperationFromDatalogQuery(
+    parseDatalogQuery(querySource),
+    DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
+  );
 }
 
 export function createPregnancyLisinoprilEvidenceOperation(): SelectFactsOperation {

@@ -1,8 +1,10 @@
 import {
+  DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
   applyDatalogFacts,
-  executeTranslatedSql,
+  executePreparedSelectFacts,
+  prepareSelectFactsExecution,
   type PostgresSqlClient,
-  translateGraphOperation,
+  type SelectFactsOperation,
 } from '@datalog/datalog-to-sql';
 
 import { loadCommittedOntologyFacts } from './committed-ontology-facts-fixture.js';
@@ -58,13 +60,13 @@ export async function createOntologyLivePostgresProofFixture(): Promise<Ontology
 
 export async function executeOntologyGraphQuery<Row extends Record<string, unknown>>(
   sql: PostgresSqlClient,
-  operation: Parameters<typeof translateGraphOperation>[0],
+  operation: SelectFactsOperation,
 ): Promise<readonly Row[]> {
-  const translated = translateGraphOperation(operation);
-
-  if (!translated.ok) {
-    throw translated.error;
-  }
-
-  return executeTranslatedSql<Row>(sql, translated.value);
+  return executePreparedSelectFacts<Row>({
+    sql,
+    execution: prepareSelectFactsExecution({
+      operation,
+      catalog: DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
+    }),
+  });
 }

@@ -1,20 +1,20 @@
 import { edgeFact, factSet, vertexFact, type DatalogFactSet } from '@datalog/ast';
 import {
+  DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
   createSelectFactsOperationFromDatalogQuery,
   type SelectFactsOperation,
-  type SelectVertexByIdOperation,
 } from '@datalog/datalog-to-sql';
 import { parseDatalogQuery } from '@datalog/parser';
 
 function createSelectFactsOperation(querySource: string): SelectFactsOperation {
-  return createSelectFactsOperationFromDatalogQuery(parseDatalogQuery(querySource));
+  return createSelectFactsOperationFromDatalogQuery(
+    parseDatalogQuery(querySource),
+    DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
+  );
 }
 
-export function createVertexByIdOperation(vertexId: string): SelectVertexByIdOperation {
-  return {
-    kind: 'select-vertex-by-id',
-    vertexId,
-  } as const;
+export function createVertexLookupByPreferredLabelOperation(label: string): SelectFactsOperation {
+  return createSelectFactsOperation(`Edge(id, "onto/preferred_label", "${label}").`);
 }
 
 export function createPreferredLabelOperation(subjectId: string, variableName = 'label'): SelectFactsOperation {
