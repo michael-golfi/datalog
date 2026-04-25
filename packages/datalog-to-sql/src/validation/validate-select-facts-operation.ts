@@ -1,4 +1,4 @@
-import type { DatalogFactPattern, DatalogTerm } from '@datalog/ast';
+import type { DatalogTerm } from '@datalog/ast';
 
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
 import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
@@ -10,7 +10,14 @@ export function validateSelectFactsOperation(operation: SelectFactsOperation): v
   }
 }
 
-function validateFactPattern(pattern: DatalogFactPattern): void {
+function validateFactPattern(pattern: SelectFactsOperation['match'][number]): void {
+  if (pattern.kind === 'predicate') {
+    for (const term of pattern.terms) {
+      validateTerm(term);
+    }
+    return;
+  }
+
   if (pattern.kind === 'vertex') {
     validateTerm(pattern.id);
     return;
