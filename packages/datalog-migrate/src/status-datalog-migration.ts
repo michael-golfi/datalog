@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { loadDatalogMigrationProjectFiles } from './load-datalog-migration-project-files.js';
@@ -40,7 +40,9 @@ export interface DatalogMigrationStatus {
 /** Inspect the current-vs-committed Datalog migration state using the flat migration workflow. */
 export function readMigrationStatus(options: DatalogMigrationStatusOptions = {}): DatalogMigrationStatus {
   const projectFiles = loadDatalogMigrationProjectFiles(options);
-  const currentSource = readFileSync(projectFiles.currentMigrationPath, 'utf8');
+  const currentSource = existsSync(projectFiles.currentMigrationPath)
+    ? readFileSync(projectFiles.currentMigrationPath, 'utf8')
+    : '';
   const hasCurrentChanges = hasMeaningfulCurrentContent(currentSource);
   const committedPresent = projectFiles.committedMigrations.length > 0;
   const reconciliation = options.appliedMigrationState
