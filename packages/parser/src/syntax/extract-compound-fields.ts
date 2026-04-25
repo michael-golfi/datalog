@@ -190,7 +190,7 @@ function readFieldAssignment(
   FIELD_PATTERN.lastIndex = startIndex;
   const match = FIELD_PATTERN.exec(text);
 
-  if (match === null || match.index !== startIndex) {
+  if (match?.index !== startIndex) {
     return null;
   }
 
