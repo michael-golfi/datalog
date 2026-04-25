@@ -34,22 +34,15 @@ describe('computeFoldingRanges', () => {
   });
 
   it('folds incomplete multiline clauses only when the parser returns a valid multiline clause range', () => {
-    const source = [
-      'Parent(child, parent) :-',
-      '  Edge(child, "food/subclass_of", parent)',
-    ].join('\n');
+    const source = ['Parent(child, parent) :-', '  Edge(child, "food/subclass_of", parent)'].join(
+      '\n',
+    );
 
-    expect(computeFoldingRanges(source)).toEqual([
-      { startLine: 0, endLine: 1, kind: 'region' },
-    ]);
+    expect(computeFoldingRanges(source)).toEqual([{ startLine: 0, endLine: 1, kind: 'region' }]);
   });
 
   it('never emits single-line or inverted ranges for malformed input', () => {
-    const source = [
-      '% comment',
-      'Parent(child, parent).',
-      ':- invalid(',
-    ].join('\n');
+    const source = ['% comment', 'Parent(child, parent).', ':- invalid('].join('\n');
 
     expect(computeFoldingRanges(source)).toEqual([]);
   });

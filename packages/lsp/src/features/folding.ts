@@ -5,12 +5,14 @@ import type { LanguageServerFoldingRange } from '../contracts/language-feature-t
 /** Compute folding ranges for comment blocks and multiline clauses. */
 export function computeFoldingRanges(source: string): LanguageServerFoldingRange[] {
   const commentRanges = collectCommentRanges(source);
-  const clauseRanges = parseDocument(source).clauses
-    .map((clause) => createFoldingRange({
-      startLine: clause.range.start.line,
-      endLine: clause.range.end.line,
-      kind: 'region',
-    }))
+  const clauseRanges = parseDocument(source)
+    .clauses.map((clause) =>
+      createFoldingRange({
+        startLine: clause.range.start.line,
+        endLine: clause.range.end.line,
+        kind: 'region',
+      }),
+    )
     .filter((range): range is LanguageServerFoldingRange => range !== null);
 
   return [...commentRanges, ...clauseRanges].sort(compareFoldingRanges);
