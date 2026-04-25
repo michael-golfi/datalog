@@ -1,13 +1,18 @@
-import type { Rule } from 'eslint';
-
-import { createImportLikeVisitors, getImportSourceReportNode, getStaticSourceValue } from '../shared/imports.js';
+import {
+  createImportLikeVisitors,
+  getImportSourceReportNode,
+  getStaticSourceValue,
+} from '../shared/imports.js';
 import { resolvesToIndexBarrel } from '../shared/paths.js';
+
+import type { Rule } from 'eslint';
 
 export const noInternalBarrelImports: Rule.RuleModule = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Disallow internal imports from index barrels, which hide dependencies and create cycles.',
+      description:
+        'Disallow internal imports from index barrels, which hide dependencies and create cycles.',
     },
     schema: [],
     messages: {
@@ -16,7 +21,12 @@ export const noInternalBarrelImports: Rule.RuleModule = {
     },
   },
   create(context) {
-    function checkNode(node: { type: string; source?: unknown; callee?: unknown; arguments?: unknown[] }): void {
+    function checkNode(node: {
+      type: string;
+      source?: unknown;
+      callee?: unknown;
+      arguments?: unknown[];
+    }): void {
       const importSource = getStaticSourceValue(node);
 
       if (!importSource || !resolvesToIndexBarrel(context.getFilename(), importSource)) {

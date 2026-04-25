@@ -1,6 +1,6 @@
-import type { Rule } from 'eslint';
-
 import { getExportedFunctionNode, isBooleanTypeAnnotation } from '../shared/export-ast.js';
+
+import type { Rule } from 'eslint';
 
 interface IdentifierParameter {
   type?: string;
@@ -9,6 +9,24 @@ interface IdentifierParameter {
       type?: string;
     } | null;
   } | null;
+}
+
+function reportBooleanFlagParameters(
+  context: Rule.RuleContext,
+  parameters: readonly unknown[],
+): void {
+  for (const parameter of parameters) {
+    const identifier = parameter as IdentifierParameter;
+
+    if (identifier.type !== 'Identifier' || !isBooleanTypeAnnotation(identifier.typeAnnotation)) {
+      continue;
+    }
+
+    context.report({
+      node: parameter as never,
+      messageId: 'booleanFlag',
+    });
+  }
 }
 
 export const noBooleanFlagsOnExportedFunctions: Rule.RuleModule = {
@@ -32,34 +50,19 @@ export const noBooleanFlagsOnExportedFunctions: Rule.RuleModule = {
           return;
         }
 
-        for (const parameter of functionNode.params) {
-          const identifier = parameter as IdentifierParameter;
-
-          if (identifier.type === 'Identifier' && isBooleanTypeAnnotation(identifier.typeAnnotation)) {
-            context.report({
-              node: parameter,
-              messageId: 'booleanFlag',
-            });
-          }
-        }
+        reportBooleanFlagParameters(context, functionNode.params);
       },
       ExportDefaultDeclaration(node) {
         const declaration = node.declaration;
 
-        if (declaration.type !== 'FunctionDeclaration' && declaration.type !== 'FunctionExpression') {
+        if (
+          declaration.type !== 'FunctionDeclaration' &&
+          declaration.type !== 'FunctionExpression'
+        ) {
           return;
         }
 
-        for (const parameter of declaration.params) {
-          const identifier = parameter as IdentifierParameter;
-
-          if (identifier.type === 'Identifier' && isBooleanTypeAnnotation(identifier.typeAnnotation)) {
-            context.report({
-              node: parameter,
-              messageId: 'booleanFlag',
-            });
-          }
-        }
+        reportBooleanFlagParameters(context, declaration.params);
       },
     };
   },

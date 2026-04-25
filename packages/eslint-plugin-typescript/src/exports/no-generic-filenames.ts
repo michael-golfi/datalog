@@ -1,8 +1,8 @@
 import path from 'node:path';
 
-import type { Rule } from 'eslint';
-
 import { genericBasenames } from '../shared/ast.js';
+
+import type { Rule } from 'eslint';
 
 export const noGenericFilenames: Rule.RuleModule = {
   meta: {

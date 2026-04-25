@@ -1,7 +1,11 @@
-import type { Rule } from 'eslint';
-
-import { createImportLikeVisitors, getImportSourceReportNode, getStaticSourceValue } from '../shared/imports.js';
+import {
+  createImportLikeVisitors,
+  getImportSourceReportNode,
+  getStaticSourceValue,
+} from '../shared/imports.js';
 import { isTestPath, resolveRelativeImport } from '../shared/paths.js';
+
+import type { Rule } from 'eslint';
 
 export const noProductionImportsFromTests: Rule.RuleModule = {
   meta: {
@@ -22,7 +26,12 @@ export const noProductionImportsFromTests: Rule.RuleModule = {
       return {};
     }
 
-    function checkNode(node: { type: string; source?: unknown; callee?: unknown; arguments?: unknown[] }): void {
+    function checkNode(node: {
+      type: string;
+      source?: unknown;
+      callee?: unknown;
+      arguments?: unknown[];
+    }): void {
       const importSource = getStaticSourceValue(node);
 
       if (!importSource) {
