@@ -1,3 +1,4 @@
+import type { DefCompoundFieldSchema } from '@datalog/ast';
 import type { parseDocument } from '@datalog/parser';
 
 import type { LanguageServerCompletionItem } from '../contracts/language-feature-types.js';
@@ -35,12 +36,12 @@ export function createNodeReferenceCompletions(options: {
 
 /** Build compound-field key completions with local fields ranked ahead of workspace fields. */
 export function createCompoundFieldCompletions(options: {
-  readonly localFields: ReadonlySet<string> | undefined;
-  readonly workspaceFields: readonly string[];
+  readonly localFields: readonly DefCompoundFieldSchema[];
+  readonly workspaceFields: readonly DefCompoundFieldSchema[];
   readonly prefix: string;
 }): LanguageServerCompletionItem[] {
   const items = new Map<string, LanguageServerCompletionItem>();
-  const localFields = [...(options.localFields ?? [])].sort((left, right) => left.localeCompare(right));
+  const localFields = [...options.localFields].sort((left, right) => left.fieldName.localeCompare(right.fieldName));
   appendCompoundFieldCompletions(items, { fields: localFields, prefix: options.prefix, sortGroup: '0' });
   appendCompoundFieldCompletions(items, { fields: options.workspaceFields, prefix: options.prefix, sortGroup: '1' });
   return [...items.values()].sort(compareCompletionItems);
@@ -97,22 +98,22 @@ function appendNodeReferenceCompletions(
 function appendCompoundFieldCompletions(
   items: Map<string, LanguageServerCompletionItem>,
   options: {
-    readonly fields: readonly string[];
+    readonly fields: readonly DefCompoundFieldSchema[];
     readonly prefix: string;
     readonly sortGroup: string;
   },
 ): void {
   for (const field of options.fields) {
-    if (items.has(field) || (options.prefix.length > 0 && !field.startsWith(options.prefix))) {
+    if (items.has(field.fieldName) || (options.prefix.length > 0 && !field.fieldName.startsWith(options.prefix))) {
       continue;
     }
 
-    items.set(field, {
-      label: `${field}=`,
+    items.set(field.fieldName, {
+      label: `${field.fieldName}=`,
       kind: 'property',
-      detail: 'Compound field',
-      insertText: `${field}=`,
-      sortText: `${options.sortGroup}:compound-field:${field}`,
+      detail: `Compound field · ${field.domain} · ${field.cardinality}`,
+      insertText: `${field.fieldName}=`,
+      sortText: `${options.sortGroup}:compound-field:${field.fieldName}`,
     });
   }
 }

@@ -1,4 +1,4 @@
-import { parseDocument } from '@datalog/parser';
+import { getCompoundSchemaDeclaration, parseDocument } from '@datalog/parser';
 
 import type { LanguageServerCompletionItem, Position } from '../contracts/language-feature-types.js';
 import type { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
@@ -27,6 +27,9 @@ function getCompletionItemsForSlot(
   context: CompletionContext,
 ): LanguageServerCompletionItem[] {
   const prefix = 'prefix' in slot ? slot.prefix : '';
+  const localCompoundSchema = slot.kind === 'compound-field-key'
+    ? getCompoundSchemaDeclaration(parsed.schemaDeclarations, slot.predicateName)?.schema
+    : undefined;
 
   return {
     suppressed: (): LanguageServerCompletionItem[] => [],
@@ -40,8 +43,8 @@ function getCompletionItemsForSlot(
       prefix,
     }),
     'compound-field-key': (): LanguageServerCompletionItem[] => createCompoundFieldCompletions({
-      localFields: slot.kind === 'compound-field-key' ? parsed.compoundPredicates.get(slot.predicateName) : undefined,
-      workspaceFields: slot.kind === 'compound-field-key' ? (context.workspaceIndex?.getCompoundFieldNames(slot.predicateName) ?? []) : [],
+      localFields: localCompoundSchema?.kind === 'compound-schema' ? localCompoundSchema.fields : [],
+      workspaceFields: slot.kind === 'compound-field-key' ? (context.workspaceIndex?.getCompoundFieldSchemas(slot.predicateName) ?? []) : [],
       prefix,
     }),
     'variable-term': (): LanguageServerCompletionItem[] => createVariableCompletions(slot.kind === 'variable-term' ? slot.variables : [], prefix),

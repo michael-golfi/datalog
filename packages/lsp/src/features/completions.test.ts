@@ -77,12 +77,13 @@ describe('computeCompletions', () => {
     expect(items.map((item) => item.label)).toEqual(['food/local_only']);
   });
 
-  it('suggests schema-derived workspace node ids in node string slots', async () => {
+  it('suggests workspace node ids in node string slots', async () => {
     const workspaceRoot = await mkdtemp(join(tmpdir(), 'datalog-completions-'));
 
     try {
       await writeFile(join(workspaceRoot, 'workspace.dl'), [
-        'DefPred("food/schema_only", "1", "class/WorkspaceSubject", "1", "class/WorkspaceObject").',
+        'Edge("class/WorkspaceSubject", "food/preferred_label", "Workspace subject").',
+        'Edge("class/WorkspaceObject", "food/preferred_label", "Workspace object").',
       ].join('\n'), 'utf8');
 
       const workspaceIndex = new DatalogWorkspaceIndex({
@@ -113,8 +114,13 @@ describe('computeCompletions', () => {
     expect(items.map((item) => item.label)).not.toContain('DefPred');
   });
 
-  it('suggests compound fields inside @ records', () => {
-    const source = `${DATALOG_SAMPLE}\nServing@(serv/`;
+  it('suggests compound fields inside @ records with schema annotations', () => {
+    const source = [
+      'DefCompound("Serving", "serv/id", "1", "liquid/node").',
+      'DefCompound("Serving", "serv/subject", "1", "liquid/node").',
+      'DefCompound("Serving", "serv/unit", "?", "liquid/string").',
+      'Serving@(serv/',
+    ].join('\n');
     const items = computeCompletions(source, {
       line: source.split('\n').length - 1,
       character: 'Serving@(serv/'.length,
@@ -122,6 +128,45 @@ describe('computeCompletions', () => {
 
     expect(items.map((item) => item.label)).toContain('serv/id=');
     expect(items.map((item) => item.label)).toContain('serv/subject=');
+    expect(items.find((item) => item.label === 'serv/id=')).toMatchObject({
+      detail: 'Compound field · node · 1',
+    });
+    expect(items.find((item) => item.label === 'serv/unit=')).toMatchObject({
+      detail: 'Compound field · text · ?',
+    });
+  });
+
+  it('merges workspace compound field schemas into completions when the local document has no schema', async () => {
+    const workspaceRoot = await mkdtemp(join(tmpdir(), 'datalog-completions-'));
+
+    try {
+      await writeFile(join(workspaceRoot, 'schema.dl'), [
+        'DefCompound("Serving", "serv/id", "1", "liquid/node").',
+        'DefCompound("Serving", "serv/unit", "?", "liquid/string").',
+      ].join('\n'), 'utf8');
+
+      const workspaceIndex = new DatalogWorkspaceIndex({
+        documentStore: new DatalogDocumentStore(),
+      });
+      await workspaceIndex.setWorkspaceRootPath(workspaceRoot);
+
+      const source = 'Serving@(serv/';
+      const items = computeCompletions(source, {
+        line: 0,
+        character: source.length,
+      }, {
+        workspaceIndex,
+      });
+
+      expect(items.find((item) => item.label === 'serv/id=')).toMatchObject({
+        detail: 'Compound field · node · 1',
+      });
+      expect(items.find((item) => item.label === 'serv/unit=')).toMatchObject({
+        detail: 'Compound field · text · ?',
+      });
+    } finally {
+      await rm(workspaceRoot, { recursive: true, force: true });
+    }
   });
 
   it('uses workspace predicates, builtins, and local precedence at clause predicate positions with stable ordering', async () => {
