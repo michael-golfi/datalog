@@ -1,19 +1,17 @@
+import type { DatalogSchema } from '@datalog/ast';
+
 import type { Range } from './position.js';
 import type { DatalogSymbols } from './datalog-symbol-identity.js';
-
-export interface PredicateSchema {
-  readonly predicateId: string;
-  readonly subjectCardinality: string;
-  readonly subjectType: string;
-  readonly objectCardinality: string;
-  readonly objectType: string;
-  readonly range: Range;
-}
 
 export interface NodeSummary {
   readonly id: string;
   readonly label?: string;
   readonly classes: readonly string[];
+  readonly range: Range;
+}
+
+export interface ParsedSchemaDeclaration {
+  readonly schema: DatalogSchema;
   readonly range: Range;
 }
 
@@ -53,9 +51,8 @@ export interface ParsedClause {
 
 export interface ParsedDocument {
   readonly clauses: readonly ParsedClause[];
-  readonly predicateSchemas: ReadonlyMap<string, PredicateSchema>;
+  readonly schemaDeclarations: readonly ParsedSchemaDeclaration[];
   readonly derivedPredicates: ReadonlyMap<string, readonly ParsedClause[]>;
-  readonly compoundPredicates: ReadonlyMap<string, ReadonlySet<string>>;
   readonly nodeSummaries: ReadonlyMap<string, NodeSummary>;
   readonly graphPredicateIds: readonly string[];
   readonly nodeIds: readonly string[];
