@@ -1,12 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { applyDatalogFacts } from './apply-datalog-facts.js';
+import { executeTranslatedSql } from './execute-translated-sql.js';
 import { createQueryCountTracker } from './query-count-tracker.js';
 import { createRecursiveClosureBenchmarkFixture } from '../benchmarks/create-recursive-closure-benchmark-fixture.js';
-import type { PostgresGraphOperation } from '../contracts/postgres-graph-operation.js';
-import { createPostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
-import { executeTranslatedSql } from './execute-translated-sql.js';
 import { DEFAULT_RECURSIVE_CLOSURE_BENCHMARK_CONTRACT } from '../benchmarks/recursive-closure-benchmark-contract.js';
+import { createPostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
 import {
   initializeGraphSchema,
   startRecursiveClosurePostgresRuntime,
@@ -14,8 +13,12 @@ import {
 } from '../runtime/recursive-closure-postgres-runtime.js';
 import { translateGraphOperation } from '../translation/translate-graph-operation.js';
 
+import type { PostgresGraphOperation } from '../contracts/postgres-graph-operation.js';
+
 describe('postgres e2e validation', () => {
-  const runtime = startRecursiveClosurePostgresRuntime(DEFAULT_RECURSIVE_CLOSURE_BENCHMARK_CONTRACT);
+  const runtime = startRecursiveClosurePostgresRuntime(
+    DEFAULT_RECURSIVE_CLOSURE_BENCHMARK_CONTRACT,
+  );
   const sql = createPostgresSqlClient(runtime.connectionString);
 
   beforeAll(async () => {
@@ -80,12 +83,16 @@ describe('postgres e2e validation', () => {
       ],
     });
 
-    const edgeCount = await sql<Array<{ count: string }>>`select count(*)::text as count from edges`;
+    const edgeCount = await sql<
+      Array<{ count: string }>
+    >`select count(*)::text as count from edges`;
     expect(edgeCount[0]?.count).toBe('0');
   });
 
   it('executes the generated recursive closure query through the translator and returns the expected row count', async () => {
-    const fixture = createRecursiveClosureBenchmarkFixture(DEFAULT_RECURSIVE_CLOSURE_BENCHMARK_CONTRACT);
+    const fixture = createRecursiveClosureBenchmarkFixture(
+      DEFAULT_RECURSIVE_CLOSURE_BENCHMARK_CONTRACT,
+    );
 
     await initializeGraphSchema(sql);
     await applyDatalogFacts({

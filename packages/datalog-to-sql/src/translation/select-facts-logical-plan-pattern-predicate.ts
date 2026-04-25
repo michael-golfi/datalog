@@ -1,8 +1,12 @@
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
-import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
-import type { PredicateBinding, PredicateCatalog, RelationColumnBinding } from '../contracts/predicate-catalog.js';
 
 import type { PatternTermBinding } from './select-facts-logical-plan-pattern-binding.js';
+import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
+import type {
+  PredicateBinding,
+  PredicateCatalog,
+  RelationColumnBinding,
+} from '../contracts/predicate-catalog.js';
 
 /** Resolve the predicate binding for one select-facts pattern kind. */
 export function getSelectFactsPredicateBinding(
@@ -19,7 +23,10 @@ export function getSelectFactsPredicateBinding(
     return predicate;
   }
 
-  throw new GraphTranslationError('UNSUPPORTED_GRAPH_PREDICATE', `Unsupported graph predicate ${predicateName}/${arity}.`);
+  throw new GraphTranslationError(
+    'UNSUPPORTED_GRAPH_PREDICATE',
+    `Unsupported graph predicate ${predicateName}/${arity}.`,
+  );
 }
 
 /** Pair a select-facts pattern's terms with the bound relation columns by ordinal. */

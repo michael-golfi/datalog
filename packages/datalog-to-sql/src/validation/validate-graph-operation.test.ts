@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
+import { validateGraphOperation } from './validate-graph-operation.js';
+
 import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 import type { PostgresGraphOperation } from '../contracts/postgres-graph-operation.js';
-
-import { validateGraphOperation } from './validate-graph-operation.js';
 
 describe('validateGraphOperation', () => {
   it('throws a structured error for unsupported operation kinds', () => {

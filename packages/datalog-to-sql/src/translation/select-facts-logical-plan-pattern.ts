@@ -1,18 +1,27 @@
-import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
-import type { LogicalExpression, LogicalJoinNode, LogicalPlanNode, LogicalNodeId, OutputColumn } from '../contracts/logical-plan.js';
-import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
-
-import {
-  bindPatternTerm,
-  type PendingJoinCondition,
-} from './select-facts-logical-plan-pattern-binding.js';
-import { getPatternBindings, getSelectFactsPredicateBinding } from './select-facts-logical-plan-pattern-predicate.js';
 import {
   createColumnReference,
   createFilterNode,
   createScanNode,
   type VariableBinding,
 } from './select-facts-logical-plan-node-factory.js';
+import {
+  bindPatternTerm,
+  type PendingJoinCondition,
+} from './select-facts-logical-plan-pattern-binding.js';
+import {
+  getPatternBindings,
+  getSelectFactsPredicateBinding,
+} from './select-facts-logical-plan-pattern-predicate.js';
+
+import type {
+  LogicalExpression,
+  LogicalJoinNode,
+  LogicalPlanNode,
+  LogicalNodeId,
+  OutputColumn,
+} from '../contracts/logical-plan.js';
+import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
+import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 
 interface CompiledPatternInput {
   readonly index: number;
@@ -68,7 +77,10 @@ export function compileSelectFactsPattern(input: CompiledPatternInput): Compiled
   };
 }
 
-function createPatternNodes(scanNode: LogicalPlanNode, filterNode?: LogicalPlanNode): Record<string, LogicalPlanNode> {
+function createPatternNodes(
+  scanNode: LogicalPlanNode,
+  filterNode?: LogicalPlanNode,
+): Record<string, LogicalPlanNode> {
   return filterNode === undefined
     ? { [scanNode.id]: scanNode }
     : { [scanNode.id]: scanNode, [filterNode.id]: filterNode };

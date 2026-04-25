@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
+import { compileSelectFactsLogicalPlan } from './compile-select-facts-logical-plan.js';
+import { DEFAULT_GRAPH_PREDICATE_CATALOG } from './default-graph-predicate-catalog.js';
+import { renderLogicalPlanToSql } from './render-logical-plan-to-sql.js';
+
 import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
-import { DEFAULT_GRAPH_PREDICATE_CATALOG } from './default-graph-predicate-catalog.js';
-import { compileSelectFactsLogicalPlan } from './compile-select-facts-logical-plan.js';
-import { renderLogicalPlanToSql } from './render-logical-plan-to-sql.js';
 
 describe('renderLogicalPlanToSql', () => {
   it('renders the shared logical plan for the likes query with explicit joins and parameters', () => {

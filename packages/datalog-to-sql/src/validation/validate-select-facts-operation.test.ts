@@ -1,9 +1,10 @@
-import type { DatalogFactPattern } from '@datalog/ast';
 import { describe, expect, it } from 'vitest';
 
-import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
+import type { DatalogFactPattern } from '@datalog/ast';
 
 import { validateSelectFactsOperation } from './validate-select-facts-operation.js';
+
+import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 
 describe('validateSelectFactsOperation', () => {
   it('throws a structured error for blank variable names', () => {

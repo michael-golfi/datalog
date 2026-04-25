@@ -1,6 +1,7 @@
 import type { DatalogFactPattern, DatalogTerm } from '@datalog/ast';
 
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
 import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
 
 /** Validate that a select-facts operation uses non-empty constants and variable names. */

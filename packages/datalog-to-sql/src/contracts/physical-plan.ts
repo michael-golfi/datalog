@@ -1,4 +1,5 @@
 import type { DatalogScalarValue } from '@datalog/ast';
+
 import type { OutputColumn, PlanDiagnostic, PlanParameter } from './logical-plan.js';
 import type { WorkRelationDefinition } from './recursive-fixpoint.js';
 

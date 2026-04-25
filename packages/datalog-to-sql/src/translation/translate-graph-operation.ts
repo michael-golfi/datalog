@@ -1,12 +1,13 @@
-import { GraphTranslationError } from '../contracts/graph-translation-error.js';
-import type { GraphTranslationResult } from '../contracts/graph-translation-result.js';
-import type { PostgresGraphOperation } from '../contracts/postgres-graph-operation.js';
-import type { TranslatedSqlQuery } from '../contracts/translated-sql-query.js';
 import { translateDatalogFactQuery } from './translate-datalog-fact-query.js';
 import { translateFactDelete } from './translate-fact-delete.js';
 import { translateFactInsert } from './translate-fact-insert.js';
+import { GraphTranslationError } from '../contracts/graph-translation-error.js';
 import { validateGraphOperation } from '../validation/validate-graph-operation.js';
 import { validateSelectFactsOperation } from '../validation/validate-select-facts-operation.js';
+
+import type { GraphTranslationResult } from '../contracts/graph-translation-result.js';
+import type { PostgresGraphOperation } from '../contracts/postgres-graph-operation.js';
+import type { TranslatedSqlQuery } from '../contracts/translated-sql-query.js';
 
 /** Translate a supported graph operation into a SQL query or mutation. */
 export function translateGraphOperation(operation: PostgresGraphOperation): GraphTranslationResult {
@@ -81,7 +82,9 @@ function createRecursiveClosureCountQuery(
   };
 }
 
-function translateSelectEdges(operation: Extract<PostgresGraphOperation, { kind: 'select-edges' }>) {
+function translateSelectEdges(
+  operation: Extract<PostgresGraphOperation, { kind: 'select-edges' }>,
+) {
   const filters = operation.where ?? {};
   const clauses: string[] = [];
   const values: string[] = [];

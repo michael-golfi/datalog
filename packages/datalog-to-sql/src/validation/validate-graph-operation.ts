@@ -1,4 +1,5 @@
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
 import type { PostgresGraphOperation } from '../contracts/postgres-graph-operation.js';
 
 const SUPPORTED_GRAPH_OPERATION_KINDS = new Set([

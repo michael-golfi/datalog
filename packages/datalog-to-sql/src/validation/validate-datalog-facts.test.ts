@@ -1,9 +1,10 @@
-import type { DatalogFact } from '@datalog/ast';
 import { describe, expect, it } from 'vitest';
 
-import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
+import type { DatalogFact } from '@datalog/ast';
 
 import { validateDatalogFacts } from './validate-datalog-facts.js';
+
+import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 
 describe('validateDatalogFacts', () => {
   it('throws a structured error when insert facts are empty', () => {
@@ -18,11 +19,14 @@ describe('validateDatalogFacts', () => {
 
   it('throws a structured error when a vertex fact is missing its id', () => {
     expect(() =>
-      validateDatalogFacts([
-        {
-          kind: 'vertex',
-        } as unknown as DatalogFact,
-      ], 'delete'),
+      validateDatalogFacts(
+        [
+          {
+            kind: 'vertex',
+          } as unknown as DatalogFact,
+        ],
+        'delete',
+      ),
     ).toThrowError(
       expect.objectContaining<Partial<GraphTranslationError>>({
         name: 'GraphTranslationError',
@@ -34,13 +38,16 @@ describe('validateDatalogFacts', () => {
 
   it('throws a structured error when an edge fact is missing a required identifier', () => {
     expect(() =>
-      validateDatalogFacts([
-        {
-          kind: 'edge',
-          subjectId: 'vertex/alice',
-          predicateId: 'graph/likes',
-        } as unknown as DatalogFact,
-      ], 'insert'),
+      validateDatalogFacts(
+        [
+          {
+            kind: 'edge',
+            subjectId: 'vertex/alice',
+            predicateId: 'graph/likes',
+          } as unknown as DatalogFact,
+        ],
+        'insert',
+      ),
     ).toThrowError(
       expect.objectContaining<Partial<GraphTranslationError>>({
         name: 'GraphTranslationError',
@@ -52,18 +59,21 @@ describe('validateDatalogFacts', () => {
 
   it('accepts well-formed vertex and edge facts', () => {
     expect(() =>
-      validateDatalogFacts([
-        {
-          kind: 'vertex',
-          id: 'vertex/alice',
-        },
-        {
-          kind: 'edge',
-          subjectId: 'vertex/alice',
-          predicateId: 'graph/likes',
-          objectId: 'vertex/bob',
-        },
-      ], 'insert'),
+      validateDatalogFacts(
+        [
+          {
+            kind: 'vertex',
+            id: 'vertex/alice',
+          },
+          {
+            kind: 'edge',
+            subjectId: 'vertex/alice',
+            predicateId: 'graph/likes',
+            objectId: 'vertex/bob',
+          },
+        ],
+        'insert',
+      ),
     ).not.toThrow();
   });
 });

@@ -1,9 +1,10 @@
-import { queryStatement } from '@datalog/ast';
 import { describe, expect, it } from 'vitest';
 
-import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
+import { queryStatement } from '@datalog/ast';
 
 import { createSelectFactsOperationFromDatalogQuery } from './create-select-facts-operation-from-datalog-query.js';
+
+import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 
 describe('createSelectFactsOperationFromDatalogQuery', () => {
   it('maps a single Vertex atom into a select-facts vertex pattern', () => {
@@ -139,7 +140,8 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
       expect.objectContaining<Partial<GraphTranslationError>>({
         name: 'GraphTranslationError',
         code: 'datalog-to-sql.query.unsupported-atom',
-        message: 'Select-facts queries only support Edge/3 and Vertex/1 graph atoms, received Likes/2.',
+        message:
+          'Select-facts queries only support Edge/3 and Vertex/1 graph atoms, received Likes/2.',
       }),
     );
   });
@@ -148,7 +150,9 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
     expect(() =>
       createSelectFactsOperationFromDatalogQuery({
         kind: 'query',
-        body: [] as unknown as Parameters<typeof createSelectFactsOperationFromDatalogQuery>[0]['body'],
+        body: [] as unknown as Parameters<
+          typeof createSelectFactsOperationFromDatalogQuery
+        >[0]['body'],
       }),
     ).toThrowError(
       expect.objectContaining<Partial<GraphTranslationError>>({

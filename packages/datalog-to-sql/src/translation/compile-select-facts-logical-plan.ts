@@ -1,7 +1,3 @@
-import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
-import type { LogicalNodeId, LogicalPlan, LogicalPlanNode, OutputColumn } from '../contracts/logical-plan.js';
-import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
-
 import {
   assertCurrentNodeId,
   createDistinctNode,
@@ -13,6 +9,15 @@ import {
   type VariableBinding,
 } from './select-facts-logical-plan-node-factory.js';
 import { compileSelectFactsPattern } from './select-facts-logical-plan-pattern.js';
+
+import type {
+  LogicalNodeId,
+  LogicalPlan,
+  LogicalPlanNode,
+  OutputColumn,
+} from '../contracts/logical-plan.js';
+import type { SelectFactsOperation } from '../contracts/postgres-graph-operation.js';
+import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 
 /** Compile a select-facts operation into the shared logical-plan IR. */
 export function compileSelectFactsLogicalPlan(
@@ -77,7 +82,11 @@ function compileAndAppendPattern(input: {
   if (input.state.currentNodeId === undefined) {
     input.state.currentNodeId = compiledPattern.nodeId;
     input.state.currentOutput = compiledPattern.output;
-    promoteBindings(input.state.variableBindings, compiledPattern.promotedVariables, compiledPattern.nodeId);
+    promoteBindings(
+      input.state.variableBindings,
+      compiledPattern.promotedVariables,
+      compiledPattern.nodeId,
+    );
     return;
   }
 

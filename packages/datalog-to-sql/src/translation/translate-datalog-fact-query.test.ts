@@ -1,5 +1,6 @@
-import { queryStatement } from '@datalog/ast';
 import { describe, expect, it } from 'vitest';
+
+import { queryStatement } from '@datalog/ast';
 
 import { createSelectFactsOperationFromDatalogQuery } from './create-select-facts-operation-from-datalog-query.js';
 import { translateDatalogFactQuery } from './translate-datalog-fact-query.js';

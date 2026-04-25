@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
-
-import { compileSelectFactsLogicalPlan } from './compile-select-facts-logical-plan.js';
 import { createCatalogMissingVertexPredicate } from './compile-select-facts-logical-plan.fixtures.js';
+import { compileSelectFactsLogicalPlan } from './compile-select-facts-logical-plan.js';
+
+import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 
 describe('compileSelectFactsLogicalPlan errors', () => {
   it('throws a structured graph translation error when the graph catalog is missing a required predicate', () => {

@@ -1,7 +1,8 @@
-import type { TranslatedSqlQuery } from '../contracts/translated-sql-query.js';
-import type { RecursiveClosureBenchmarkContract } from '../benchmarks/recursive-closure-benchmark-contract.js';
-import { runCommand, sleep } from '../benchmarks/benchmark-command-runner.js';
 import { createPostgresSqlClient, type PostgresSqlClient } from './create-postgres-sql-client.js';
+import { runCommand, sleep } from '../benchmarks/benchmark-command-runner.js';
+
+import type { RecursiveClosureBenchmarkContract } from '../benchmarks/recursive-closure-benchmark-contract.js';
+import type { TranslatedSqlQuery } from '../contracts/translated-sql-query.js';
 
 export interface RecursiveClosurePostgresRuntime {
   readonly connectionString: string;
@@ -31,7 +32,11 @@ export function startRecursiveClosurePostgresRuntime(
   return {
     connectionString: `postgresql://${contract.username}:${contract.password}@127.0.0.1:${port}/${contract.databaseName}`,
     cleanup: () => {
-      runCommand({ command: 'docker', args: ['rm', '--force', containerId], throwOnFailure: false });
+      runCommand({
+        command: 'docker',
+        args: ['rm', '--force', containerId],
+        throwOnFailure: false,
+      });
     },
   };
 }
@@ -56,13 +61,15 @@ export async function waitForPostgres(connectionString: string): Promise<void> {
 
 /** Initialize the generic vertices/edges graph schema in PostgreSQL. */
 export async function initializeGraphSchema(sql: PostgresSqlClient): Promise<void> {
-  await sql.unsafe([
-    'create table if not exists vertices (id text primary key);',
-    'create table if not exists edges (subject_id text not null, predicate_id text not null, object_id text not null, primary key (subject_id, predicate_id, object_id));',
-    'create index if not exists edges_predicate_subject_idx on edges (predicate_id, subject_id);',
-    'truncate table edges;',
-    'truncate table vertices;',
-  ].join('\n'));
+  await sql.unsafe(
+    [
+      'create table if not exists vertices (id text primary key);',
+      'create table if not exists edges (subject_id text not null, predicate_id text not null, object_id text not null, primary key (subject_id, predicate_id, object_id));',
+      'create index if not exists edges_predicate_subject_idx on edges (predicate_id, subject_id);',
+      'truncate table edges;',
+      'truncate table vertices;',
+    ].join('\n'),
+  );
 }
 
 /** Read the PostgreSQL major version from the running database. */
@@ -105,7 +112,10 @@ function parseExplainPlan(value: unknown): Array<Record<string, unknown>> {
 }
 
 function resolveDockerPort(containerId: string): string {
-  const portOutput = runCommand({ command: 'docker', args: ['port', containerId, '5432/tcp'] }).trim();
+  const portOutput = runCommand({
+    command: 'docker',
+    args: ['port', containerId, '5432/tcp'],
+  }).trim();
   const firstMapping = portOutput.split(/\r?\n/u)[0] ?? '';
   const hostPort = firstMapping.split(':').at(-1);
 

@@ -1,4 +1,7 @@
+import { renderExpression, renderJoinCondition } from './render-logical-plan-sql-expression.js';
 import { GraphTranslationError } from '../contracts/graph-translation-error.js';
+
+import type { RenderContext } from './render-logical-plan-sql-context.js';
 import type {
   LogicalFilterNode,
   LogicalJoinNode,
@@ -7,10 +10,11 @@ import type {
   LogicalProjectNode,
   LogicalScanNode,
 } from '../contracts/logical-plan.js';
-import type { PredicateBinding, PredicateCatalog, PredicateStorageBinding } from '../contracts/predicate-catalog.js';
-
-import type { RenderContext } from './render-logical-plan-sql-context.js';
-import { renderExpression, renderJoinCondition } from './render-logical-plan-sql-expression.js';
+import type {
+  PredicateBinding,
+  PredicateCatalog,
+  PredicateStorageBinding,
+} from '../contracts/predicate-catalog.js';
 
 export interface RenderedSource {
   readonly from: string;
@@ -55,12 +59,18 @@ export function renderSource(nodeId: string, context: RenderContext): RenderedSo
 
 function renderJoinSource(node: LogicalJoinNode, context: RenderContext): RenderedSource {
   if (node.joinKind !== 'inner') {
-    throw new GraphTranslationError('UNSUPPORTED_LOGICAL_PLAN_NODE', `Unsupported join kind ${node.joinKind}.`);
+    throw new GraphTranslationError(
+      'UNSUPPORTED_LOGICAL_PLAN_NODE',
+      `Unsupported join kind ${node.joinKind}.`,
+    );
   }
 
   const leftSource = renderSource(node.leftNodeId, context);
   const rightSource = renderSource(node.rightNodeId, context);
-  const onConditions = [...node.conditions.map((condition) => renderJoinCondition(condition, context)), ...rightSource.where];
+  const onConditions = [
+    ...node.conditions.map((condition) => renderJoinCondition(condition, context)),
+    ...rightSource.where,
+  ];
 
   return {
     from: `${leftSource.from} join ${rightSource.from} on ${onConditions.join(' and ')}`,
@@ -84,14 +94,20 @@ function renderScanSource(node: LogicalScanNode, catalog: PredicateCatalog): str
   if (storage.kind !== 'postgres-table' && storage.kind !== 'postgres-view') {
     throw new GraphTranslationError(
       'UNSUPPORTED_GRAPH_PREDICATE',
-      `Unsupported storage binding ${storage.kind} for ${String(predicate.signature.name)}/${predicate.signature.arity}.`,
+      `Unsupported storage binding ${storage.kind} for ${String(predicate.signature.name)}/${
+        predicate.signature.arity
+      }.`,
     );
   }
 
   return `${quoteRelationName(storage)} ${node.id}`;
 }
 
-function getPredicateBinding(catalog: PredicateCatalog, predicateName: string, arity: number): PredicateBinding {
+function getPredicateBinding(
+  catalog: PredicateCatalog,
+  predicateName: string,
+  arity: number,
+): PredicateBinding {
   const aliasedPredicateName = catalog.aliases?.[predicateName] ?? predicateName;
   const predicate = catalog.predicates.find((candidate) => {
     return candidate.signature.name === aliasedPredicateName && candidate.signature.arity === arity;
@@ -114,7 +130,10 @@ function getNode(plan: LogicalPlan, nodeId: string): LogicalPlanNode {
     return node;
   }
 
-  throw new GraphTranslationError('UNSUPPORTED_LOGICAL_PLAN_NODE', `Missing logical plan node ${nodeId}.`);
+  throw new GraphTranslationError(
+    'UNSUPPORTED_LOGICAL_PLAN_NODE',
+    `Missing logical plan node ${nodeId}.`,
+  );
 }
 
 function expectDistinctNode(node: LogicalPlanNode): Extract<LogicalPlanNode, { kind: 'distinct' }> {
@@ -134,10 +153,15 @@ function expectProjectNode(node: LogicalPlanNode): LogicalProjectNode {
 }
 
 function createUnsupportedNodeError(kind: LogicalPlanNode['kind']): GraphTranslationError {
-  return new GraphTranslationError('UNSUPPORTED_LOGICAL_PLAN_NODE', `Unsupported logical plan node ${kind}.`);
+  return new GraphTranslationError(
+    'UNSUPPORTED_LOGICAL_PLAN_NODE',
+    `Unsupported logical plan node ${kind}.`,
+  );
 }
 
-function quoteRelationName(storage: Extract<PredicateStorageBinding, { kind: 'postgres-table' | 'postgres-view' }>): string {
+function quoteRelationName(
+  storage: Extract<PredicateStorageBinding, { kind: 'postgres-table' | 'postgres-view' }>,
+): string {
   if (storage.schemaName === undefined) {
     return storage.relationName;
   }

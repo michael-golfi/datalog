@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
-
 import { translateFactInsert } from './translate-fact-insert.js';
+
+import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 
 describe('translateFactInsert', () => {
   it('groups multiple vertex facts into a single insert CTE with stable placeholder ordering', () => {
@@ -49,7 +49,14 @@ describe('translateFactInsert', () => {
     ).toEqual({
       operation: 'insert',
       text: 'with inserted_edges as (insert into edges (subject_id, predicate_id, object_id) values ($1, $2, $3), ($4, $5, $6) on conflict do nothing returning subject_id, predicate_id, object_id) select 1;',
-      values: ['vertex/alice', 'graph/likes', 'vertex/bob', 'vertex/bob', 'graph/likes', 'vertex/carol'],
+      values: [
+        'vertex/alice',
+        'graph/likes',
+        'vertex/bob',
+        'vertex/bob',
+        'graph/likes',
+        'vertex/carol',
+      ],
     });
   });
 

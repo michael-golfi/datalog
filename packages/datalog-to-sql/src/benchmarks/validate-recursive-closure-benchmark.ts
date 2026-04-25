@@ -1,5 +1,5 @@
-import type { RecursiveClosureBenchmarkContract } from './recursive-closure-benchmark-contract.js';
 import type { RecursiveClosureBenchmarkFixture } from './create-recursive-closure-benchmark-fixture.js';
+import type { RecursiveClosureBenchmarkContract } from './recursive-closure-benchmark-contract.js';
 
 export interface RecursiveClosureBenchmarkMeasurement {
   readonly postgresMajorVersion: number;
@@ -69,7 +69,11 @@ function collectBenchmarkValidationReasons(input: {
   const reasons: string[] = [];
 
   appendVersionReason(reasons, input.contract, input.measurement.postgresMajorVersion);
-  appendClosureCountReason(reasons, input.fixture.expectedClosureRowCount, input.measurement.closureRowCount);
+  appendClosureCountReason(
+    reasons,
+    input.fixture.expectedClosureRowCount,
+    input.measurement.closureRowCount,
+  );
   appendMedianExecutionReason(reasons, input.contract, input.summary.medianExecutionTimeMs);
   appendMaxExecutionReason(reasons, input.contract, input.summary.maxExecutionTimeMs);
 
@@ -94,7 +98,9 @@ function appendClosureCountReason(
   closureRowCount: number,
 ): void {
   if (closureRowCount !== expectedClosureRowCount) {
-    reasons.push(`Expected ${expectedClosureRowCount} recursive closure rows but measured ${closureRowCount}.`);
+    reasons.push(
+      `Expected ${expectedClosureRowCount} recursive closure rows but measured ${closureRowCount}.`,
+    );
   }
 }
 
