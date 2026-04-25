@@ -4,7 +4,11 @@ import path from 'node:path';
 
 import { describe } from 'vitest';
 
-const currentMigrationBody = 'Edge("vertex/alpha", "graph/links_to", "vertex/beta").\n';
+const currentMigrationBody = [
+  'DefPred("graph/links_to", "1", "graph/node", "0", "graph/node").',
+  'Edge("vertex/alpha", "graph/links_to", "vertex/beta").',
+  '',
+].join('\n');
 
 export const invalidCurrentMigrationBody = '% migration.previous: none\nEdge("vertex/example", "graph/label", "value/example").\n';
 
