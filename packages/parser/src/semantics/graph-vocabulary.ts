@@ -1,4 +1,5 @@
 export const BUILTIN_PREDICATE_NAMES = new Set<string>([
+  'DefCompound',
   'DefPred',
   'Edge',
   'TypeAndCardinality',
