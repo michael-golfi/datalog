@@ -1,10 +1,10 @@
 import type { DatalogTerm } from '@datalog/ast';
 
-import type { LogicalPlan } from './logical-plan.js';
 import type {
   MaterializeBeforeSqlExternalResolverDefinition,
   PostQueryHydrateExternalResolverDefinition,
 } from './external-resolver-definition.js';
+import type { LogicalPlan } from './logical-plan.js';
 import type { RelationColumnBinding } from './predicate-catalog.js';
 import type { TranslatedSqlQuery } from './translated-sql-query.js';
 

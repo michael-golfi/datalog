@@ -6,6 +6,7 @@ import type {
   DatalogTerm,
   DefCompoundSchema,
 } from '@datalog/ast';
+
 import type { PredicateCatalog } from './predicate-catalog.js';
 
 export interface SelectVertexByIdOperation {
