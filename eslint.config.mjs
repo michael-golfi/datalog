@@ -4,9 +4,6 @@ import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import importPlugin from 'eslint-plugin-import';
 import jsdoc from 'eslint-plugin-jsdoc';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
-import react from 'eslint-plugin-react';
-import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 
 import { createDatalogPlugin } from '@datalog/eslint-plugin-datalog';
@@ -21,7 +18,6 @@ const { plugin: typeScriptWorkspacePlugin } = createTypeScriptWorkspacePlugin(ts
 
 const sourceFileGlobs = ['packages/**/*.{ts,mts,cts,tsx,js,mjs,cjs,jsx}'];
 const typedSourceGlobs = ['packages/**/*.{ts,mts,cts,tsx}'];
-const reactSourceGlobs = ['packages/vscode-extension/src/**/*.{tsx,jsx}'];
 const maintainabilityFileGlobs = ['packages/*/src/**/*.{ts,tsx,js,mjs,cjs,jsx}'];
 const librarySourceGlobs = ['packages/{parser,datalog-to-sql,datalog-migrate,lsp,eslint-plugin-datalog,eslint-plugin-typescript}/src/**/*.{ts,tsx}'];
 const testFileGlobs = [
@@ -201,27 +197,6 @@ const restrictedWorkspaceImportPatternMessages = [
     group: ['packages/**'],
     message:
       'Do not import repository paths as modules. Use @datalog/* package exports for workspace-to-workspace imports and relative paths within the current package.',
-  },
-];
-
-const unstableRenderValueRestrictions = [
-  {
-    selector: "CallExpression[callee.object.name='Date'][callee.property.name='now']",
-    message:
-      'Do not read Date.now() during UI rendering. Inject time through a clock, fixture, or service.',
-  },
-  {
-    selector: 'NewExpression[callee.name="Date"][arguments.length=0]',
-    message:
-      'Do not construct new Date() without an explicit input in UI code. Inject time or pass serialized values.',
-  },
-  {
-    selector: "CallExpression[callee.object.name='Math'][callee.property.name='random']",
-    message: 'Do not use Math.random() in UI code. Use stable ids, seeded randomness, or supplied values.',
-  },
-  {
-    selector: "CallExpression[callee.object.name='crypto'][callee.property.name='randomUUID']",
-    message: 'Do not create random UUIDs during UI rendering. Use stable ids from data or controlled mutations.',
   },
 ];
 
@@ -414,92 +389,6 @@ export default tseslint.config(
           patterns: restrictedWorkspaceImportPatternMessages,
         },
       ],
-    },
-  },
-  {
-    files: reactSourceGlobs,
-    ignores: ['**/*.dl.__datalog__'],
-    plugins: {
-      'typescript-workspace': typeScriptWorkspacePlugin,
-      react,
-      'react-hooks': reactHooks,
-      'jsx-a11y': jsxA11y,
-    },
-    languageOptions: {
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-    },
-    settings: {
-      react: {
-        version: 'detect',
-      },
-    },
-    rules: {
-      'react/button-has-type': 'error',
-      'react/jsx-key': ['error', { checkFragmentShorthand: true }],
-      'react/jsx-no-constructed-context-values': 'error',
-      'react/jsx-no-duplicate-props': 'error',
-      'react/jsx-no-useless-fragment': ['error', { allowExpressions: true }],
-      'react/no-array-index-key': 'error',
-      'react/no-danger': 'error',
-      'react/no-unstable-nested-components': [
-        'warn',
-        {
-          allowAsProps: true,
-          propNamePattern: 'render*',
-        },
-      ],
-      'react/no-unknown-property': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
-      'react-hooks/rules-of-hooks': 'error',
-      'jsx-a11y/alt-text': 'error',
-      'jsx-a11y/anchor-has-content': 'error',
-      'jsx-a11y/anchor-is-valid': 'error',
-      'jsx-a11y/aria-activedescendant-has-tabindex': 'error',
-      'jsx-a11y/aria-props': 'error',
-      'jsx-a11y/aria-proptypes': 'error',
-      'jsx-a11y/aria-role': ['error', { ignoreNonDOM: true }],
-      'jsx-a11y/aria-unsupported-elements': 'error',
-      'jsx-a11y/click-events-have-key-events': 'error',
-      'jsx-a11y/control-has-associated-label': [
-        'warn',
-        {
-          ignoreElements: ['audio', 'canvas', 'embed', 'input', 'textarea', 'tr', 'video'],
-          ignoreRoles: ['grid', 'listbox', 'menu', 'menubar', 'radiogroup', 'row', 'tablist', 'toolbar', 'tree', 'treegrid'],
-        },
-      ],
-      'jsx-a11y/heading-has-content': 'error',
-      'jsx-a11y/html-has-lang': 'error',
-      'jsx-a11y/iframe-has-title': 'error',
-      'jsx-a11y/img-redundant-alt': 'error',
-      'jsx-a11y/interactive-supports-focus': 'error',
-      'jsx-a11y/label-has-associated-control': 'error',
-      'jsx-a11y/media-has-caption': 'warn',
-      'jsx-a11y/mouse-events-have-key-events': 'error',
-      'jsx-a11y/no-access-key': 'error',
-      'jsx-a11y/no-aria-hidden-on-focusable': 'error',
-      'jsx-a11y/no-autofocus': ['error', { ignoreNonDOM: true }],
-      'jsx-a11y/no-distracting-elements': 'error',
-      'jsx-a11y/no-interactive-element-to-noninteractive-role': 'error',
-      'jsx-a11y/no-noninteractive-element-interactions': 'error',
-      'jsx-a11y/no-noninteractive-element-to-interactive-role': 'error',
-      'jsx-a11y/no-noninteractive-tabindex': 'error',
-      'jsx-a11y/no-redundant-roles': 'error',
-      'jsx-a11y/no-static-element-interactions': 'error',
-      'jsx-a11y/role-has-required-aria-props': 'error',
-      'jsx-a11y/role-supports-aria-props': 'error',
-      'jsx-a11y/scope': 'error',
-      'jsx-a11y/tabindex-no-positive': 'error',
-    },
-  },
-  {
-    files: reactSourceGlobs,
-    ignores: [...testFileGlobs, '**/*.stories.{ts,tsx,js,jsx}'],
-    rules: {
-      'no-restricted-syntax': ['error', ...unstableRenderValueRestrictions],
     },
   },
   {
