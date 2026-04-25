@@ -1,4 +1,8 @@
-import { getStringReferenceAtPosition, parseDocument } from '@datalog/parser';
+import {
+  getPredicateSchemaDeclaration,
+  getStringReferenceAtPosition,
+  parseDocument,
+} from '@datalog/parser';
 
 import type {
   LanguageServerDefinition,
@@ -60,9 +64,9 @@ function getLocalStringReferenceDefinition(
   referenceId: string,
   targetUri?: string,
 ): LanguageServerDefinition | null {
-  const schema = parsed.predicateSchemas.get(referenceId);
-  if (schema) {
-    return [createDefinitionResult(schema.range, targetUri)];
+  const schemaDeclaration = getPredicateSchemaDeclaration(parsed.schemaDeclarations, referenceId);
+  if (schemaDeclaration) {
+    return [createDefinitionResult(schemaDeclaration.range, targetUri)];
   }
 
   const node = parsed.nodeSummaries.get(referenceId);
