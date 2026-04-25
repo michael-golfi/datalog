@@ -1,9 +1,10 @@
 import type { DefCompoundFieldSchema } from '@datalog/ast';
 import type { parseDocument } from '@datalog/parser';
 
+import { createPredicateCompletions as createPredicateCompletionItems } from './completion-predicate-items.js';
+
 import type { LanguageServerCompletionItem } from '../contracts/language-feature-types.js';
 import type { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
-import { createPredicateCompletions as createPredicateCompletionItems } from './completion-predicate-items.js';
 
 /** Build graph predicate-id completions for quoted predicate references. */
 export function createGraphPredicateCompletions(
@@ -29,8 +30,16 @@ export function createNodeReferenceCompletions(options: {
   readonly prefix: string;
 }): LanguageServerCompletionItem[] {
   const items = new Map<string, LanguageServerCompletionItem>();
-  appendNodeReferenceCompletions(items, { nodeIds: options.localNodeIds, prefix: options.prefix, sortGroup: '0' });
-  appendNodeReferenceCompletions(items, { nodeIds: options.workspaceNodeIds, prefix: options.prefix, sortGroup: '1' });
+  appendNodeReferenceCompletions(items, {
+    nodeIds: options.localNodeIds,
+    prefix: options.prefix,
+    sortGroup: '0',
+  });
+  appendNodeReferenceCompletions(items, {
+    nodeIds: options.workspaceNodeIds,
+    prefix: options.prefix,
+    sortGroup: '1',
+  });
   return [...items.values()].sort(compareCompletionItems);
 }
 
@@ -41,9 +50,19 @@ export function createCompoundFieldCompletions(options: {
   readonly prefix: string;
 }): LanguageServerCompletionItem[] {
   const items = new Map<string, LanguageServerCompletionItem>();
-  const localFields = [...options.localFields].sort((left, right) => left.fieldName.localeCompare(right.fieldName));
-  appendCompoundFieldCompletions(items, { fields: localFields, prefix: options.prefix, sortGroup: '0' });
-  appendCompoundFieldCompletions(items, { fields: options.workspaceFields, prefix: options.prefix, sortGroup: '1' });
+  const localFields = [...options.localFields].sort((left, right) =>
+    left.fieldName.localeCompare(right.fieldName),
+  );
+  appendCompoundFieldCompletions(items, {
+    fields: localFields,
+    prefix: options.prefix,
+    sortGroup: '0',
+  });
+  appendCompoundFieldCompletions(items, {
+    fields: options.workspaceFields,
+    prefix: options.prefix,
+    sortGroup: '1',
+  });
   return [...items.values()].sort(compareCompletionItems);
 }
 
@@ -104,7 +123,10 @@ function appendCompoundFieldCompletions(
   },
 ): void {
   for (const field of options.fields) {
-    if (items.has(field.fieldName) || (options.prefix.length > 0 && !field.fieldName.startsWith(options.prefix))) {
+    if (
+      items.has(field.fieldName) ||
+      (options.prefix.length > 0 && !field.fieldName.startsWith(options.prefix))
+    ) {
       continue;
     }
 
@@ -118,6 +140,12 @@ function appendCompoundFieldCompletions(
   }
 }
 
-function compareCompletionItems(left: LanguageServerCompletionItem, right: LanguageServerCompletionItem): number {
-  return (left.sortText ?? left.label).localeCompare(right.sortText ?? right.label) || left.label.localeCompare(right.label);
+function compareCompletionItems(
+  left: LanguageServerCompletionItem,
+  right: LanguageServerCompletionItem,
+): number {
+  return (
+    (left.sortText ?? left.label).localeCompare(right.sortText ?? right.label) ||
+    left.label.localeCompare(right.label)
+  );
 }

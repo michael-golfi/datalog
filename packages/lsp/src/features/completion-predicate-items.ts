@@ -1,9 +1,10 @@
 import { BUILTIN_PREDICATE_NAMES, getCompoundSchemaDeclaration } from '@datalog/parser';
 import type { parseDocument } from '@datalog/parser';
 
+import { BUILTIN_PREDICATE_DOCS } from './builtin-predicate-docs.js';
+
 import type { LanguageServerCompletionItem } from '../contracts/language-feature-types.js';
 import type { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
-import { BUILTIN_PREDICATE_DOCS } from './builtin-predicate-docs.js';
 
 /** Build predicate and builtin completion items with local-first deduping. */
 export function createPredicateCompletions(options: {
@@ -23,7 +24,9 @@ function appendLocalPredicateCompletions(
   parsed: ReturnType<typeof parseDocument>,
   prefix: string,
 ): void {
-  const localPredicateNames = [...parsed.derivedPredicates.keys()].sort((left, right) => left.localeCompare(right));
+  const localPredicateNames = [...parsed.derivedPredicates.keys()].sort((left, right) =>
+    left.localeCompare(right),
+  );
 
   for (const predicateName of localPredicateNames) {
     const clauses = parsed.derivedPredicates.get(predicateName) ?? [];
@@ -41,24 +44,30 @@ function appendLocalClauseCompletions(options: {
   readonly arity: number;
   readonly prefix: string;
 }): void {
-  addCompletionItem(options.items, createUserPredicateCompletionItem({
-    predicateName: options.predicateName,
-    arity: options.arity,
-    prefix: options.prefix,
-    sortGroup: '0',
-    detail: 'Local predicate',
-  }));
+  addCompletionItem(
+    options.items,
+    createUserPredicateCompletionItem({
+      predicateName: options.predicateName,
+      arity: options.arity,
+      prefix: options.prefix,
+      sortGroup: '0',
+      detail: 'Local predicate',
+    }),
+  );
   if (!getCompoundSchemaDeclaration(options.parsed.schemaDeclarations, options.predicateName)) {
     return;
   }
 
-  addCompletionItem(options.items, createCompoundPredicateCompletionItem({
-    predicateName: options.predicateName,
-    arity: options.arity,
-    prefix: options.prefix,
-    sortGroup: '1',
-    detail: 'Local compound predicate',
-  }));
+  addCompletionItem(
+    options.items,
+    createCompoundPredicateCompletionItem({
+      predicateName: options.predicateName,
+      arity: options.arity,
+      prefix: options.prefix,
+      sortGroup: '1',
+      detail: 'Local compound predicate',
+    }),
+  );
 }
 
 function appendWorkspacePredicateCompletions(
@@ -67,27 +76,33 @@ function appendWorkspacePredicateCompletions(
   prefix: string,
 ): void {
   for (const identity of workspaceIndex?.getWorkspacePredicateIdentities() ?? []) {
-    addCompletionItem(items, createUserPredicateCompletionItem({
-      predicateName: identity.name,
-      arity: identity.arity,
-      prefix,
-      sortGroup: '2',
-      detail: 'Workspace predicate',
-      dedupeKey: `predicate:${identity.key}`,
-    }));
+    addCompletionItem(
+      items,
+      createUserPredicateCompletionItem({
+        predicateName: identity.name,
+        arity: identity.arity,
+        prefix,
+        sortGroup: '2',
+        detail: 'Workspace predicate',
+        dedupeKey: `predicate:${identity.key}`,
+      }),
+    );
 
     if ((workspaceIndex?.getCompoundFieldNames(identity.name).length ?? 0) === 0) {
       continue;
     }
 
-    addCompletionItem(items, createCompoundPredicateCompletionItem({
-      predicateName: identity.name,
-      arity: identity.arity,
-      prefix,
-      sortGroup: '3',
-      detail: 'Workspace compound predicate',
-      dedupeKey: `compound:${identity.key}`,
-    }));
+    addCompletionItem(
+      items,
+      createCompoundPredicateCompletionItem({
+        predicateName: identity.name,
+        arity: identity.arity,
+        prefix,
+        sortGroup: '3',
+        detail: 'Workspace compound predicate',
+        dedupeKey: `compound:${identity.key}`,
+      }),
+    );
   }
 }
 
@@ -95,7 +110,9 @@ function appendBuiltinCompletions(
   items: Map<string, LanguageServerCompletionItem>,
   prefix: string,
 ): void {
-  for (const name of [...BUILTIN_PREDICATE_NAMES].sort((left, right) => left.localeCompare(right))) {
+  for (const name of [...BUILTIN_PREDICATE_NAMES].sort((left, right) =>
+    left.localeCompare(right),
+  )) {
     addCompletionItem(items, createBuiltinCompletionItem(name, prefix));
   }
 }
@@ -183,6 +200,12 @@ function addCompletionItem(
   items.set(candidate.dedupeKey, candidate.item);
 }
 
-function compareCompletionItems(left: LanguageServerCompletionItem, right: LanguageServerCompletionItem): number {
-  return (left.sortText ?? left.label).localeCompare(right.sortText ?? right.label) || left.label.localeCompare(right.label);
+function compareCompletionItems(
+  left: LanguageServerCompletionItem,
+  right: LanguageServerCompletionItem,
+): number {
+  return (
+    (left.sortText ?? left.label).localeCompare(right.sortText ?? right.label) ||
+    left.label.localeCompare(right.label)
+  );
 }
