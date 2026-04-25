@@ -1,10 +1,12 @@
-import type { DatalogFactPattern } from '@datalog/ast';
 import { describe, expect, it } from 'vitest';
+
+import type { DatalogFactPattern } from '@datalog/ast';
+
+import { validateSelectFactsOperation } from './validate-select-facts-operation.js';
 
 import type { GraphTranslationError } from '../contracts/graph-translation-error.js';
 import type { PredicateCatalog } from '../contracts/predicate-catalog.js';
 
-import { validateSelectFactsOperation } from './validate-select-facts-operation.js';
 
 const EMPTY_PREDICATE_CATALOG = {
   version: 1,
