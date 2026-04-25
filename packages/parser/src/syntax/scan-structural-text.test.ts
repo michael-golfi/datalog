@@ -21,7 +21,7 @@ describe('scan-structural-text', () => {
 
   it('ignores strings with structural punctuation and escaped quotes while scanning', () => {
     const indexes: number[] = [];
-    const text = 'Outer("a,(b),%comment,\\\"still string\\\"", tail), after';
+    const text = 'Outer("a,(b),%comment,\\"still string\\"", tail), after';
 
     forEachTopLevelStructuralCharacter(text, (index) => {
       if (text[index] === ',') {

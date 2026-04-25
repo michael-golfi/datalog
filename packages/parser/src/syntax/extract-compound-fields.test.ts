@@ -8,7 +8,7 @@ describe('extractCompoundFields', () => {
   });
 
   it('ignores field-like text inside escaped quoted values', () => {
-    expect(extractCompoundFields('id="serv/chickpea", note="quoted unit=grams and \\\"fake=value\\\"", unit="g"')).toEqual([
+    expect(extractCompoundFields('id="serv/chickpea", note="quoted unit=grams and \\"fake=value\\"", unit="g"')).toEqual([
       'id',
       'note',
       'unit',
