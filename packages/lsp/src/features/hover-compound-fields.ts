@@ -14,8 +14,9 @@ export function getCompoundFieldHover(options: {
   readonly position: Position;
   readonly workspaceIndex?: DatalogWorkspaceIndex;
 }): LanguageServerHover | null {
-  const compoundField = findCompoundFieldAtPosition(options.parsed, options.position)
-    ?? findDefCompoundFieldAtPosition(options.parsed, options.position);
+  const compoundField =
+    findCompoundFieldAtPosition(options.parsed, options.position) ??
+    findDefCompoundFieldAtPosition(options.parsed, options.position);
   if (!compoundField) {
     return null;
   }
@@ -42,9 +43,15 @@ export function getCompoundFieldHover(options: {
 function findCompoundFieldAtPosition(
   parsed: ParsedDocument,
   position: Position,
-): { readonly compoundName: string; readonly fieldName: string; readonly range: HoverRange } | null {
+): {
+  readonly compoundName: string;
+  readonly fieldName: string;
+  readonly range: HoverRange;
+} | null {
   for (const clause of parsed.clauses) {
-    const fieldOccurrence = clause.compoundFieldOccurrences.find((candidate) => containsPosition(position, candidate.range));
+    const fieldOccurrence = clause.compoundFieldOccurrences.find((candidate) =>
+      containsPosition(position, candidate.range),
+    );
     if (fieldOccurrence) {
       return {
         compoundName: fieldOccurrence.predicateName,
@@ -60,7 +67,11 @@ function findCompoundFieldAtPosition(
 function findDefCompoundFieldAtPosition(
   parsed: ParsedDocument,
   position: Position,
-): { readonly compoundName: string; readonly fieldName: string; readonly range: HoverRange } | null {
+): {
+  readonly compoundName: string;
+  readonly fieldName: string;
+  readonly range: HoverRange;
+} | null {
   for (const clause of parsed.clauses) {
     if (clause.predicate !== 'DefCompound') {
       continue;
@@ -86,9 +97,12 @@ function getCompoundFieldSchema(options: {
   readonly compoundName: string;
   readonly fieldName: string;
 }): DefCompoundFieldSchema | undefined {
-  return getLocalCompoundFieldSchema(options.parsed, options.compoundName, options.fieldName)
-    ?? options.workspaceIndex?.getCompoundFieldSchemas(options.compoundName)
-      .find((field) => field.fieldName === options.fieldName);
+  return (
+    getLocalCompoundFieldSchema(options.parsed, options.compoundName, options.fieldName) ??
+    options.workspaceIndex
+      ?.getCompoundFieldSchemas(options.compoundName)
+      .find((field) => field.fieldName === options.fieldName)
+  );
 }
 
 function getLocalCompoundFieldSchema(
@@ -116,14 +130,13 @@ function formatCompoundFieldHover(options: {
   ].join('\n');
 }
 
-function containsPosition(
-  position: Position,
-  range: HoverRange,
-): boolean {
-  const startsBefore = position.line > range.start.line
-    || (position.line === range.start.line && position.character >= range.start.character);
-  const endsAfter = position.line < range.end.line
-    || (position.line === range.end.line && position.character <= range.end.character);
+function containsPosition(position: Position, range: HoverRange): boolean {
+  const startsBefore =
+    position.line > range.start.line ||
+    (position.line === range.start.line && position.character >= range.start.character);
+  const endsAfter =
+    position.line < range.end.line ||
+    (position.line === range.end.line && position.character <= range.end.character);
 
   return startsBefore && endsAfter;
 }

@@ -47,19 +47,27 @@ describe('computeHover', () => {
       const currentUri = pathToFileURL(join(workspaceRoot, 'current.dl')).href;
       const source = 'Serving@(serv/id="serv/chickpea_bowl").';
 
-      await writeWorkspaceFile(workspaceRoot, 'schema.dl', [
-        'DefCompound("Serving", "serv/id", "1", "liquid/node").',
-        'DefCompound("Serving", "serv/unit", "?", "liquid/string").',
-      ].join('\n'));
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'schema.dl',
+        [
+          'DefCompound("Serving", "serv/id", "1", "liquid/node").',
+          'DefCompound("Serving", "serv/unit", "?", "liquid/string").',
+        ].join('\n'),
+      );
 
       const workspaceIndex = await createWorkspaceIndex(workspaceRoot, currentUri, source);
-      const hover = computeHover(source, {
-        line: 0,
-        character: source.indexOf('serv/id') + 2,
-      }, {
-        targetUri: currentUri,
-        workspaceIndex,
-      });
+      const hover = computeHover(
+        source,
+        {
+          line: 0,
+          character: source.indexOf('serv/id') + 2,
+        },
+        {
+          targetUri: currentUri,
+          workspaceIndex,
+        },
+      );
 
       expect(hover?.contents).toContain('**serv/id**');
       expect(hover?.contents).toContain('- domain: `node`');
@@ -87,12 +95,16 @@ describe('computeHover', () => {
       'Ancestor(child, parent) :- Parent(child, parent).',
     ].join('\n');
 
-    const hover = computeHover(source, {
-      line: 1,
-      character: source.split('\n')[1]!.indexOf('Ancestor') + 2,
-    }, {
-      targetUri: 'file:///workspace/current.dl',
-    });
+    const hover = computeHover(
+      source,
+      {
+        line: 1,
+        character: getRequiredLine(source, 1).indexOf('Ancestor') + 2,
+      },
+      {
+        targetUri: 'file:///workspace/current.dl',
+      },
+    );
 
     expect(hover?.contents).toContain('**Ancestor/2**');
     expect(hover?.contents).toContain('Arity: `2`');
@@ -112,8 +124,16 @@ describe('computeHover', () => {
         'UsesShared(left, right) :- Shared(left, right).',
       ].join('\n');
 
-      await writeWorkspaceFile(workspaceRoot, 'schema.dl', 'Shared(schema_left, schema_right) :- Parent(schema_left, schema_right).');
-      await writeWorkspaceFile(workspaceRoot, 'migrations/001-derived.dl', 'Shared(migration_left, migration_right) :- Parent(migration_left, migration_right).');
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'schema.dl',
+        'Shared(schema_left, schema_right) :- Parent(schema_left, schema_right).',
+      );
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'migrations/001-derived.dl',
+        'Shared(migration_left, migration_right) :- Parent(migration_left, migration_right).',
+      );
 
       const workspaceIndex = new DatalogWorkspaceIndex({
         documentStore: new DatalogDocumentStore(),
@@ -124,21 +144,29 @@ describe('computeHover', () => {
         source,
       });
 
-      const hover = computeHover(source, {
-        line: 1,
-        character: source.split('\n')[1]!.lastIndexOf('Shared') + 2,
-      }, {
-        targetUri: currentUri,
-        workspaceIndex,
-      });
+      const hover = computeHover(
+        source,
+        {
+          line: 1,
+          character: getRequiredLine(source, 1).lastIndexOf('Shared') + 2,
+        },
+        {
+          targetUri: currentUri,
+          workspaceIndex,
+        },
+      );
 
       expect(hover?.contents).toContain('**Shared/2**');
       expect(hover?.contents).toContain('3 definitions');
       expect(hover?.contents).toContain(currentUri);
       expect(hover?.contents).toContain(schemaUri);
       expect(hover?.contents).toContain(migrationUri);
-      expect(hover?.contents.indexOf(currentUri)).toBeLessThan(hover?.contents.indexOf(migrationUri) ?? Number.POSITIVE_INFINITY);
-      expect(hover?.contents.indexOf(migrationUri)).toBeLessThan(hover?.contents.indexOf(schemaUri) ?? Number.POSITIVE_INFINITY);
+      expect(hover?.contents.indexOf(currentUri)).toBeLessThan(
+        hover?.contents.indexOf(migrationUri) ?? Number.POSITIVE_INFINITY,
+      );
+      expect(hover?.contents.indexOf(migrationUri)).toBeLessThan(
+        hover?.contents.indexOf(schemaUri) ?? Number.POSITIVE_INFINITY,
+      );
     } finally {
       await rm(workspaceRoot, { recursive: true, force: true });
     }
@@ -151,16 +179,24 @@ describe('computeHover', () => {
       const currentUri = pathToFileURL(join(workspaceRoot, 'current.dl')).href;
       const source = 'Edge("concept/taco", "food/has_cuisine", "cuisine/mexican").';
 
-      await writeWorkspaceFile(workspaceRoot, 'schema.dl', 'DefPred("food/has_cuisine", "0", "liquid/node", "1", "liquid/string").');
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'schema.dl',
+        'DefPred("food/has_cuisine", "0", "liquid/node", "1", "liquid/string").',
+      );
 
       const workspaceIndex = await createWorkspaceIndex(workspaceRoot, currentUri, source);
-      const hover = computeHover(source, {
-        line: 0,
-        character: source.indexOf('food/has_cuisine') + 2,
-      }, {
-        targetUri: currentUri,
-        workspaceIndex,
-      });
+      const hover = computeHover(
+        source,
+        {
+          line: 0,
+          character: source.indexOf('food/has_cuisine') + 2,
+        },
+        {
+          targetUri: currentUri,
+          workspaceIndex,
+        },
+      );
 
       expect(hover?.contents).toContain('**food/has_cuisine**');
       expect(hover?.contents).toContain('Runtime predicate schema.');
@@ -178,20 +214,28 @@ describe('computeHover', () => {
       const currentUri = pathToFileURL(join(workspaceRoot, 'current.dl')).href;
       const source = 'Edge("concept/ramen", "food/related_to", "concept/noodle").';
 
-      await writeWorkspaceFile(workspaceRoot, 'nodes.dl', [
-        'Edge("class/Dish", "food/preferred_label", "Dish").',
-        'Edge("concept/ramen", "food/preferred_label", "Ramen").',
-        'Edge("concept/ramen", "food/instance_of", "class/Dish").',
-      ].join('\n'));
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'nodes.dl',
+        [
+          'Edge("class/Dish", "food/preferred_label", "Dish").',
+          'Edge("concept/ramen", "food/preferred_label", "Ramen").',
+          'Edge("concept/ramen", "food/instance_of", "class/Dish").',
+        ].join('\n'),
+      );
 
       const workspaceIndex = await createWorkspaceIndex(workspaceRoot, currentUri, source);
-      const hover = computeHover(source, {
-        line: 0,
-        character: source.indexOf('concept/ramen') + 2,
-      }, {
-        targetUri: currentUri,
-        workspaceIndex,
-      });
+      const hover = computeHover(
+        source,
+        {
+          line: 0,
+          character: source.indexOf('concept/ramen') + 2,
+        },
+        {
+          targetUri: currentUri,
+          workspaceIndex,
+        },
+      );
 
       expect(hover?.contents).toContain('**concept/ramen**');
       expect(hover?.contents).toContain('Preferred label: Ramen');
@@ -211,16 +255,24 @@ describe('computeHover', () => {
         'Edge("concept/ramen", "food/has_cuisine", "cuisine/japanese").',
       ].join('\n');
 
-      await writeWorkspaceFile(workspaceRoot, 'schema.dl', 'DefPred("food/has_cuisine", "0", "text", "0", "node").');
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'schema.dl',
+        'DefPred("food/has_cuisine", "0", "text", "0", "node").',
+      );
 
       const workspaceIndex = await createWorkspaceIndex(workspaceRoot, currentUri, source);
-      const hover = computeHover(source, {
-        line: 1,
-        character: source.split('\n')[1]!.indexOf('food/has_cuisine') + 2,
-      }, {
-        targetUri: currentUri,
-        workspaceIndex,
-      });
+      const hover = computeHover(
+        source,
+        {
+          line: 1,
+          character: getRequiredLine(source, 1).indexOf('food/has_cuisine') + 2,
+        },
+        {
+          targetUri: currentUri,
+          workspaceIndex,
+        },
+      );
 
       expect(hover?.contents).toContain('- subject: `node` (cardinality `0`)');
       expect(hover?.contents).toContain('- object: `text` (cardinality `0`)');
@@ -238,17 +290,27 @@ describe('computeHover', () => {
       const currentUri = pathToFileURL(join(workspaceRoot, 'current.dl')).href;
       const source = 'Edge("concept/unknown", "food/missing_predicate", "concept/missing").';
 
-      await writeWorkspaceFile(workspaceRoot, 'schema.dl', 'DefPred("food/known_predicate", "0", "liquid/node", "0", "liquid/node").');
+      await writeWorkspaceFile(
+        workspaceRoot,
+        'schema.dl',
+        'DefPred("food/known_predicate", "0", "liquid/node", "0", "liquid/node").',
+      );
 
       const workspaceIndex = await createWorkspaceIndex(workspaceRoot, currentUri, source);
 
-      expect(computeHover(source, {
-        line: 0,
-        character: source.indexOf('food/missing_predicate') + 2,
-      }, {
-        targetUri: currentUri,
-        workspaceIndex,
-      })).toBeNull();
+      expect(
+        computeHover(
+          source,
+          {
+            line: 0,
+            character: source.indexOf('food/missing_predicate') + 2,
+          },
+          {
+            targetUri: currentUri,
+            workspaceIndex,
+          },
+        ),
+      ).toBeNull();
     } finally {
       await rm(workspaceRoot, { recursive: true, force: true });
     }
@@ -261,8 +323,12 @@ describe('computeHover', () => {
       character: 1,
     });
 
-    expect(hover?.contents).toContain('Use `Edge(subject, predicate, object)` for the canonical graph layer.');
-    expect(hover?.contents).toContain('Example: `Edge("concept/chickpea_bowl", "food/has_cuisine", "cuisine/mediterranean").`');
+    expect(hover?.contents).toContain(
+      'Use `Edge(subject, predicate, object)` for the canonical graph layer.',
+    );
+    expect(hover?.contents).toContain(
+      'Example: `Edge("concept/chickpea_bowl", "food/has_cuisine", "cuisine/mediterranean").`',
+    );
   });
 
   it('returns null for unknown predicates, comments, and ordinary strings', () => {
@@ -272,32 +338,49 @@ describe('computeHover', () => {
       'Label("just text").',
     ].join('\n');
 
-    expect(computeHover(source, {
-      line: 0,
-      character: 3,
-    })).toBeNull();
-    expect(computeHover(source, {
-      line: 1,
-      character: source.split('\n')[1]!.indexOf('Missing') + 2,
-    })).toBeNull();
-    expect(computeHover(source, {
-      line: 2,
-      character: source.split('\n')[2]!.indexOf('just text') + 2,
-    })).toBeNull();
+    expect(
+      computeHover(source, {
+        line: 0,
+        character: 3,
+      }),
+    ).toBeNull();
+    expect(
+      computeHover(source, {
+        line: 1,
+        character: getRequiredLine(source, 1).indexOf('Missing') + 2,
+      }),
+    ).toBeNull();
+    expect(
+      computeHover(source, {
+        line: 2,
+        character: getRequiredLine(source, 2).indexOf('just text') + 2,
+      }),
+    ).toBeNull();
   });
 
   it('returns null for quoted strings with escaped quotes that are not graph references', () => {
     const source = 'Says("escaped \\"hello\\" text").';
 
-    expect(computeHover(source, {
-      line: 0,
-      character: source.indexOf('hello'),
-    })).toBeNull();
+    expect(
+      computeHover(source, {
+        line: 0,
+        character: source.indexOf('hello'),
+      }),
+    ).toBeNull();
   });
 });
 
 async function createWorkspaceRoot(): Promise<string> {
   return mkdtemp(join(tmpdir(), 'datalog-hover-'));
+}
+
+function getRequiredLine(source: string, lineIndex: number): string {
+  const line = source.split('\n')[lineIndex];
+  if (line === undefined) {
+    throw new Error(`Expected source line ${lineIndex} to exist.`);
+  }
+
+  return line;
 }
 
 async function writeWorkspaceFile(
@@ -306,7 +389,10 @@ async function writeWorkspaceFile(
   source: string,
 ): Promise<void> {
   const filePath = join(workspaceRoot, relativePath);
-  const directoryPath = filePath.slice(0, Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\')));
+  const directoryPath = filePath.slice(
+    0,
+    Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\')),
+  );
 
   await mkdir(directoryPath, { recursive: true });
   await writeFile(filePath, source, 'utf8');

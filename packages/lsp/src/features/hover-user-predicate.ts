@@ -22,7 +22,11 @@ export function getUserPredicateHover(options: {
 }): LanguageServerHover | null {
   const definitions = [
     ...getLocalPredicateDefinitions(options.parsed, options.identity, options.targetUri),
-    ...getWorkspacePredicateDefinitions(options.workspaceIndex, options.identity, options.targetUri),
+    ...getWorkspacePredicateDefinitions(
+      options.workspaceIndex,
+      options.identity,
+      options.targetUri,
+    ),
   ];
   if (definitions.length === 0) {
     return null;
@@ -71,7 +75,8 @@ function getWorkspacePredicateDefinitions(
     return [];
   }
 
-  return workspaceIndex.getPredicateDefinitions(identity.key)
+  return workspaceIndex
+    .getPredicateDefinitions(identity.key)
     .filter((definition) => definition.uri !== targetUri)
     .map((definition) => ({
       uri: definition.uri,
@@ -80,7 +85,9 @@ function getWorkspacePredicateDefinitions(
 }
 
 function formatDefinitionProvenance(definition: PredicateDefinitionProvenance): string {
-  return `- \`${definition.uri}\`:${definition.range.start.line + 1}:${definition.range.start.character + 1}`;
+  return `- \`${definition.uri}\`:${definition.range.start.line + 1}:${
+    definition.range.start.character + 1
+  }`;
 }
 
 interface PredicateDefinitionProvenance {
