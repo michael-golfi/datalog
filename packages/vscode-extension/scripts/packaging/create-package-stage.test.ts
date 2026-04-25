@@ -13,6 +13,7 @@ import {
   extensionRoot,
 } from './create-package-stage.mjs';
 import { compiledExtensionMainRelativePath } from './extension-package-paths.mjs';
+import { copyStageAsset } from './stage-extension-assets.mjs';
 
 describe('create-package-stage helpers', () => {
   it('rewrites workspace dependencies to concrete consumer versions', () => {
@@ -88,7 +89,10 @@ describe('create-package-stage helpers', () => {
     const stageRoot = await mkdtemp(path.join(tmpdir(), 'datalog-vscode-package-stage-'));
 
     try {
-      await createPackageStage({ stageRoot });
+      await createPackageStage({
+        stageRoot,
+        allowMissingCompiledExtension: true,
+      });
 
       await expect(readFile(path.join(stageRoot, 'README.md'), 'utf8')).resolves.toBe(
         await readFile(path.join(extensionRoot, 'README.md'), 'utf8'),
@@ -103,5 +107,20 @@ describe('create-package-stage helpers', () => {
 
   it('exposes the compiled extension entry under build/out', () => {
     expect(compiledExtensionMainRelativePath).toBe(path.join('build', 'out', 'extension.js'));
+  });
+
+  it('keeps asset copying strict by default and optional when requested', async () => {
+    const stageRoot = await mkdtemp(path.join(tmpdir(), 'datalog-vscode-package-stage-'));
+
+    try {
+      await expect(copyStageAsset(stageRoot, '__missing__/asset.txt')).rejects.toMatchObject({
+        code: 'ENOENT',
+      });
+      await expect(
+        copyStageAsset(stageRoot, '__missing__/asset.txt', { allowMissing: true }),
+      ).resolves.toBeUndefined();
+    } finally {
+      await rm(stageRoot, { recursive: true, force: true });
+    }
   });
 });
