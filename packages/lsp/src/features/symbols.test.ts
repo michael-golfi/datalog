@@ -38,11 +38,7 @@ describe('computeDocumentSymbols', () => {
       },
     });
     expect(parent2?.children).toHaveLength(3);
-    expect(parent2?.children?.map((child) => child.name)).toEqual([
-      'Parent',
-      'Parent',
-      'Parent',
-    ]);
+    expect(parent2?.children?.map((child) => child.name)).toEqual(['Parent', 'Parent', 'Parent']);
     expect(parent2?.children?.map((child) => child.range.start.line)).toEqual([0, 1, 2]);
     expect(parent2?.children?.every((child) => child.children === undefined)).toBe(true);
 

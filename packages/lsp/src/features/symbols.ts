@@ -29,7 +29,10 @@ function getRepeatedUserIdentityKeys(parsed: ReturnType<typeof parseDocument>): 
   return new Set(
     parsed.datalogSymbols.predicates
       .filter((symbol) => symbol.identity.kind === 'user-predicate')
-      .filter((symbol) => symbol.occurrences.filter((occurrence) => occurrence.kind === 'head').length > 1)
+      .filter(
+        (symbol) =>
+          symbol.occurrences.filter((occurrence) => occurrence.kind === 'head').length > 1,
+      )
       .map((symbol) => `${symbol.identity.name}/${symbol.identity.arity}`),
   );
 }
