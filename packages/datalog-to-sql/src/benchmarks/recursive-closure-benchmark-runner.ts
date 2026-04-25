@@ -3,7 +3,6 @@ import { dirname, resolve } from 'node:path';
 
 import { applyDatalogFacts } from '../execution/apply-datalog-facts.js';
 import { createRecursiveClosureBenchmarkFixture } from './create-recursive-closure-benchmark-fixture.js';
-import { createPostgresGraphTranslator } from '../runtime/create-postgres-graph-translator.js';
 import { createPostgresSqlClient } from '../runtime/create-postgres-sql-client.js';
 import { executeTranslatedSql } from '../execution/execute-translated-sql.js';
 import {
@@ -18,6 +17,7 @@ import {
   waitForPostgres,
 } from '../runtime/recursive-closure-postgres-runtime.js';
 import type { TranslatedSqlQuery } from '../contracts/translated-sql-query.js';
+import { translateSelectRecursiveClosureCount } from '../translation/translate-select-recursive-closure-count.js';
 import { validateRecursiveClosureBenchmark } from './validate-recursive-closure-benchmark.js';
 
 export interface RunRecursiveClosureBenchmarkOptions {
@@ -46,8 +46,7 @@ export async function runRecursiveClosureBenchmark(
 ): Promise<RecursiveClosureBenchmarkReport> {
   const contract = DEFAULT_RECURSIVE_CLOSURE_BENCHMARK_CONTRACT;
   const fixture = createRecursiveClosureBenchmarkFixture(contract);
-  const translator = createPostgresGraphTranslator();
-  const benchmarkTranslation = translateBenchmarkOperation(translator, fixture.benchmarkOperation);
+  const benchmarkTranslation = translateBenchmarkOperation(fixture.benchmarkOperation);
   const postgresRuntime = startRecursiveClosurePostgresRuntime(contract);
   const sql = createPostgresSqlClient(postgresRuntime.connectionString);
 
@@ -88,16 +87,9 @@ function assertBenchmarkValidation(
 }
 
 function translateBenchmarkOperation(
-  translator: ReturnType<typeof createPostgresGraphTranslator>,
   operation: ReturnType<typeof createRecursiveClosureBenchmarkFixture>['benchmarkOperation'],
 ): TranslatedSqlQuery {
-  const translation = translator.translate(operation);
-
-  if (!translation.ok) {
-    throw translation.error;
-  }
-
-  return translation.value;
+  return translateSelectRecursiveClosureCount(operation);
 }
 
 async function measureBenchmark(input: {

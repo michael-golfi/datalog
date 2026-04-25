@@ -9,7 +9,7 @@ const readExecutionTime = vi.fn();
 const validateBenchmark = vi.fn();
 const applyDatalogFacts = vi.fn();
 const executeTranslatedSql = vi.fn();
-const createTranslator = vi.fn();
+const translateSelectRecursiveClosureCount = vi.fn();
 const createPostgresSqlClient = vi.fn();
 const mkdirSync = vi.fn();
 const writeFileSync = vi.fn();
@@ -24,8 +24,8 @@ vi.mock('../execution/apply-datalog-facts.js', () => ({
 vi.mock('../execution/execute-translated-sql.js', () => ({
   executeTranslatedSql,
 }));
-vi.mock('../runtime/create-postgres-graph-translator.js', () => ({
-  createPostgresGraphTranslator: createTranslator,
+vi.mock('../translation/translate-select-recursive-closure-count.js', () => ({
+  translateSelectRecursiveClosureCount,
 }));
 vi.mock('../runtime/create-postgres-sql-client.js', () => ({
   createPostgresSqlClient,
@@ -56,7 +56,7 @@ describe('runRecursiveClosureBenchmark', () => {
     validateBenchmark.mockReset();
     applyDatalogFacts.mockReset();
     executeTranslatedSql.mockReset();
-    createTranslator.mockReset();
+    translateSelectRecursiveClosureCount.mockReset();
     createPostgresSqlClient.mockReset();
     mkdirSync.mockReset();
     writeFileSync.mockReset();
@@ -70,9 +70,7 @@ describe('runRecursiveClosureBenchmark', () => {
       benchmarkOperation: { kind: 'select-recursive-closure-count', rootVertexId: 'vertex/root', predicateId: 'graph/reachable' },
       expectedClosureRowCount: 21844,
     });
-    createTranslator.mockReturnValue({
-      translate: vi.fn().mockReturnValue({ ok: true, value: { operation: 'select', text: 'select 1', values: [] } }),
-    });
+    translateSelectRecursiveClosureCount.mockReturnValue({ operation: 'select', text: 'select 1', values: [] });
     startRuntime.mockReturnValue({ connectionString: 'postgresql://x', cleanup: vi.fn() });
     createPostgresSqlClient.mockReturnValue({ end: sqlEnd });
     readMajorVersion.mockResolvedValue(13);
@@ -97,9 +95,7 @@ describe('runRecursiveClosureBenchmark', () => {
       benchmarkOperation: { kind: 'select-recursive-closure-count', rootVertexId: 'vertex/root', predicateId: 'graph/reachable' },
       expectedClosureRowCount: 21844,
     });
-    createTranslator.mockReturnValue({
-      translate: vi.fn().mockReturnValue({ ok: true, value: { operation: 'select', text: 'select 1', values: [] } }),
-    });
+    translateSelectRecursiveClosureCount.mockReturnValue({ operation: 'select', text: 'select 1', values: [] });
     startRuntime.mockReturnValue({ connectionString: 'postgresql://x', cleanup: vi.fn() });
     createPostgresSqlClient.mockReturnValue({ end: sqlEnd });
     readMajorVersion.mockResolvedValue(13);
