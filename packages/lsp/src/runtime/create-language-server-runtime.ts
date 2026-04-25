@@ -1,6 +1,5 @@
 import { parseDocument } from '@datalog/parser';
 
-import type { LanguageServerRuntime } from '../contracts/language-server-runtime.js';
 import { computeCompletions } from '../features/completions.js';
 import { computeDefinition } from '../features/definition.js';
 import { computeDiagnostics } from '../features/diagnostics.js';
@@ -10,6 +9,8 @@ import { computeSemanticTokens } from '../features/semantic-tokens.js';
 import { computeDocumentSymbols } from '../features/symbols.js';
 import { DatalogDocumentStore } from '../workspace/datalog-document-store.js';
 import { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
+
+import type { LanguageServerRuntime } from '../contracts/language-server-runtime.js';
 
 /** Create the parser-backed runtime surface used by the language server. */
 export function createLanguageServerRuntime(): LanguageServerRuntime {
