@@ -4,11 +4,13 @@ import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
+  DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
   applyDatalogFacts,
   createPostgresSqlClient,
-  executeTranslatedSql,
+  executePreparedSelectFacts,
   initializeGraphSchema,
-  translateGraphOperation,
+  prepareSelectFactsExecution,
+  type SelectFactsOperation,
   waitForPostgres,
 } from '@datalog/datalog-to-sql';
 
@@ -219,14 +221,13 @@ describe('datalog migration workflow e2e', () => {
 
 async function executeQuery<Row extends Record<string, unknown>>(
   sql: ReturnType<typeof createPostgresSqlClient>,
-  operation: Parameters<typeof translateGraphOperation>[0],
+  operation: SelectFactsOperation,
 ): Promise<readonly Row[]> {
-  const translated = translateGraphOperation(operation);
-
-  expect(translated.ok).toBe(true);
-  if (!translated.ok) {
-    throw translated.error;
-  }
-
-  return executeTranslatedSql<Row>(sql, translated.value);
+  return executePreparedSelectFacts<Row>({
+    sql,
+    execution: prepareSelectFactsExecution({
+      operation,
+      catalog: DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
+    }),
+  });
 }
