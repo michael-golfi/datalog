@@ -4,7 +4,6 @@ import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
-  DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
   applyDatalogFacts,
   createPostgresSqlClient,
   initializeGraphSchema,
@@ -13,8 +12,6 @@ import {
 
 import { applyDatalogMigrations } from './apply-datalog-migrations.js';
 import { commitCurrentMigration } from './commit-current-datalog-migration.js';
-import { loadDatalogMigrationProjectFiles } from './load-datalog-migration-project-files.js';
-import { readAppliedMigrationStateFromDatabase } from './read-applied-migration-state.js';
 import { ensureLocalWorkflowDatabaseExists, localPostgresConnectionString } from './datalog-migration-workflow-test-database.test.js';
 import { loadCommittedWorkflowFacts } from './datalog-migration-workflow-test-facts.test.js';
 import {
@@ -23,6 +20,8 @@ import {
   getCurrentMigrationBody,
   invalidCurrentMigrationBody,
 } from './datalog-migration-workflow-test-fixture.test.js';
+import { loadDatalogMigrationProjectFiles } from './load-datalog-migration-project-files.js';
+import { readAppliedMigrationStateFromDatabase } from './read-applied-migration-state.js';
 import { readMigrationStatus } from './status-datalog-migration.js';
 import { uncommitLatestDatalogMigration } from './uncommit-datalog-migration.js';
 

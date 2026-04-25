@@ -1,6 +1,7 @@
+import { describe } from 'vitest';
+
 import { createPostgresSqlClient } from '@datalog/datalog-to-sql';
 
-import { describe } from 'vitest';
 
 export const localPostgresConnectionString = 'postgresql://postgres:postgres@localhost:5432/datalog_benchmark';
 const localPostgresAdminConnectionString = 'postgresql://postgres:postgres@localhost:5432/postgres';
