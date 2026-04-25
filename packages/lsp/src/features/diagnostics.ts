@@ -1,9 +1,10 @@
-import { parseDatalogProgram, parseDocument } from '@datalog/parser';
+import type { parseDatalogProgram, parseDocument } from '@datalog/parser';
+
+import { createCompoundSchemaDiagnostics } from './diagnostic-compound-schema-violations.js';
+import { createDiagnosticsContext } from './diagnostics-context.js';
 
 import type { LanguageServerDiagnostic } from '../contracts/language-feature-types.js';
 import type { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
-import { createCompoundSchemaDiagnostics } from './diagnostic-compound-schema-violations.js';
-import { collectDuplicateSchemaClauses } from './diagnostic-duplicate-defpred-schemas.js';
 
 const EXPECTED_ARITY = new Map<string, number>([
   ['DefPred', 5],
@@ -20,99 +21,26 @@ export function computeDiagnostics(
 ): LanguageServerDiagnostic[] {
   const diagnosticsContext = createDiagnosticsContext(source, context);
   const diagnostics = createSourceDiagnostics(source);
-  const allowInteractiveQuery = isLikelyInteractiveQuery(source, diagnosticsContext.parsedDocument.clauses.length);
+  const allowInteractiveQuery = isLikelyInteractiveQuery(
+    source,
+    diagnosticsContext.parsedDocument.clauses.length,
+  );
 
   for (const [clauseIndex, clause] of diagnosticsContext.parsedDocument.clauses.entries()) {
-    diagnostics.push(...createClauseDiagnostics({
-      source,
-      clause,
-      statement: diagnosticsContext.parsedProgram.statements[clauseIndex],
-      duplicateSchemaClauses: diagnosticsContext.duplicateSchemaClauses,
-      allowInteractiveQuery,
-      parsedDocument: diagnosticsContext.parsedDocument,
-      ...(context.workspaceIndex ? { workspaceIndex: context.workspaceIndex } : {}),
-    }));
+    diagnostics.push(
+      ...createClauseDiagnostics({
+        source,
+        clause,
+        statement: diagnosticsContext.parsedProgram.statements[clauseIndex],
+        duplicateSchemaClauses: diagnosticsContext.duplicateSchemaClauses,
+        allowInteractiveQuery,
+        parsedDocument: diagnosticsContext.parsedDocument,
+        ...(context.workspaceIndex ? { workspaceIndex: context.workspaceIndex } : {}),
+      }),
+    );
   }
 
   return diagnostics;
-}
-
-function createDiagnosticsContext(
-  source: string,
-  context: {
-    readonly targetUri?: string;
-    readonly workspaceIndex?: DatalogWorkspaceIndex;
-  },
-): {
-  readonly parsedDocument: ReturnType<typeof parseDocument>;
-  readonly parsedProgram: ReturnType<typeof parseDatalogProgram>;
-  readonly duplicateSchemaClauses: ReadonlySet<ReturnType<typeof parseDocument>['clauses'][number]>;
-} {
-  const targetDocument = getProgramTargetDocument(source, context);
-  const parsedDocument = targetDocument?.parsedDocument ?? parseDocument(source);
-  const parsedProgram = safeParseDatalogProgram(source);
-  const sources = getDiagnosticsSources({
-    parsedDocument,
-    targetDocument,
-    ...(context.targetUri ? { targetUri: context.targetUri } : {}),
-    ...(context.workspaceIndex ? { workspaceIndex: context.workspaceIndex } : {}),
-  });
-
-  return {
-    parsedDocument,
-    parsedProgram,
-    duplicateSchemaClauses: collectDuplicateSchemaClauses({
-      targetSourceId: targetDocument?.sourceId ?? context.targetUri ?? 'local',
-      sources,
-    }),
-  };
-}
-
-function safeParseDatalogProgram(source: string): ReturnType<typeof parseDatalogProgram> {
-  try {
-    return parseDatalogProgram(source);
-  } catch {
-    return {
-      kind: 'program',
-      statements: [],
-    };
-  }
-}
-
-function getDiagnosticsSources(options: {
-  readonly parsedDocument: ReturnType<typeof parseDocument>;
-  readonly targetDocument: ReturnType<typeof getProgramTargetDocument>;
-  readonly targetUri?: string;
-  readonly workspaceIndex?: DatalogWorkspaceIndex;
-}): ReadonlyArray<{
-  readonly sourceId: string;
-  readonly parsedDocument: ReturnType<typeof parseDocument>;
-}> {
-  if (options.targetDocument) {
-    return options.workspaceIndex?.getProgram()?.sources ?? [options.targetDocument];
-  }
-
-  return [{ sourceId: options.targetUri ?? 'local', parsedDocument: options.parsedDocument }];
-}
-
-function getProgramTargetDocument(
-  source: string,
-  context: {
-    readonly targetUri?: string;
-    readonly workspaceIndex?: DatalogWorkspaceIndex;
-  },
-): (NonNullable<ReturnType<DatalogWorkspaceIndex['getProgram']>>['sources'][number] & { readonly sourceId: string }) | null {
-  if (!context.targetUri) {
-    return null;
-  }
-
-  const program = context.workspaceIndex?.getProgram();
-  const targetDocument = program?.sources.find((candidate) => candidate.sourceId === context.targetUri);
-  if (targetDocument?.source !== source) {
-    return null;
-  }
-
-  return targetDocument;
 }
 
 function createSourceDiagnostics(source: string): LanguageServerDiagnostic[] {
@@ -120,32 +48,36 @@ function createSourceDiagnostics(source: string): LanguageServerDiagnostic[] {
     return [];
   }
 
-  return [{
-    range: {
-      start: { line: 0, character: 0 },
-      end: { line: 0, character: 1 },
+  return [
+    {
+      range: {
+        start: { line: 0, character: 0 },
+        end: { line: 0, character: 1 },
+      },
+      severity: 'error',
+      source: 'datalog',
+      message: 'Detected an unterminated string literal.',
     },
-    severity: 'error',
-    source: 'datalog',
-    message: 'Detected an unterminated string literal.',
-  }];
+  ];
 }
 
-function createClauseDiagnostics(
-  options: {
-    readonly source: string;
-    readonly clause: ReturnType<typeof parseDocument>['clauses'][number];
-    readonly statement: ReturnType<typeof parseDatalogProgram>['statements'][number] | undefined;
-    readonly duplicateSchemaClauses: ReadonlySet<ReturnType<typeof parseDocument>['clauses'][number]>;
-    readonly allowInteractiveQuery: boolean;
-    readonly parsedDocument: ReturnType<typeof parseDocument>;
-    readonly workspaceIndex?: DatalogWorkspaceIndex;
-  },
-): LanguageServerDiagnostic[] {
+function createClauseDiagnostics(options: {
+  readonly source: string;
+  readonly clause: ReturnType<typeof parseDocument>['clauses'][number];
+  readonly statement: ReturnType<typeof parseDatalogProgram>['statements'][number] | undefined;
+  readonly duplicateSchemaClauses: ReadonlySet<ReturnType<typeof parseDocument>['clauses'][number]>;
+  readonly allowInteractiveQuery: boolean;
+  readonly parsedDocument: ReturnType<typeof parseDocument>;
+  readonly workspaceIndex?: DatalogWorkspaceIndex;
+}): LanguageServerDiagnostic[] {
   return [
     ...createArityDiagnostics(options.clause),
     ...createDuplicateSchemaDiagnostics(options.clause, options.duplicateSchemaClauses),
-    ...createClauseTerminationDiagnostics(options.source, options.clause, options.allowInteractiveQuery),
+    ...createClauseTerminationDiagnostics(
+      options.source,
+      options.clause,
+      options.allowInteractiveQuery,
+    ),
     ...createCompoundSchemaDiagnostics({
       clause: options.clause,
       statement: options.statement,
@@ -163,12 +95,14 @@ function createArityDiagnostics(
     return [];
   }
 
-  return [{
-    range: clause.predicateRange,
-    severity: 'error',
-    source: 'datalog',
-    message: `${clause.predicate} expects arity ${expectedArity}, found ${clause.arity}.`,
-  }];
+  return [
+    {
+      range: clause.predicateRange,
+      severity: 'error',
+      source: 'datalog',
+      message: `${clause.predicate} expects arity ${expectedArity}, found ${clause.arity}.`,
+    },
+  ];
 }
 
 function createDuplicateSchemaDiagnostics(
@@ -186,12 +120,14 @@ function createDuplicateSchemaDiagnostics(
   }
 
   return duplicateSchemaClauses.has(clause)
-    ? [{
-      range: predicateReference.range,
-      severity: 'warning' as const,
-      source: 'datalog',
-      message: `Duplicate DefPred for ${predicateId}.`,
-    }]
+    ? [
+        {
+          range: predicateReference.range,
+          severity: 'warning' as const,
+          source: 'datalog',
+          message: `Duplicate DefPred for ${predicateId}.`,
+        },
+      ]
     : [];
 }
 
@@ -204,15 +140,20 @@ function createClauseTerminationDiagnostics(
     return [];
   }
 
-  return [{
-    range: clause.range,
-    severity: 'error',
-    source: 'datalog',
-    message: 'Clause must end with a period.',
-  }];
+  return [
+    {
+      range: clause.range,
+      severity: 'error',
+      source: 'datalog',
+      message: 'Clause must end with a period.',
+    },
+  ];
 }
 
-function getClauseText(source: string, clause: ReturnType<typeof parseDocument>['clauses'][number]): string {
+function getClauseText(
+  source: string,
+  clause: ReturnType<typeof parseDocument>['clauses'][number],
+): string {
   return source
     .split('\n')
     .slice(clause.range.start.line, clause.range.end.line + 1)
@@ -223,9 +164,11 @@ function getClauseText(source: string, clause: ReturnType<typeof parseDocument>[
 function isLikelyInteractiveQuery(source: string, clauseCount: number): boolean {
   const trimmed = source.trim();
 
-  return clauseCount === 1
-    && trimmed.length > 0
-    && !trimmed.endsWith('.')
-    && !trimmed.includes('\n')
-    && !trimmed.startsWith('%');
+  return (
+    clauseCount === 1 &&
+    trimmed.length > 0 &&
+    !trimmed.endsWith('.') &&
+    !trimmed.includes('\n') &&
+    !trimmed.startsWith('%')
+  );
 }

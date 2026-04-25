@@ -3,10 +3,10 @@ import { pathToFileURL } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-import { DatalogDocumentStore } from '../workspace/datalog-document-store.js';
-import { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
 import { DATALOG_SAMPLE } from './datalog-sample.js';
 import { computeDiagnostics } from './diagnostics.js';
+import { DatalogDocumentStore } from '../workspace/datalog-document-store.js';
+import { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
 
 describe('computeDiagnostics', () => {
   it('accepts valid graph-oriented datalog', () => {
@@ -21,8 +21,12 @@ describe('computeDiagnostics', () => {
     ].join('\n');
     const diagnostics = computeDiagnostics(source);
 
-    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain('Duplicate DefPred for food/has_cuisine.');
-    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain('Edge expects arity 3, found 2.');
+    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain(
+      'Duplicate DefPred for food/has_cuisine.',
+    );
+    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain(
+      'Edge expects arity 3, found 2.',
+    );
   });
 
   it('reports compound field cardinality and domain violations from local schema declarations', () => {
@@ -35,9 +39,15 @@ describe('computeDiagnostics', () => {
 
     const diagnostics = computeDiagnostics(source);
 
-    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain('Serving@ field serv/id requires at least one value (cardinality `1`).');
-    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain('Serving@ field serv/unit allows at most one value (cardinality `?`).');
-    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain('Serving@ field serv/count expects domain `int8`, found `bool`.');
+    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain(
+      'Serving@ field serv/id requires at least one value (cardinality `1`).',
+    );
+    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain(
+      'Serving@ field serv/unit allows at most one value (cardinality `?`).',
+    );
+    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain(
+      'Serving@ field serv/count expects domain `int8`, found `bool`.',
+    );
   });
 
   it('reports workspace-backed compound schema violations for open documents', async () => {
@@ -81,8 +91,12 @@ describe('computeDiagnostics', () => {
       workspaceIndex,
     });
 
-    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain('Serving@ field serv/id requires at least one value (cardinality `1`).');
-    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain('Serving@ field serv/count expects domain `int8`, found `bool`.');
+    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain(
+      'Serving@ field serv/id requires at least one value (cardinality `1`).',
+    );
+    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain(
+      'Serving@ field serv/count expects domain `int8`, found `bool`.',
+    );
   });
 
   it('does not flag a one-line interactive query for missing trailing period', () => {
@@ -91,7 +105,10 @@ describe('computeDiagnostics', () => {
 
   it('uses migration program order for duplicate schema diagnostics and respects open-buffer current.dl content', async () => {
     const workspaceRootPath = '/workspace';
-    const committedMigrationPath = join(workspaceRootPath, 'migrations/20260422.0001.foundation.dl');
+    const committedMigrationPath = join(
+      workspaceRootPath,
+      'migrations/20260422.0001.foundation.dl',
+    );
     const currentMigrationPath = join(workspaceRootPath, 'current.dl');
     const currentUri = pathToFileURL(currentMigrationPath).href;
     const workspaceIndex = new DatalogWorkspaceIndex({
@@ -122,11 +139,16 @@ describe('computeDiagnostics', () => {
       source: 'DefPred("graph/shared", "0", "class/Entity", "0", "class/Target").',
     });
 
-    const diagnostics = computeDiagnostics('DefPred("graph/shared", "0", "class/Entity", "0", "class/Target").', {
-      targetUri: currentUri,
-      workspaceIndex,
-    });
+    const diagnostics = computeDiagnostics(
+      'DefPred("graph/shared", "0", "class/Entity", "0", "class/Target").',
+      {
+        targetUri: currentUri,
+        workspaceIndex,
+      },
+    );
 
-    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain('Duplicate DefPred for graph/shared.');
+    expect(diagnostics.map((diagnostic) => diagnostic.message)).toContain(
+      'Duplicate DefPred for graph/shared.',
+    );
   });
 });
