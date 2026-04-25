@@ -8,8 +8,7 @@ import {
 } from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
-import type { LanguageServerRuntime } from '../contracts/language-server-runtime.js';
-import { encodeSemanticTokens } from '../features/semantic-tokens.js';
+import { createLanguageServerCapabilities } from './language-server-capabilities.js';
 import {
   clearDocumentDiagnostics,
   createDefinitionLocation,
@@ -17,12 +16,14 @@ import {
   getDeletedWatchedFileUris,
   publishDiagnosticsForOpenDocuments,
 } from './language-server-diagnostics.js';
+import { encodeSemanticTokens } from '../features/semantic-tokens.js';
 import {
   toLspCompletionItem,
   toLspDocumentSymbol,
   toLspFoldingRange,
 } from '../protocol/lsp-protocol-mappers.js';
-import { createLanguageServerCapabilities } from './language-server-capabilities.js';
+
+import type { LanguageServerRuntime } from '../contracts/language-server-runtime.js';
 
 /** Attach protocol handlers and start listening on the LSP connection. */
 export function runLanguageServer(runtime: LanguageServerRuntime): LanguageServerRuntime {
@@ -59,7 +60,6 @@ export function registerLanguageServerHandlers(
   registerSemanticTokensHandler(connection, documents, runtime);
   registerWatchedFileHandler(connection, documents, runtime);
 }
-
 
 function registerDocumentChangeHandler(
   connection: ReturnType<typeof createConnection>,
@@ -99,9 +99,11 @@ function registerCompletionHandler(
       return [];
     }
 
-    return runtime.computeCompletions(document.getText(), params.position, {
-      workspaceIndex: runtime.workspaceIndex,
-    }).map(toLspCompletionItem);
+    return runtime
+      .computeCompletions(document.getText(), params.position, {
+        workspaceIndex: runtime.workspaceIndex,
+      })
+      .map(toLspCompletionItem);
   });
 }
 
@@ -174,7 +176,8 @@ function registerDefinitionHandler(
     }
 
     if (definition.length === 1) {
-      return createDefinitionLocation(definition[0]!, document.uri);
+      const [singleDefinition] = definition;
+      return singleDefinition ? createDefinitionLocation(singleDefinition, document.uri) : null;
     }
 
     return definition.map((target) => createDefinitionLocation(target, document.uri));
@@ -208,14 +211,14 @@ function registerWatchedFileHandler(
   });
 }
 
-async function handleWatchedFileChanges(
-  options: {
-    readonly connection: ReturnType<typeof createConnection>;
-    readonly documents: TextDocuments<TextDocument>;
-    readonly runtime: LanguageServerRuntime;
-    readonly params: Parameters<Parameters<ReturnType<typeof createConnection>['onDidChangeWatchedFiles']>[0]>[0];
-  },
-): Promise<void> {
+async function handleWatchedFileChanges(options: {
+  readonly connection: ReturnType<typeof createConnection>;
+  readonly documents: TextDocuments<TextDocument>;
+  readonly runtime: LanguageServerRuntime;
+  readonly params: Parameters<
+    Parameters<ReturnType<typeof createConnection>['onDidChangeWatchedFiles']>[0]
+  >[0];
+}): Promise<void> {
   await options.runtime.workspaceIndex.refresh();
 
   for (const deletedUri of getDeletedWatchedFileUris(options.params)) {

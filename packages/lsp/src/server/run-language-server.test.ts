@@ -1,16 +1,23 @@
 import { pathToFileURL } from 'node:url';
 
-import { parseDocument } from '@datalog/parser';
 import { describe, expect, it } from 'vitest';
-import { FileChangeType, type Diagnostic, type DidChangeWatchedFilesParams, type InitializeParams } from 'vscode-languageserver/node.js';
+import {
+  FileChangeType,
+  type Diagnostic,
+  type DidChangeWatchedFilesParams,
+  type InitializeParams,
+} from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
-import type { LanguageServerDiagnostic } from '../contracts/language-feature-types.js';
-import type { LanguageServerRuntime } from '../contracts/language-server-runtime.js';
+import { parseDocument } from '@datalog/parser';
+
+import { registerLanguageServerHandlers } from './run-language-server.js';
 import { toLspDiagnostic } from '../protocol/lsp-protocol-mappers.js';
 import { DatalogDocumentStore } from '../workspace/datalog-document-store.js';
 import { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
-import { registerLanguageServerHandlers } from './run-language-server.js';
+
+import type { LanguageServerDiagnostic } from '../contracts/language-feature-types.js';
+import type { LanguageServerRuntime } from '../contracts/language-server-runtime.js';
 
 describe('registerLanguageServerHandlers', () => {
   it('publishes diagnostics on open and change, then clears them on close', async () => {
@@ -81,9 +88,7 @@ describe('registerLanguageServerHandlers', () => {
 
     harness.setDiskFile(dependencyPath, 'new dependency');
     await harness.changeWatchedFiles({
-      changes: [
-        { uri: dependencyUri, type: FileChangeType.Created },
-      ],
+      changes: [{ uri: dependencyUri, type: FileChangeType.Created }],
     });
 
     harness.deleteDiskFile(renamedOldPath);
@@ -96,13 +101,9 @@ describe('registerLanguageServerHandlers', () => {
     });
 
     expect(harness.sentDiagnostics).toEqual([
-      createPublishedDiagnostics(currentUri, [
-        createDiagnostic('error', 'error open buffer'),
-      ]),
+      createPublishedDiagnostics(currentUri, [createDiagnostic('error', 'error open buffer')]),
       createPublishedDiagnostics(renamedOldUri, []),
-      createPublishedDiagnostics(currentUri, [
-        createDiagnostic('error', 'error open buffer'),
-      ]),
+      createPublishedDiagnostics(currentUri, [createDiagnostic('error', 'error open buffer')]),
     ]);
   });
 });
@@ -114,9 +115,10 @@ function createServerHarness(options?: {
   const diskFiles = new Map(options?.diskFiles ?? []);
   const workspaceIndex = new DatalogWorkspaceIndex({
     documentStore: new DatalogDocumentStore(),
-    listWorkspaceFiles: async (workspaceRootPath) => [...diskFiles.keys()]
-      .filter((filePath) => filePath.startsWith(`${workspaceRootPath}/`))
-      .sort((left, right) => left.localeCompare(right)),
+    listWorkspaceFiles: async (workspaceRootPath) =>
+      [...diskFiles.keys()]
+        .filter((filePath) => filePath.startsWith(`${workspaceRootPath}/`))
+        .sort((left, right) => left.localeCompare(right)),
     readFile: (async (filePath: string) => {
       const source = diskFiles.get(filePath);
       if (typeof source !== 'string') {
@@ -139,7 +141,9 @@ function createServerHarness(options?: {
     onDocumentSymbol: () => undefined,
     onFoldingRanges: () => undefined,
     onDefinition: () => undefined,
-    onDidChangeWatchedFiles: (handler: (params: DidChangeWatchedFilesParams) => Promise<void> | void) => {
+    onDidChangeWatchedFiles: (
+      handler: (params: DidChangeWatchedFilesParams) => Promise<void> | void,
+    ) => {
       handlers.didChangeWatchedFiles = handler;
     },
     languages: {
@@ -179,9 +183,7 @@ function createServerHarness(options?: {
       await handlers.initialize?.({
         processId: null,
         capabilities: {},
-        rootUri: options?.workspaceRootPath
-          ? pathToFileURL(options.workspaceRootPath).href
-          : null,
+        rootUri: options?.workspaceRootPath ? pathToFileURL(options.workspaceRootPath).href : null,
         workspaceFolders: options?.workspaceRootPath
           ? [{ uri: pathToFileURL(options.workspaceRootPath).href, name: 'workspace' }]
           : null,
@@ -267,7 +269,10 @@ function createDiagnostic(
   };
 }
 
-function createPublishedDiagnostics(uri: string, diagnostics: readonly LanguageServerDiagnostic[]): PublishedDiagnostics {
+function createPublishedDiagnostics(
+  uri: string,
+  diagnostics: readonly LanguageServerDiagnostic[],
+): PublishedDiagnostics {
   return { uri, diagnostics: diagnostics.map(toLspDiagnostic) };
 }
 

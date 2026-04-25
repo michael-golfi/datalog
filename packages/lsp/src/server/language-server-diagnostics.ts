@@ -1,12 +1,22 @@
-import { FileChangeType, type Diagnostic, type DidChangeWatchedFilesParams, type Hover, type TextDocuments } from 'vscode-languageserver/node.js';
-import type { TextDocument } from 'vscode-languageserver-textdocument';
+import {
+  FileChangeType,
+  type Diagnostic,
+  type DidChangeWatchedFilesParams,
+  type Hover,
+  type TextDocuments,
+} from 'vscode-languageserver/node.js';
+
+import { toLspDiagnostic } from '../protocol/lsp-protocol-mappers.js';
 
 import type { LanguageServerRuntime } from '../contracts/language-server-runtime.js';
-import { toLspDiagnostic } from '../protocol/lsp-protocol-mappers.js';
+import type { TextDocument } from 'vscode-languageserver-textdocument';
+
 
 /** Publish diagnostics for every currently open document. */
 export async function publishDiagnosticsForOpenDocuments(
-  connection: { sendDiagnostics: (payload: { uri: string; diagnostics: Diagnostic[] }) => Promise<void> },
+  connection: {
+    sendDiagnostics: (payload: { uri: string; diagnostics: Diagnostic[] }) => Promise<void>;
+  },
   documents: TextDocuments<TextDocument>,
   runtime: LanguageServerRuntime,
 ): Promise<void> {
@@ -17,22 +27,28 @@ export async function publishDiagnosticsForOpenDocuments(
 
 /** Publish diagnostics for one open document snapshot. */
 export async function publishDocumentDiagnostics(
-  connection: { sendDiagnostics: (payload: { uri: string; diagnostics: Diagnostic[] }) => Promise<void> },
+  connection: {
+    sendDiagnostics: (payload: { uri: string; diagnostics: Diagnostic[] }) => Promise<void>;
+  },
   runtime: LanguageServerRuntime,
   document: TextDocument,
 ): Promise<void> {
   await connection.sendDiagnostics({
     uri: document.uri,
-    diagnostics: runtime.computeDiagnostics(document.getText(), {
-      targetUri: document.uri,
-      workspaceIndex: runtime.workspaceIndex,
-    }).map(toLspDiagnostic),
+    diagnostics: runtime
+      .computeDiagnostics(document.getText(), {
+        targetUri: document.uri,
+        workspaceIndex: runtime.workspaceIndex,
+      })
+      .map(toLspDiagnostic),
   });
 }
 
 /** Clear previously published diagnostics for a URI. */
 export async function clearDocumentDiagnostics(
-  connection: { sendDiagnostics: (payload: { uri: string; diagnostics: Diagnostic[] }) => Promise<void> },
+  connection: {
+    sendDiagnostics: (payload: { uri: string; diagnostics: Diagnostic[] }) => Promise<void>;
+  },
   uri: string,
 ): Promise<void> {
   await connection.sendDiagnostics({ uri, diagnostics: [] satisfies Diagnostic[] });
@@ -64,7 +80,12 @@ export function createHoverResponse(
 export function createDefinitionLocation(
   definition: NonNullable<ReturnType<LanguageServerRuntime['computeDefinition']>>[number],
   documentUri: string,
-): { uri: string; range: NonNullable<ReturnType<LanguageServerRuntime['computeDefinition']>>[number]['targetSelectionRange'] } {
+): {
+  uri: string;
+  range: NonNullable<
+    ReturnType<LanguageServerRuntime['computeDefinition']>
+  >[number]['targetSelectionRange'];
+} {
   return {
     uri: definition.targetUri ?? documentUri,
     range: definition.targetSelectionRange,
