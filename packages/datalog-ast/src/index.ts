@@ -35,6 +35,15 @@ export type {
 } from './datalog-language.js';
 
 export type {
+  Cardinality,
+  DatalogSchema,
+  DefCompoundFieldSchema,
+  DefCompoundSchema,
+  DefPredSchema,
+  ScalarDomain,
+} from './datalog-schema.js';
+
+export type {
   DatalogFact,
   DatalogFactPattern,
   DatalogFactPatternMatch,
@@ -70,6 +79,13 @@ export {
   variableTerm,
   wildcardTerm,
 } from './datalog-builders.js';
+
+export {
+  defCompoundFieldSchema,
+  defCompoundSchema,
+  defPredSchema,
+  generateCompoundIdentity,
+} from './datalog-schema-builders.js';
 
 export {
   edgeFact,
@@ -111,6 +127,15 @@ export {
   isPosition,
   isRange,
 } from './datalog-type-guards.js';
+
+export {
+  isCardinality,
+  isDatalogSchema,
+  isDefCompoundFieldSchema,
+  isDefCompoundSchema,
+  isDefPredSchema,
+  isScalarDomain,
+} from './datalog-schema-type-guards.js';
 
 export {
   DATALOG_VISITOR_KEYS,
