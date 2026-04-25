@@ -4,12 +4,21 @@ export { applyDatalogFacts } from './execution/apply-datalog-facts.js';
 export { executeTranslatedSql } from './execution/execute-translated-sql.js';
 export { executePreparedSelectFacts } from './execution/execute-prepared-select-facts.js';
 export { prepareSelectFactsExecution } from './execution/prepare-select-facts-execution.js';
-export { createSelectFactsOperationFromDatalogQuery } from './translation/create-select-facts-operation-from-datalog-query.js';
 export { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from './translation/default-graph-predicate-catalog.js';
+export { buildPredicateCatalogFromSchema } from './translation/build-predicate-catalog-from-schema.js';
+export { createSelectFactsOperationFromDatalogQuery } from './translation/create-select-facts-operation-from-datalog-query.js';
+export { translateCompoundAssertion } from './translation/translate-compound-assertion.js';
 export type {
   DeleteFactsOperation,
+  InsertCompoundAssertionOperation,
   InsertFactsOperation,
+  PostgresGraphOperation,
+  SelectFactPattern,
   SelectFactsOperation,
+  SelectPredicatePattern,
+  SelectRecursiveClosureCountOperation,
+  SelectEdgesOperation,
+  SelectVertexByIdOperation,
 } from './contracts/postgres-graph-operation.js';
 export { GraphTranslationError } from './contracts/graph-translation-error.js';
 export type { GraphTranslationResult } from './contracts/graph-translation-result.js';

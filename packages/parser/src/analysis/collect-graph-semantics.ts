@@ -2,7 +2,7 @@ import type {
   NodeSummary,
   ParsedClause,
   ParsedDocument,
-  PredicateSchema,
+  ParsedSchemaDeclaration,
 } from '../contracts/parsed-document.js';
 import {
   BUILTIN_PREDICATE_NAMES,
@@ -11,13 +11,13 @@ import {
 } from '../semantics/graph-vocabulary.js';
 
 import { createGraphClassNodeSummaryInput, createNodeSummary } from './node-summary.js';
+import { extractDatalogSchema } from './extract-datalog-schema.js';
 
 type CollectedGraphSemantics = Omit<ParsedDocument, 'clauses' | 'datalogSymbols' | 'lineStarts'>;
 
 interface GraphSemanticsState {
-  readonly predicateSchemas: Map<string, PredicateSchema>;
+  readonly schemaDeclarations: readonly ParsedSchemaDeclaration[];
   readonly derivedPredicates: Map<string, ParsedClause[]>;
-  readonly compoundPredicates: Map<string, Set<string>>;
   readonly nodeSummaries: Map<string, NodeSummary>;
   readonly graphPredicateIds: Set<string>;
   readonly nodeIds: Set<string>;
@@ -31,7 +31,7 @@ interface EdgeReferences {
 
 /** Collect graph-oriented semantic indexes from parsed Datalog clauses. */
 export function collectGraphSemantics(clauses: readonly ParsedClause[]): CollectedGraphSemantics {
-  const state = createGraphSemanticsState();
+  const state = createGraphSemanticsState(extractDatalogSchema(clauses));
 
   for (const clause of clauses) {
     collectClauseSemantics(clause, state);
@@ -41,11 +41,10 @@ export function collectGraphSemantics(clauses: readonly ParsedClause[]): Collect
   return finalizeGraphSemantics(state);
 }
 
-function createGraphSemanticsState(): GraphSemanticsState {
+function createGraphSemanticsState(schemaDeclarations: readonly ParsedSchemaDeclaration[]): GraphSemanticsState {
   return {
-    predicateSchemas: new Map<string, PredicateSchema>(),
+    schemaDeclarations,
     derivedPredicates: new Map<string, ParsedClause[]>(),
-    compoundPredicates: new Map<string, Set<string>>(),
     nodeSummaries: new Map<string, NodeSummary>(),
     graphPredicateIds: new Set<string>(),
     nodeIds: new Set<string>(),
@@ -55,23 +54,23 @@ function createGraphSemanticsState(): GraphSemanticsState {
 function collectClauseSemantics(clause: ParsedClause, state: GraphSemanticsState): void {
   collectDerivedPredicates(clause, state.derivedPredicates);
   collectReferenceIds(clause, state.graphPredicateIds, state.nodeIds);
-  collectPredicateSchema(clause, state.predicateSchemas, state.graphPredicateIds);
   collectEdgeSemantics(clause, state);
-  collectCompoundPredicates(clause, state.compoundPredicates);
 }
 
 function addSchemaNodeIds(state: GraphSemanticsState): void {
-  for (const schema of state.predicateSchemas.values()) {
-    state.nodeIds.add(schema.subjectType);
-    state.nodeIds.add(schema.objectType);
+  for (const declaration of state.schemaDeclarations) {
+    if (declaration.schema.kind !== 'predicate-schema') {
+      continue;
+    }
+
+    state.graphPredicateIds.add(declaration.schema.predicateName);
   }
 }
 
 function finalizeGraphSemantics(state: GraphSemanticsState): CollectedGraphSemantics {
   return {
-    predicateSchemas: state.predicateSchemas,
+    schemaDeclarations: state.schemaDeclarations,
     derivedPredicates: state.derivedPredicates,
-    compoundPredicates: state.compoundPredicates,
     nodeSummaries: state.nodeSummaries,
     graphPredicateIds: [...state.graphPredicateIds].sort(),
     nodeIds: [...state.nodeIds].sort(),
@@ -105,42 +104,6 @@ function collectReferenceIds(
       nodeIds.add(reference.value);
     }
   }
-}
-
-function collectPredicateSchema(
-  clause: ParsedClause,
-  predicateSchemas: Map<string, PredicateSchema>,
-  graphPredicateIds: Set<string>,
-): void {
-  if (clause.predicate !== 'DefPred' || clause.references.length < 5) {
-    return;
-  }
-
-  const predicateId = clause.references[0];
-  const subjectCardinality = clause.references[1];
-  const subjectType = clause.references[2];
-  const objectCardinality = clause.references[3];
-  const objectType = clause.references[4];
-
-  if (
-    predicateId === undefined
-    || subjectCardinality === undefined
-    || subjectType === undefined
-    || objectCardinality === undefined
-    || objectType === undefined
-  ) {
-    return;
-  }
-
-  predicateSchemas.set(predicateId.value, {
-    predicateId: predicateId.value,
-    subjectCardinality: subjectCardinality.value,
-    subjectType: subjectType.value,
-    objectCardinality: objectCardinality.value,
-    objectType: objectType.value,
-    range: predicateId.range,
-  });
-  graphPredicateIds.add(predicateId.value);
 }
 
 function collectEdgeSemantics(clause: ParsedClause, state: GraphSemanticsState): void {
@@ -214,21 +177,4 @@ function collectGraphClassEdge(
       ...(current?.label === undefined ? {} : { label: current.label }),
     })),
   );
-}
-
-function collectCompoundPredicates(
-  clause: ParsedClause,
-  compoundPredicates: Map<string, Set<string>>,
-): void {
-  if (!clause.isCompound || clause.compoundFields.length === 0) {
-    return;
-  }
-
-  const existing = compoundPredicates.get(clause.predicate) ?? new Set<string>();
-
-  for (const field of clause.compoundFields) {
-    existing.add(field);
-  }
-
-  compoundPredicates.set(clause.predicate, existing);
 }

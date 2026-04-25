@@ -63,6 +63,7 @@ export interface PostgresViewBinding {
   readonly relationName: string;
   readonly schemaName?: string;
   readonly columns: readonly RelationColumnBinding[];
+  readonly definitionSql?: string;
   readonly literalWhereSql?: string;
 }
 

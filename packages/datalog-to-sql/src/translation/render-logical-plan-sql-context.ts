@@ -46,9 +46,21 @@ function createColumnReferenceMap(plan: LogicalPlan): ReadonlyMap<string, string
     }
 
     for (const column of node.output) {
-      references.set(column.id, `${node.id}.${column.name}`);
+      references.set(column.id, `${node.id}.${renderColumnIdentifier(column.name)}`);
     }
   }
 
   return references;
+}
+
+function renderColumnIdentifier(value: string): string {
+  if (/^[A-Za-z_][A-Za-z0-9_]*$/u.test(value)) {
+    return value;
+  }
+
+  return quoteIdentifier(value);
+}
+
+function quoteIdentifier(value: string): string {
+  return `"${value.replaceAll('"', '""')}"`;
 }

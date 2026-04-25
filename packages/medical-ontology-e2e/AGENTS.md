@@ -12,7 +12,7 @@
 - Do not keep a package-style `src/` tree or export surface here; this workspace is fixture/test-owned.
 - Keep helper code test-scoped and package-local under `test/fixtures/` with explicit fixture-oriented names.
 - Keep ontology meaning in Datalog files under `migrations/` rather than expanding TypeScript modeling layers.
-- Committed migrations are moving to flat dated `.dl` files, with `current.dl` reserved as the mutable working area for later CLI tasks.
+- Committed migrations use flat dated `.dl` files, with `current.dl` reserved as the mutable working area consumed by the package migration CLI scripts.
 - Keep workspace test suites under `test/**/*.test.ts` and package-local support modules under `test/fixtures/**/*.ts`.
 - Avoid deep imports into other workspaces; use `@datalog/*` package surfaces when cross-workspace dependencies become necessary in later tasks.
 - When invoking migration tooling, use `@datalog/datalog-migrate` package exports or public binaries only; do not deep-link into sibling `dist/` output or private source files.
@@ -29,17 +29,17 @@
 - `test/fixtures/medical-ontology-workspace-path-support.ts` owns package-local path resolution for tests and workspace helpers.
 - `test/fixtures/committed-ontology-facts-fixture.ts` owns domain-specific loading of committed ontology edge facts for SQL-backed verification.
 - `test/fixtures/ontology-migration-chain-fixture.ts` owns the package-local CLI workspace fixture and canonical migration-chain replay used by consumer-side tests.
+- `test/fixtures/localhost-postgres-fixture.ts` and live-postgres proof fixtures own localhost PostgreSQL verification support.
+- `test/fixtures/ontology-graph-rag-*.ts` owns package-local GraphRAG query and assertion fixtures.
 - Graphile-Migrate-style workflow tooling now lives in `@datalog/datalog-migrate` and this package consumes it through scripts/tests instead of owning the implementation directly.
 - Consumer-side tests should generate chains by writing current-state step bodies and committing them through the public CLI seam, then prove outcomes from the generated `migrations/` state rather than inspecting migration internals directly.
 
 ## Verification
 
-- Default suite, including the localhost ontology happy/failure-path tests, must stay available through `yarn workspace @datalog/medical-ontology-e2e test`.
-- Keep the worker-collision proof opt-in behind `MEDICAL_ONTOLOGY_E2E_RUN_WORKER_COLLISION_PROOF=1`; it is verification-only and must not run as part of the default suite.
-- Preserve `MEDICAL_ONTOLOGY_E2E_ADMIN_POSTGRES_URL` as the localhost admin override for verification against a local PostgreSQL instance.
+- GraphRAG coverage is intentionally split by intent between `test/ontology-graph-rag-live-e2e.test.ts` for the PostgreSQL-backed happy path and `test/ontology-graph-rag-edge-cases.test.ts` for plain no-LLM and invalid-metadata edge cases; both must remain available through `yarn workspace @datalog/medical-ontology-e2e test`.
+- Keep `test/ontology-graph-rag-live-e2e.test.ts` as the only suite that exercises live OpenAI answering, and keep that block declaration-time gated through the existing opt-in `OPENAI_API_KEY` availability check instead of treating it as unconditional default coverage.
+- Preserve `MEDICAL_ONTOLOGY_E2E_ADMIN_POSTGRES_URL` as the admin PostgreSQL override for verification against the live fixture seam used by the live GraphRAG suite.
 - `yarn workspace @datalog/medical-ontology-e2e lint`
 - `yarn workspace @datalog/medical-ontology-e2e typecheck`
 - `yarn workspace @datalog/medical-ontology-e2e build`
 - `yarn workspace @datalog/medical-ontology-e2e test`
-- `yarn workspace @datalog/medical-ontology-e2e test:worker-collision-proof`
-- Simultaneous package-run safety proof: start two `yarn workspace @datalog/medical-ontology-e2e test` invocations at the same time and confirm both pass without database-name collisions.

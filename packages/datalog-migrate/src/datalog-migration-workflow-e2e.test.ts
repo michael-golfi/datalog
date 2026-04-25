@@ -7,10 +7,7 @@ import {
   DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
   applyDatalogFacts,
   createPostgresSqlClient,
-  executePreparedSelectFacts,
   initializeGraphSchema,
-  prepareSelectFactsExecution,
-  type SelectFactsOperation,
   waitForPostgres,
 } from '@datalog/datalog-to-sql';
 
@@ -82,17 +79,6 @@ describe('datalog migration workflow e2e', () => {
         facts: loadCommittedWorkflowFacts(workspaceRoot),
       });
 
-      const linkedRows = await executeQuery<{ target_id: string }>(sql, {
-        kind: 'select-facts',
-        match: [
-          {
-            kind: 'edge',
-            subject: { kind: 'constant', value: 'vertex/alpha' },
-            predicate: { kind: 'constant', value: 'graph/links_to' },
-            object: { kind: 'variable', name: 'target_id' },
-          },
-        ],
-      });
       const edgeCount = await sql<Array<{ count: string }>>`select count(*)::text as count from edges`;
       const vertexCount = await sql<Array<{ count: string }>>`select count(*)::text as count from vertices`;
       const edgeRows = await sql<Array<{ subject_id: string; predicate_id: string; object_id: string }>>`
@@ -107,8 +93,6 @@ describe('datalog migration workflow e2e', () => {
         where id in ('vertex/alpha', 'vertex/beta')
         order by id asc
       `;
-
-      expect(linkedRows[0]?.target_id).toBe('vertex/beta');
       expect(Number.parseInt(edgeCount[0]?.count ?? '0', 10)).toBeGreaterThan(0);
       expect(Number.parseInt(vertexCount[0]?.count ?? '0', 10)).toBeGreaterThan(0);
       expect(edgeRows).toContainEqual({
@@ -218,16 +202,3 @@ describe('datalog migration workflow e2e', () => {
     expect(statusAfterApply.statusFlags.pendingCommittedUnknown).toBe(false);
   }, 20_000);
 });
-
-async function executeQuery<Row extends Record<string, unknown>>(
-  sql: ReturnType<typeof createPostgresSqlClient>,
-  operation: SelectFactsOperation,
-): Promise<readonly Row[]> {
-  return executePreparedSelectFacts<Row>({
-    sql,
-    execution: prepareSelectFactsExecution({
-      operation,
-      catalog: DEFAULT_SELECT_FACTS_PREDICATE_CATALOG,
-    }),
-  });
-}

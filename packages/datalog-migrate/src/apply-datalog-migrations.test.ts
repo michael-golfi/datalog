@@ -1,16 +1,68 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  extractDatalogFactsFromMigrations,
-  type CompoundBacklinkExpander,
-} from './apply-datalog-migrations.js';
+import { extractDatalogFactsFromMigrations, type CompoundBacklinkExpander } from './apply-datalog-migrations.js';
+import { extractDatalogSchemaFromMigrations } from './extract-datalog-schema-from-migrations.js';
+
+describe('extractDatalogSchemaFromMigrations', () => {
+  it('extracts predicate and compound schemas from committed migration bodies', () => {
+    expect(extractDatalogSchemaFromMigrations([
+      {
+        body: [
+          'DefPred("graph/likes", "1", "graph/node", "0", "graph/node").',
+          'DefCompound("Serving", "serv/id", "1", "graph/node").',
+          'DefCompound("Serving", "serv/unit", "?", "graph/string").',
+          '',
+        ].join('\n'),
+      },
+    ])).toEqual([
+      {
+        kind: 'predicate-schema',
+        predicateName: 'graph/likes',
+        subjectCardinality: '1',
+        subjectDomain: 'node',
+        objectCardinality: '0',
+        objectDomain: 'node',
+      },
+      {
+        kind: 'compound-schema',
+        compoundName: 'Serving',
+        fields: [
+          { fieldName: 'serv/id', cardinality: '1', domain: 'node' },
+          { fieldName: 'serv/unit', cardinality: '?', domain: 'text' },
+        ],
+      },
+    ]);
+  });
+
+  it('throws a structured error for invalid schema declarations', () => {
+    expect(() => extractDatalogSchemaFromMigrations([
+      {
+        fileName: '000001_invalid_schema.dl',
+        body: 'DefPred("graph/likes", "many", "graph/node", "0", "graph/node").\n',
+      },
+    ])).toThrowError(expect.objectContaining({
+      name: 'DatalogMigrationSchemaError',
+      code: 'datalog-migrate.invalid-schema-declaration',
+      details: expect.objectContaining({
+        migrationFileName: '000001_invalid_schema.dl',
+        migrationIndex: 0,
+        predicate: 'DefPred',
+      }),
+    }));
+  });
+});
 
 describe('extractDatalogFactsFromMigrations', () => {
   it('extracts vertex and edge facts from simple Edge clauses', () => {
     expect(
       extractDatalogFactsFromMigrations([
         {
-          body: 'Edge("node/alice", "graph/likes", "node/bob").\nEdge("node/bob", "graph/likes", "node/carol").\n',
+          body: [
+            'DefPred("graph/likes", "1", "graph/node", "0", "graph/node").',
+            'Edge("node/alice", "graph/likes", "node/bob").',
+            'Edge("node/bob", "graph/likes", "node/carol").',
+            '',
+          ].join('\n'),
         },
       ]),
     ).toEqual({
@@ -42,7 +94,13 @@ describe('extractDatalogFactsFromMigrations', () => {
     expect(
       extractDatalogFactsFromMigrations([
         {
-          body: 'Vertex("node/alice").\nNode("node/bob").\nEdge("node/alice", "graph/likes", "node/bob").\n',
+          body: [
+            'DefPred("graph/likes", "1", "graph/node", "0", "graph/node").',
+            'Vertex("node/alice").',
+            'Node("node/bob").',
+            'Edge("node/alice", "graph/likes", "node/bob").',
+            '',
+          ].join('\n'),
         },
       ]),
     ).toEqual({
@@ -63,12 +121,13 @@ describe('extractDatalogFactsFromMigrations', () => {
     });
   });
 
-  it('skips compound declarations, DefCompound clauses, and DefPred clauses', () => {
+  it('skips schema declarations while still validating declared graph facts', () => {
     const extraction = extractDatalogFactsFromMigrations([
       {
         body: [
           'DefPred("graph/likes", "1", "graph/node", "0", "graph/node").',
-          'DefCompound("Serving", "serv/id", "graph/node").',
+          'DefCompound("Serving", "serv/id", "1", "graph/node").',
+          'DefCompound("Serving", "serv/unit", "?", "graph/string").',
           'Serving@(serv/id="node/alice", serv/unit="unit/serving").',
           'Edge("node/alice", "graph/likes", "node/bob").',
           '',
@@ -91,8 +150,10 @@ describe('extractDatalogFactsFromMigrations', () => {
   });
 
   it('expands compound backlinks when a compoundBacklinkExpander is provided', () => {
-    const expander: CompoundBacklinkExpander = (clause) => {
+    const expander: CompoundBacklinkExpander = ({ clause, schema, schemas }) => {
       if (clause.predicate === 'Serving') {
+        expect(schema.compoundName).toBe('Serving');
+        expect(schemas).toContainEqual(expect.objectContaining({ kind: 'compound-schema', compoundName: 'Serving' }));
         const subjectId = clause.references[0]?.value;
         const objectId = clause.references[1]?.value;
 
@@ -108,7 +169,9 @@ describe('extractDatalogFactsFromMigrations', () => {
       [
         {
           body: [
-            'DefCompound("Serving", "serv/id", "serv/unit").',
+            'DefPred("graph/likes", "1", "graph/node", "0", "graph/node").',
+            'DefCompound("Serving", "serv/id", "1", "graph/node").',
+            'DefCompound("Serving", "serv/unit", "?", "graph/string").',
             'Serving@(serv/id="node/alice", serv/unit="unit/serving").',
             'Edge("node/alice", "graph/likes", "node/bob").',
             '',
@@ -131,6 +194,7 @@ describe('extractDatalogFactsFromMigrations', () => {
     const extraction = extractDatalogFactsFromMigrations([
       {
         body: [
+          'DefPred("graph/likes", "1", "graph/node", "0", "graph/node").',
           'Reachable(node_a, node_b) :-',
           '  Edge(node_a, "graph/likes", node_b).',
           'Edge("node/alice", "graph/likes", "node/bob").',
@@ -154,6 +218,7 @@ describe('extractDatalogFactsFromMigrations', () => {
     const extraction = extractDatalogFactsFromMigrations([
       {
         body: [
+          'DefPred("graph/likes", "1", "graph/node", "0", "graph/node").',
           'Edge("node/alice", "graph/likes", "node/bob").',
           'Edge("node/carol", "graph/likes", "node/alice").',
           'Edge("node/alice", "graph/likes", "node/bob").',
@@ -192,5 +257,66 @@ describe('extractDatalogFactsFromMigrations', () => {
       vertices: [],
       edges: [],
     });
+  });
+
+  it('throws a structured error when an edge fact uses an undeclared predicate schema', () => {
+    expect(() => extractDatalogFactsFromMigrations([
+      {
+        body: 'Edge("node/alice", "graph/likes", "node/bob").\n',
+      },
+    ])).toThrowError(expect.objectContaining({
+      name: 'DatalogMigrationSchemaError',
+      code: 'datalog-migrate.missing-schema',
+      details: expect.objectContaining({
+        predicate: 'graph/likes',
+      }),
+    }));
+  });
+
+  it('throws a structured error when a compound fact uses an undeclared compound schema', () => {
+    expect(() => extractDatalogFactsFromMigrations([
+      {
+        body: 'Serving@(serv/id="node/alice").\n',
+      },
+    ])).toThrowError(expect.objectContaining({
+      name: 'DatalogMigrationSchemaError',
+      code: 'datalog-migrate.missing-schema',
+      details: expect.objectContaining({
+        predicate: 'Serving',
+      }),
+    }));
+  });
+
+  it('throws a structured error when a compound fact violates a declared field domain', () => {
+    expect(() => extractDatalogFactsFromMigrations([
+      {
+        body: [
+          'DefCompound("Measurement", "measure/value", "1", "int8").',
+          'Measurement@(measure/value="not-a-number").',
+          '',
+        ].join('\n'),
+      },
+    ])).toThrowError(expect.objectContaining({
+      name: 'DatalogMigrationSchemaError',
+      code: 'datalog-migrate.invalid-fact',
+      message: 'Measurement field measure/value must match the int8 domain.',
+    }));
+  });
+
+  it('throws a structured error when a compound fact omits a required field', () => {
+    expect(() => extractDatalogFactsFromMigrations([
+      {
+        body: [
+          'DefCompound("Serving", "serv/id", "1", "graph/node").',
+          'DefCompound("Serving", "serv/unit", "1", "graph/string").',
+          'Serving@(serv/id="node/alice").',
+          '',
+        ].join('\n'),
+      },
+    ])).toThrowError(expect.objectContaining({
+      name: 'DatalogMigrationSchemaError',
+      code: 'datalog-migrate.invalid-fact',
+      message: 'Compound fact Serving@ is missing required field serv/unit.',
+    }));
   });
 });

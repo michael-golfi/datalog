@@ -6,7 +6,7 @@ import {
 } from '@datalog/parser';
 import type { DatalogMigrationProjectFiles } from '@datalog/datalog-migrate/load-datalog-migration-project-files';
 
-import type { DatalogWorkspaceDocument } from './datalog-workspace-index.js';
+import type { DatalogWorkspaceDocument } from './load-datalog-workspace-documents.js';
 
 type LoadMigrationProjectFiles = (options: { readonly workspaceRoot: string }) => DatalogMigrationProjectFiles;
 

@@ -1,4 +1,8 @@
-export { applyDatalogMigrations, extractDatalogFactsFromMigrations } from './apply-datalog-migrations.js';
+export {
+  applyDatalogMigrations,
+  extractDatalogFactsFromMigrations,
+} from './apply-datalog-migrations.js';
+export { DatalogMigrationSchemaError, extractDatalogSchemaFromMigrations } from './extract-datalog-schema-from-migrations.js';
 export { commitCurrentMigration } from './commit-current-datalog-migration.js';
 export {
   createCommittedMigrationSource,
@@ -15,6 +19,7 @@ export { readDatalogWatchSnapshot, watchCurrentDatalogMigration } from './watch-
 export type {
   ApplyDatalogMigrationsOptions,
   ApplyDatalogMigrationsResult,
+  CompoundBacklinkExpansionContext,
   CompoundBacklinkExpander,
   DatalogMigrationFactExtraction,
   ExtractDatalogFactsOptions,

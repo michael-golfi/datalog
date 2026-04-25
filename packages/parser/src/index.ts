@@ -1,4 +1,14 @@
 export { collectDatalogSymbols } from './analysis/collect-datalog-symbols.js';
+export {
+  extractDatalogSchema,
+  extractDefCompoundSchemas,
+  extractDefPredSchema,
+} from './analysis/extract-datalog-schema.js';
+export {
+  getCompoundFieldNames,
+  getCompoundSchemaDeclaration,
+  getPredicateSchemaDeclaration,
+} from './analysis/schema-declarations.js';
 export { getStringReferenceAtPosition } from './analysis/get-string-reference-at-position.js';
 export { parseDatalogFacts } from './ast/parse-datalog-facts.js';
 export { parseDatalogProgram } from './ast/parse-datalog-program.js';
@@ -37,6 +47,6 @@ export type {
   ParsedPredicateOccurrence,
   ParsedReference,
   ParsedReferenceRole,
-  PredicateSchema,
+  ParsedSchemaDeclaration,
 } from './contracts/parsed-document.js';
 export type { Position, Range } from './contracts/position.js';

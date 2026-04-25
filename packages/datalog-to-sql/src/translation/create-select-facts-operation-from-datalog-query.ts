@@ -14,7 +14,7 @@ import { getSelectFactsPredicateBinding } from './select-facts-logical-plan-patt
 /** Convert a shared Datalog query AST into the SQL package's select-facts operation envelope. */
 export function createSelectFactsOperationFromDatalogQuery(
   query: DatalogQueryStatement,
-  catalog: PredicateCatalog,
+  predicateCatalog: PredicateCatalog,
 ): SelectFactsOperation {
   const [firstPattern, ...remainingPatterns] = query.body.map((literal) => {
     if (literal.kind !== 'atom') {
@@ -24,7 +24,7 @@ export function createSelectFactsOperationFromDatalogQuery(
       );
     }
 
-    return createFactPatternFromAtom(literal, catalog);
+    return createFactPatternFromAtom(literal, predicateCatalog);
   });
 
   if (firstPattern === undefined) {
@@ -36,6 +36,7 @@ export function createSelectFactsOperationFromDatalogQuery(
 
   return {
     kind: 'select-facts',
+    predicateCatalog,
     match: [firstPattern, ...remainingPatterns],
   };
 }

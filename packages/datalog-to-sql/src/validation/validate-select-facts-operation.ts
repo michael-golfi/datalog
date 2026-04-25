@@ -11,15 +11,16 @@ export function validateSelectFactsOperation(operation: SelectFactsOperation): v
 }
 
 function validateFactPattern(pattern: SelectFactsOperation['match'][number]): void {
+  if (pattern.kind === 'vertex') {
+    validateTerm(pattern.id);
+    return;
+  }
+
   if (pattern.kind === 'predicate') {
     for (const term of pattern.terms) {
       validateTerm(term);
     }
-    return;
-  }
 
-  if (pattern.kind === 'vertex') {
-    validateTerm(pattern.id);
     return;
   }
 

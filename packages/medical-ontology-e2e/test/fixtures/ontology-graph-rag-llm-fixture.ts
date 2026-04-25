@@ -159,8 +159,6 @@ function buildSystemPrompt(): string {
   return [
     'You answer clinical ontology Graph RAG scenarios using ONLY the provided ontology evidence.',
     'Cite every clinical claim with evidence IDs from the provided evidence context.',
-    'You MUST cite EVERY required evidence ID listed in the user prompt at least once in your citations array.',
-    'You MUST include every required entity ID from the user prompt as either a subjectId or objectId in at least one keyFinding.',
     'Never invent, hallucinate, or alter evidence IDs.',
     'If the provided evidence is insufficient, return status "insufficient_evidence".',
     'Return ONLY valid JSON (no markdown) matching this exact schema:',
@@ -178,12 +176,6 @@ function buildUserPrompt(input: GraphRagLlmInput): string {
   return [
     `Scenario ID: ${input.scenario.scenarioId}`,
     `Question: ${input.scenario.question}`,
-    '',
-    'Required evidence IDs:',
-    input.scenario.requiredEvidenceIds.map((id) => `- ${id}`).join('\n'),
-    '',
-    'Required entity IDs:',
-    input.scenario.requiredEntityIds.map((id) => `- ${id}`).join('\n'),
     '',
     'Ontology evidence:',
     buildEvidenceContext(input.evidence),

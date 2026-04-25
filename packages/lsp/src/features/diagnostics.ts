@@ -1,7 +1,8 @@
-import { parseDocument } from '@datalog/parser';
+import { parseDatalogProgram, parseDocument } from '@datalog/parser';
 
 import type { LanguageServerDiagnostic } from '../contracts/language-feature-types.js';
 import type { DatalogWorkspaceIndex } from '../workspace/datalog-workspace-index.js';
+import { createCompoundSchemaDiagnostics } from './diagnostic-compound-schema-violations.js';
 import { collectDuplicateSchemaClauses } from './diagnostic-duplicate-defpred-schemas.js';
 
 const EXPECTED_ARITY = new Map<string, number>([
@@ -21,12 +22,15 @@ export function computeDiagnostics(
   const diagnostics = createSourceDiagnostics(source);
   const allowInteractiveQuery = isLikelyInteractiveQuery(source, diagnosticsContext.parsedDocument.clauses.length);
 
-  for (const clause of diagnosticsContext.parsedDocument.clauses) {
+  for (const [clauseIndex, clause] of diagnosticsContext.parsedDocument.clauses.entries()) {
     diagnostics.push(...createClauseDiagnostics({
       source,
       clause,
+      statement: diagnosticsContext.parsedProgram.statements[clauseIndex],
       duplicateSchemaClauses: diagnosticsContext.duplicateSchemaClauses,
       allowInteractiveQuery,
+      parsedDocument: diagnosticsContext.parsedDocument,
+      ...(context.workspaceIndex ? { workspaceIndex: context.workspaceIndex } : {}),
     }));
   }
 
@@ -41,10 +45,12 @@ function createDiagnosticsContext(
   },
 ): {
   readonly parsedDocument: ReturnType<typeof parseDocument>;
+  readonly parsedProgram: ReturnType<typeof parseDatalogProgram>;
   readonly duplicateSchemaClauses: ReadonlySet<ReturnType<typeof parseDocument>['clauses'][number]>;
 } {
   const targetDocument = getProgramTargetDocument(source, context);
   const parsedDocument = targetDocument?.parsedDocument ?? parseDocument(source);
+  const parsedProgram = safeParseDatalogProgram(source);
   const sources = getDiagnosticsSources({
     parsedDocument,
     targetDocument,
@@ -54,11 +60,23 @@ function createDiagnosticsContext(
 
   return {
     parsedDocument,
+    parsedProgram,
     duplicateSchemaClauses: collectDuplicateSchemaClauses({
       targetSourceId: targetDocument?.sourceId ?? context.targetUri ?? 'local',
       sources,
     }),
   };
+}
+
+function safeParseDatalogProgram(source: string): ReturnType<typeof parseDatalogProgram> {
+  try {
+    return parseDatalogProgram(source);
+  } catch {
+    return {
+      kind: 'program',
+      statements: [],
+    };
+  }
 }
 
 function getDiagnosticsSources(options: {
@@ -117,14 +135,23 @@ function createClauseDiagnostics(
   options: {
     readonly source: string;
     readonly clause: ReturnType<typeof parseDocument>['clauses'][number];
+    readonly statement: ReturnType<typeof parseDatalogProgram>['statements'][number] | undefined;
     readonly duplicateSchemaClauses: ReadonlySet<ReturnType<typeof parseDocument>['clauses'][number]>;
     readonly allowInteractiveQuery: boolean;
+    readonly parsedDocument: ReturnType<typeof parseDocument>;
+    readonly workspaceIndex?: DatalogWorkspaceIndex;
   },
 ): LanguageServerDiagnostic[] {
   return [
     ...createArityDiagnostics(options.clause),
     ...createDuplicateSchemaDiagnostics(options.clause, options.duplicateSchemaClauses),
     ...createClauseTerminationDiagnostics(options.source, options.clause, options.allowInteractiveQuery),
+    ...createCompoundSchemaDiagnostics({
+      clause: options.clause,
+      statement: options.statement,
+      parsedDocument: options.parsedDocument,
+      ...(options.workspaceIndex ? { workspaceIndex: options.workspaceIndex } : {}),
+    }),
   ];
 }
 

@@ -56,6 +56,11 @@ const SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE = {
   },
 } satisfies PredicateCatalog;
 
+const EMPTY_PREDICATE_CATALOG = {
+  version: 1,
+  predicates: [],
+} satisfies PredicateCatalog;
+
 describe('createSelectFactsOperationFromDatalogQuery', () => {
   it('catalog-driven graph predicates compile through the explicit catalog path', () => {
     const query = queryStatement({
@@ -75,6 +80,7 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
 
     expect(createSelectFactsOperationFromDatalogQuery(query, SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE)).toEqual({
       kind: 'select-facts',
+      predicateCatalog: SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE,
       match: [
         {
           kind: 'predicate',
@@ -134,6 +140,7 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
 
     expect(createSelectFactsOperationFromDatalogQuery(query, SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE)).toEqual({
       kind: 'select-facts',
+      predicateCatalog: SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE,
       match: [
         {
           kind: 'predicate',
@@ -197,6 +204,7 @@ describe('createSelectFactsOperationFromDatalogQuery', () => {
 
     expect(createSelectFactsOperationFromDatalogQuery(query, SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE)).toEqual({
       kind: 'select-facts',
+      predicateCatalog: SELECT_FACTS_CATALOG_WITH_EXTERNAL_PREDICATE,
       match: [
         {
           kind: 'predicate',

@@ -1,3 +1,4 @@
+import { defPredSchema } from '@datalog/ast';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -19,6 +20,24 @@ import {
   waitForPostgres,
 } from '../runtime/recursive-closure-postgres-runtime.js';
 import { DEFAULT_SELECT_FACTS_PREDICATE_CATALOG } from '../translation/default-graph-predicate-catalog.js';
+import { buildPredicateCatalogFromSchema } from '../translation/build-predicate-catalog-from-schema.js';
+
+const GRAPH_PREDICATE_CATALOG = buildPredicateCatalogFromSchema([
+  defPredSchema({
+    predicateName: 'vertex',
+    subjectCardinality: '1',
+    subjectDomain: 'node',
+    objectCardinality: '0',
+    objectDomain: 'node',
+  }),
+  defPredSchema({
+    predicateName: 'edge',
+    subjectCardinality: '0',
+    subjectDomain: 'node',
+    objectCardinality: '0',
+    objectDomain: 'node',
+  }),
+]);
 
 describe('postgres e2e validation', () => {
   let sql!: PostgresSqlClient;

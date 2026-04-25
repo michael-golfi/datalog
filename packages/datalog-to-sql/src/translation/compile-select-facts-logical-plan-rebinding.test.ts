@@ -8,6 +8,7 @@ describe('compileSelectFactsLogicalPlan rebinding', () => {
     const plan = compileSelectFactsLogicalPlan(
       {
         kind: 'select-facts',
+        predicateCatalog: graphPredicateCatalog,
         match: [
           {
             kind: 'edge',

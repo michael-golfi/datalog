@@ -20,6 +20,7 @@
 
 ## Verification
 - `yarn workspace @datalog/eslint-plugin-datalog lint`
+- `yarn workspace @datalog/eslint-plugin-datalog typecheck`
 - `yarn workspace @datalog/eslint-plugin-datalog test`
 - `yarn workspace @datalog/eslint-plugin-datalog build`
 

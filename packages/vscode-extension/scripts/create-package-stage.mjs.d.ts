@@ -4,6 +4,7 @@ export const stagedExtensionRoot: string;
 export function createPackageStage(options?: {
   stageRoot?: string;
   languageServerModuleId?: string;
+  allowMissingCompiledExtension?: boolean;
 }): Promise<string>;
 
 export function createLanguageServerModuleResolverSource(languageServerModuleId: string): string;

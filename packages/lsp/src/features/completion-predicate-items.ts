@@ -1,4 +1,4 @@
-import { BUILTIN_PREDICATE_NAMES } from '@datalog/parser';
+import { BUILTIN_PREDICATE_NAMES, getCompoundSchemaDeclaration } from '@datalog/parser';
 import type { parseDocument } from '@datalog/parser';
 
 import type { LanguageServerCompletionItem } from '../contracts/language-feature-types.js';
@@ -48,7 +48,7 @@ function appendLocalClauseCompletions(options: {
     sortGroup: '0',
     detail: 'Local predicate',
   }));
-  if (!options.parsed.compoundPredicates.has(options.predicateName)) {
+  if (!getCompoundSchemaDeclaration(options.parsed.schemaDeclarations, options.predicateName)) {
     return;
   }
 

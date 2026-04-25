@@ -3,13 +3,14 @@
 ## Ownership
 
 - This package owns generic Datalog migration workflow tooling.
-- It is the home for commit/status/uncommit/watch command logic and committed-migration metadata helpers.
+- It is the home for apply/init/commit/status/uncommit/watch command logic and committed-migration metadata helpers.
 - It must remain independent from ontology domain modeling and production SQL execution ownership.
 
 ## Package shape
 
 - Keep `src/index.ts` export-only.
 - Keep the package small and CLI/tooling-oriented.
+- Keep executable command seams in focused top-level modules such as `src/apply-datalog-migrations.ts`, `src/init-datalog-migration-workspace.ts`, `src/commit-current-datalog-migration.ts`, `src/status-datalog-migration.ts`, `src/uncommit-datalog-migration.ts`, and `src/watch-current-datalog-migration.ts`.
 - Prefer filesystem-driven helpers over code-heavy project modeling.
 - If a module exists only to support tests or relies on dev-only imports, keep it test-scoped with `*.test.ts` naming instead of plain `src/**/*.ts`.
 
@@ -18,7 +19,8 @@
 - Flat committed migration discovery.
 - Embedded migration metadata reading/validation.
 - Current-vs-committed command workflows.
-- Tooling-oriented tests for commit/status/uncommit/watch behavior.
+- Apply/init command workflows and public CLI seams.
+- Tooling-oriented tests for apply/init/commit/status/uncommit/watch behavior.
 
 ## What does not belong here
 

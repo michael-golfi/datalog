@@ -1,13 +1,12 @@
 import { readFile } from 'node:fs/promises';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 
+import type { DefCompoundFieldSchema } from '@datalog/ast';
 import {
   parseDocument,
   type DatalogPredicateSymbolIdentity,
   type NodeSummary,
-  type ParsedDocument,
   type ParsedDatalogProgramSources,
-  type PredicateSchema,
   type Range,
 } from '@datalog/parser';
 import {
@@ -18,34 +17,18 @@ import type {
   DatalogDocumentStore,
   DatalogTextDocumentSnapshot,
 } from './datalog-document-store.js';
-import { buildDatalogWorkspaceProgram } from './datalog-workspace-program.js';
+import { buildDatalogWorkspaceIndexState } from './build-datalog-workspace-index-state.js';
 import { listDatalogWorkspaceFiles } from './datalog-workspace-files.js';
-import {
-  buildCompoundFieldNames,
-  buildGraphPredicateIds,
-  buildGraphNodeIds,
-  buildNodeSummaryTargets,
-  buildPredicateDefinitions,
-  buildPredicateSchemaTargets,
-  buildWorkspacePredicateIdentities,
-  isPathInsideWorkspaceRoot,
-} from './datalog-workspace-index-builders.js';
-
-export interface DatalogWorkspaceDocument {
-  readonly uri: string;
-  readonly source: string;
-  readonly parsedDocument: ParsedDocument;
-}
+import { isPathInsideWorkspaceRoot } from './datalog-workspace-index-builders.js';
+import { loadDatalogWorkspaceDocuments, type DatalogWorkspaceDocument } from './load-datalog-workspace-documents.js';
+import type {
+  DatalogWorkspaceCompoundSchemaTarget,
+  DatalogWorkspacePredicateSchemaTarget,
+} from './datalog-workspace-schema-targets.js';
 
 export interface DatalogWorkspacePredicateDefinition {
   readonly uri: string;
   readonly identity: DatalogPredicateSymbolIdentity;
-  readonly range: Range;
-}
-
-export interface DatalogWorkspacePredicateSchemaTarget {
-  readonly uri: string;
-  readonly schema: PredicateSchema;
   readonly range: Range;
 }
 
@@ -71,8 +54,10 @@ export class DatalogWorkspaceIndex {
   #workspacePredicateIdentities = new Map<string, DatalogPredicateSymbolIdentity>();
   #graphPredicateIds: readonly string[] = [];
   #predicateSchemaTargetsById = new Map<string, readonly DatalogWorkspacePredicateSchemaTarget[]>();
+  #compoundSchemaTargetsByName = new Map<string, readonly DatalogWorkspaceCompoundSchemaTarget[]>();
   #nodeSummaryTargetsById = new Map<string, readonly DatalogWorkspaceNodeSummaryTarget[]>();
   #graphNodeIds: readonly string[] = [];
+  #compoundFieldSchemasByPredicate = new Map<string, readonly DefCompoundFieldSchema[]>();
   #compoundFieldNamesByPredicate = new Map<string, readonly string[]>();
   #refreshGeneration = 0;
 
@@ -97,7 +82,12 @@ export class DatalogWorkspaceIndex {
 
   async refresh(): Promise<void> {
     const refreshGeneration = ++this.#refreshGeneration;
-    const diskDocumentsByUri = await this.#loadDiskDocuments();
+    const diskDocumentsByUri = await loadDatalogWorkspaceDocuments({
+      workspaceRootPath: this.#workspaceRootPath,
+      listWorkspaceFiles: this.#listWorkspaceFiles,
+      readWorkspaceFile: this.#readFile,
+      parseWorkspaceDocument: this.#parseDocument,
+    });
 
     if (refreshGeneration !== this.#refreshGeneration) {
       return;
@@ -145,6 +135,10 @@ export class DatalogWorkspaceIndex {
     return this.#predicateSchemaTargetsById.get(predicateId) ?? [];
   }
 
+  getCompoundSchemaTargets(compoundName: string): readonly DatalogWorkspaceCompoundSchemaTarget[] {
+    return this.#compoundSchemaTargetsByName.get(compoundName) ?? [];
+  }
+
   getNodeSummaryTargets(nodeId: string): readonly DatalogWorkspaceNodeSummaryTarget[] {
     return this.#nodeSummaryTargetsById.get(nodeId) ?? [];
   }
@@ -153,44 +147,16 @@ export class DatalogWorkspaceIndex {
     return this.#graphNodeIds;
   }
 
+  getCompoundFieldSchemas(predicateName: string): readonly DefCompoundFieldSchema[] {
+    return this.#compoundFieldSchemasByPredicate.get(predicateName) ?? [];
+  }
+
   getCompoundFieldNames(predicateName: string): readonly string[] {
     return this.#compoundFieldNamesByPredicate.get(predicateName) ?? [];
   }
 
-  async #loadDiskDocuments(): Promise<Map<string, DatalogWorkspaceDocument>> {
-    if (!this.#workspaceRootPath) {
-      return new Map();
-    }
-
-    const filePaths = await this.#listWorkspaceFiles(this.#workspaceRootPath);
-    const documents = await Promise.all(filePaths.map(async (filePath) => {
-      try {
-        const source = await this.#readFile(filePath, 'utf8');
-        const uri = pathToFileURL(filePath).href;
-
-        return [
-          uri,
-          {
-            uri,
-            source,
-            parsedDocument: this.#parseDocument(source),
-          },
-        ] as const;
-      } catch (error) {
-        if (isSkippableWorkspaceFsError(error)) {
-          return null;
-        }
-
-        throw error;
-      }
-    }));
-
-    return new Map(documents.filter((document): document is NonNullable<typeof document> => document !== null));
-  }
-
   #rebuildIndex(): void {
-    const indexedDocuments = [...this.#diskDocumentsByUri.values()];
-    const documentsByUri = new Map(indexedDocuments.map((document) => [document.uri, document] as const));
+    const documentsByUri = new Map(this.#diskDocumentsByUri);
 
     for (const openDocument of this.#getOpenWorkspaceDocuments()) {
       documentsByUri.set(openDocument.uri, {
@@ -201,19 +167,27 @@ export class DatalogWorkspaceIndex {
     }
 
     const documents = [...documentsByUri.values()].sort((left, right) => left.uri.localeCompare(right.uri));
-    this.#indexedDocumentsByUri = new Map(documents.map((document) => [document.uri, document] as const));
-    this.#workspaceProgram = buildDatalogWorkspaceProgram({
+    const nextState = buildDatalogWorkspaceIndexState({
       documents,
       workspaceRootPath: this.#workspaceRootPath,
       loadMigrationProjectFiles: this.#loadMigrationProjectFiles,
     });
-    this.#predicateDefinitionsByIdentity = buildPredicateDefinitions(documents);
-    this.#workspacePredicateIdentities = buildWorkspacePredicateIdentities(this.#predicateDefinitionsByIdentity);
-    this.#graphPredicateIds = buildGraphPredicateIds(documents);
-    this.#predicateSchemaTargetsById = buildPredicateSchemaTargets(documents);
-    this.#nodeSummaryTargetsById = buildNodeSummaryTargets(documents);
-    this.#graphNodeIds = buildGraphNodeIds(documents);
-    this.#compoundFieldNamesByPredicate = buildCompoundFieldNames(documents);
+
+    this.#applyIndexState(nextState);
+  }
+
+  #applyIndexState(nextState: ReturnType<typeof buildDatalogWorkspaceIndexState>): void {
+    this.#indexedDocumentsByUri = nextState.indexedDocumentsByUri;
+    this.#workspaceProgram = nextState.workspaceProgram;
+    this.#predicateDefinitionsByIdentity = nextState.predicateDefinitionsByIdentity;
+    this.#workspacePredicateIdentities = nextState.workspacePredicateIdentities;
+    this.#graphPredicateIds = nextState.graphPredicateIds;
+    this.#predicateSchemaTargetsById = nextState.predicateSchemaTargetsById;
+    this.#compoundSchemaTargetsByName = nextState.compoundSchemaTargetsByName;
+    this.#nodeSummaryTargetsById = nextState.nodeSummaryTargetsById;
+    this.#graphNodeIds = nextState.graphNodeIds;
+    this.#compoundFieldSchemasByPredicate = nextState.compoundFieldSchemasByPredicate;
+    this.#compoundFieldNamesByPredicate = nextState.compoundFieldNamesByPredicate;
   }
 
   #getOpenWorkspaceDocuments(): readonly DatalogTextDocumentSnapshot[] {
@@ -235,15 +209,4 @@ export class DatalogWorkspaceIndex {
       workspaceRootPath: this.#workspaceRootPath,
     });
   }
-}
-
-function isSkippableWorkspaceFsError(error: unknown): boolean {
-  if (!(error instanceof Error) || !("code" in error)) {
-    return false;
-  }
-
-  return error.code === 'ENOENT'
-    || error.code === 'ENOTDIR'
-    || error.code === 'EACCES'
-    || error.code === 'EPERM';
 }
